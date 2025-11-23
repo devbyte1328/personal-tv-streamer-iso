@@ -123,7 +123,6 @@ Vendor links (read the above warning first):
     
     ```
     echo 'export YT_DATA_API_KEY="<your-api-key-here>"' >> ~/.bashrc
-
     ```
     Reload your shell (optional because the reboot at the end will apply it):
     ```
