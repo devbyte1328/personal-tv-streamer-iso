@@ -111,6 +111,7 @@ Vendor links (read the above warning first):
     Allow the setup script to finish before moving onto the manual setup.
 
 7. **Manual Setup**
+   
     Before closing the terminal, generate a **YouTube Data API key**.
 
     Follow the official YouTube/Google documentation (or lookup a YouTube tutorial video):  
