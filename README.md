@@ -196,4 +196,4 @@ Vendor links (read the above warning first):
     ``` 
     
 ## Credits
-- The icons in the **"App"** section of the streamer were sourced and modified. Several of them require attribution under their respective licenses. I have compiled a list of the icon asset origins, which is located at **"/static/assets/asset-origins.txt"**. Link: [https://github.com/devbyte1328/personal-streamer-tv-iso/tree/static/assets/asset-origin.txt](https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)
+- The icons in the **"App"** section of the streamer were sourced and modified. Several of them require attribution under their respective licenses. I have compiled a list of the icon asset origins, which is located at **"/static/assets/asset-origins.txt"**. Link: [https://github.com/devbyte1328/personal-tv-streamer-iso/tree/static/assets/asset-origin.txt](https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)
