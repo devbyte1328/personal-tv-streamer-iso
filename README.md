@@ -12,7 +12,7 @@ In fact, **almost any computer will work** as long as you can install the ISO, c
 
 ![Blackview](images/Blackview.png) ![Dell_Optiplex](images/Dell_Optiplex.png) ![Laptop](images/Laptop.png)
 
-The minimum hardware requirements for the Streamer TV have not been determined yet.
+The minimum hardware requirements for the TV Streamer have not been determined yet.
 
 > [!WARNING]
 > I am not sponsored by, nor affiliated with, any airmouse vendors.  
