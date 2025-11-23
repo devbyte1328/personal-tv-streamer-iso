@@ -7,7 +7,7 @@
 
 ## 📺💻 Supported Devices
 
-Streamer TV is designed to run on a PC, such as a Mini PC, Dell Optiplex, or an old laptop you have lying around.  
+The TV Streamer is designed to run on a PC, such as a Mini PC, Dell Optiplex, or an old laptop you have lying around.  
 In fact, **almost any computer will work** as long as you can install the ISO, connect it to your TV, and control it with an airmouse.
 
 ![Blackview](images/Blackview.png) ![Dell_Optiplex](images/Dell_Optiplex.png) ![Laptop](images/Laptop.png)
