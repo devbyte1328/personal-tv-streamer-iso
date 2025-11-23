@@ -39,12 +39,14 @@ Vendor links (read the above warning first):
 > I’m not fully sure whether producing custom Manjaro-based builds is officially supported, and I’m not attempting to automate much at this stage. For now, you’ll have to follow a lot of manual steps to setup the streamer.  
 > Once Easy Arch is patched up, I will migrate this project to the new base and automate the setup process.
 
-1. **Download the Manjaro Cinnamon ISO**  
+1. **Download the Manjaro Cinnamon ISO**
+   
     Head over to the official Manjaro website and download the Cinnamon edition:
    
     **📥Link: [https://manjaro.org/products/download/x86](https://manjaro.org/products/download/x86)**
 
-3. **Create a Bootable USB**  
+2. **Create a Bootable USB**
+   
     Use one of the following tools to write the ISO to a USB drive:
     - **[balenaEtcher](https://etcher.balena.io/)** (Windows/macOS/Linux)
     - **[Rufus](https://rufus.ie/en/)** (Windows only)
@@ -57,12 +59,14 @@ Vendor links (read the above warning first):
    
     ⚠️ Replace `manjaro-cinnamon-25.0.3-250609-linux612.iso` with the name of the downloaded ISO.
 
-5. **Boot from USB**  
+3. **Boot from USB**
+
     Reboot your machine and use your **BIOS/UEFI boot menu** to boot from the USB drive.  
     When the boot options appear, choose either **"Boot with open-source drivers"** or **"Boot with proprietary drivers."**  
     (As of now, it does not matter which option you select.)
 
-6. **Live Environment and Installation**  
+4. **Live Environment and Installation**
+
     After booting, the ISO will load into a live session. When the **"Manjaro Hello"** window appears, begin the installation by clicking **"Launch Installer"**, located at the bottom center under the **"INSTALLATION"** section.
 
     Select your preferred **"language"**, **"location and timezone"** (the streamer displays the time and weather on the home page), and **"keyboard layout"**.
@@ -78,13 +82,15 @@ Vendor links (read the above warning first):
     At the **"Summary"** page, click **"Install,"** then confirm with **"Install Now."**  
     Allow Manjaro Cinnamon to complete the installation. When finished, check **"Restart now"** and click **"Done."**
    
-7. **First Boot After Installation** 
+5. **First Boot After Installation**
+
     When the system starts for the first time, the **"Manjaro Hello"** window will appear again.  
     Uncheck "Launch at start" and close the window.
     After closing **"Manjaro Hello"**, a **"Save history"** window will become visible.  
     Click **"No"** to close that window as well.
 
-8. **Run the Setup Script**
+6. **Run the Setup Script**
+
     Click the terminal icon in the bottom left corner of the panel.
     Git clone this repository:
     ```bash
@@ -104,7 +110,7 @@ Vendor links (read the above warning first):
     ```
     Allow the setup script to finish before moving onto the manual setup.
 
-9. **Manual Setup**
+7. **Manual Setup**
     Before closing the terminal, generate a **YouTube Data API key**.
 
     Follow the official YouTube/Google documentation (or lookup a YouTube tutorial video):  
@@ -176,12 +182,14 @@ Vendor links (read the above warning first):
     → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from repository
     setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
     
-11. **"..."** (Steps to be added...)
+8. **"..."** (Steps to be added...)
+    
     ```
     ...
     ```
 
-12. **Reboot**
+9. **Reboot**
+
     Reboot to finalize changes:
     ```bash
     sudo reboot
