@@ -66,7 +66,7 @@ Vendor links (read the above warning first):
 
     When you reach the **"Partitions"** step, choose **"Erase disk"** and leave **"Encrypt system"** unchecked.
 
-    In the **"Users"** section, enter **“streamer-tv”** for all three name fields and set the password to **"password"**
+    In the **"Users"** section, enter **"tv-streamer"** for all three name fields and set the password to **"password"**
     (As of now, password is only used for setup so just use "password" for simplicity.)  
     Make sure to enable both **"Log in automatically"** and **"Use the same password for the administrator account."**
 
@@ -85,11 +85,11 @@ Vendor links (read the above warning first):
     Click the terminal icon in the bottom left corner of the panel.
     Git clone this repository:
     ```bash
-    git clone https://github.com/devbyte1328/personal-streamer-tv-iso
+    git clone https://github.com/devbyte1328/personal-tv-streamer-iso
     ```
     Navigate into the setup directory:
     ```bash
-    cd personal-streamer-tv-iso/setup/
+    cd personal-tv-streamer-iso/setup/
     ```
     Set permissions for **"setup.sh"**:
     ```bash
