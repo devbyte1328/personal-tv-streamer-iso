@@ -67,7 +67,7 @@ Vendor links (read the above warning first):
 
 4. **Live Environment and Installation**
 
-    After booting, the ISO will load into a live session. When the **"Manjaro Hello"** window appears, begin the installation by clicking **"Launch Installer"**, located at the bottom center under the **"INSTALLATION"** section.
+    After booting, the ISO will load into a live session. When the **"Manjaro Hello"** window appears, begin the installation by clicking **"Launch Installer"**, located at the bottom center under the **"INSTALLATION"** text label.
 
     Select your preferred **"language"**, **"location and timezone"** (the streamer displays the time and weather on the home page), and **"keyboard layout"**.
 
