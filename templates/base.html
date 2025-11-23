@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <video autoplay muted loop id="bgvideo">
+        <source src="{{ url_for('static', filename='assets/backgrounds/background.mp4') }}" type="video/mp4">
+    </video>
+
+    <div id="sidebar">
+        <div class="logo">Streamer TV</div>
+        <ul>
+            <li data-url="{{ url_for('home') }}" class="{{ 'active-tab' if active=='home' else '' }}">Home</li>
+            <li data-url="{{ url_for('curated') }}" class="{{ 'active-tab' if active=='curated' else '' }}">Curated</li>
+            <li data-url="{{ url_for('apps') }}" class="{{ 'active-tab' if active=='apps' else '' }}">Apps</li>
+        </ul>
+    </div>
+
+    <div id="persistent-player" style="display:none;">
+        <iframe width="560" height="315"
+            src="https://www.youtube.com/embed/on1pjsxYOwc?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1"
+            frameborder="0"
+            style="pointer-events: none;"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+
