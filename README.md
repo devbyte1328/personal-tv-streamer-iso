@@ -41,6 +41,7 @@ Vendor links (read the above warning first):
 
 1. **Download the Manjaro Cinnamon ISO**  
     Head over to the official Manjaro website and download the Cinnamon edition:
+   
     **📥Link: [https://manjaro.org/products/download/x86](https://manjaro.org/products/download/x86)**
 
 3. **Create a Bootable USB**  
@@ -51,15 +52,17 @@ Vendor links (read the above warning first):
     ```bash
     sudo dd if=manjaro-cinnamon-25.0.3-250609-linux612.iso of=/dev/sdX bs=4M status=progress && sync
     ```
+    
     ⚠️ Replace `/dev/sdX` with your actual USB device (this will erase the disk).
+   
     ⚠️ Replace `manjaro-cinnamon-25.0.3-250609-linux612.iso` with the name of the downloaded ISO.
 
-4. **Boot from USB**  
+5. **Boot from USB**  
     Reboot your machine and use your **BIOS/UEFI boot menu** to boot from the USB drive.  
     When the boot options appear, choose either **"Boot with open-source drivers"** or **"Boot with proprietary drivers."**  
     (As of now, it does not matter which option you select.)
 
-5. **Live Environment and Installation**  
+6. **Live Environment and Installation**  
     After booting, the ISO will load into a live session. When the **"Manjaro Hello"** window appears, begin the installation by clicking **"Launch Installer"**, located at the bottom center under the **"INSTALLATION"** section.
 
     Select your preferred **"language"**, **"location and timezone"** (the streamer displays the time and weather on the home page), and **"keyboard layout"**.
@@ -75,13 +78,13 @@ Vendor links (read the above warning first):
     At the **"Summary"** page, click **"Install,"** then confirm with **"Install Now."**  
     Allow Manjaro Cinnamon to complete the installation. When finished, check **"Restart now"** and click **"Done."**
    
-6. **First Boot After Installation** 
+7. **First Boot After Installation** 
     When the system starts for the first time, the **"Manjaro Hello"** window will appear again.  
     Uncheck "Launch at start" and close the window.
     After closing **"Manjaro Hello"**, a **"Save history"** window will become visible.  
     Click **"No"** to close that window as well.
 
-7. **Run the Setup Script**
+8. **Run the Setup Script**
     Click the terminal icon in the bottom left corner of the panel.
     Git clone this repository:
     ```bash
@@ -101,13 +104,14 @@ Vendor links (read the above warning first):
     ```
     Allow the setup script to finish before moving onto the manual setup.
 
-8. **Manual Setup**
+9. **Manual Setup**
     Before closing the terminal, generate a **YouTube Data API key**.
 
     Follow the official YouTube/Google documentation (or lookup a YouTube tutorial video):  
     https://developers.google.com/youtube/registering_an_application
 
     Once you have your API key, run the following to make it available to the system:
+   
     ⚠️ Replace `<your-api-key-here>` with your YouTube Data API key (Don't share this with anyone).
     
     ```
@@ -172,12 +176,12 @@ Vendor links (read the above warning first):
     → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from repository
     setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
     
-9. **"..."** (Steps to be added...)
+11. **"..."** (Steps to be added...)
     ```
     ...
     ```
 
-10. **Reboot**
+12. **Reboot**
     Reboot to finalize changes:
     ```bash
     sudo reboot
