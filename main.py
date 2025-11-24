@@ -4,6 +4,7 @@ import websockets
 import threading
 import json
 import pyautogui
+import os
 
 app = Flask(__name__)
 pyautogui.FAILSAFE = False
@@ -45,7 +46,9 @@ def curated():
 
 @app.route('/apps')
 def apps():
-    return render_template("apps.html", title="Apps", active="apps")
+    app_folder = os.path.join(app.root_path, 'templates', 'apps')
+    app_files = sorted(f for f in os.listdir(app_folder) if f.endswith(".html"))
+    return render_template("apps.html", title="Apps", active="apps", app_files=app_files)
 
 if __name__ == "__main__":
     threading.Thread(target=start_ws, daemon=True).start()

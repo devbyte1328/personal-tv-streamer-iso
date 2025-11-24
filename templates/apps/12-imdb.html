@@ -1,0 +1,13 @@
+
+<button class="app-btn" onclick="(function(){
+    const urls = [
+        'https://www.imdb.com/calendar/?region=US&type=TV_EPISODE',
+        'https://www.imdb.com/calendar/?region=US&type=TV',
+        'https://www.imdb.com/calendar/?region=US&type=MOVIE'
+    ];
+    window.location.href = urls[Math.floor(Math.random() * urls.length)];
+})();">
+    <img src="{{ url_for('static', filename='assets/icons/imdb-64x64.png') }}" class="app-icon">
+    <span>IMDb</span>
+</button>
+
