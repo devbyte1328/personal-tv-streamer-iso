@@ -1,4 +1,15 @@
 {% extends "base.html" %}
+
+{% block persistent_player %}
+<iframe width="560" height="315"
+        src="https://www.youtube.com/embed/on1pjsxYOwc?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1"
+        frameborder="0"
+        style="pointer-events: none;"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+</iframe>
+{% endblock %}
+
 {% block content %}
 <h1>Curated</h1>
 {% endblock %}
