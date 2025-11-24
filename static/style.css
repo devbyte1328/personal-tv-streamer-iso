@@ -121,17 +121,28 @@ html, body {
 #persistent-player {
     position: fixed;
     top: 50%;
-    left: 50%;
+    left: calc(220px + 50%);
     transform: translate(-50%, -50%);
     z-index: 3;
     pointer-events: none;
+    width: calc(100vw - 240px);
+    max-width: 1500px;
 }
 
 #persistent-player iframe {
-    width: 60vw;
-    height: 34vw;
-    max-width: 900px;
-    max-height: 520px;
-    border-radius: 12px;
+    border-radius: 0;
+}
+
+.carousel {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    height: auto;
+}
+
+.carousel iframe {
+    width: 100%;
+    aspect-ratio: 16 / 9;
 }
 
