@@ -133,16 +133,44 @@ html, body {
     border-radius: 0;
 }
 
+.carousel-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 220px;
+    width: calc(100vw - 220px);
+    margin-top: -200px;
+}
+
 .carousel {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    width: 100%;
-    height: auto;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 40px;
+    align-items: center;
+    transform: translateX(-33%);
 }
 
 .carousel iframe {
     width: 100%;
     aspect-ratio: 16 / 9;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.center-video {
+    transform: scale(1.25);
+    z-index: 3;
+}
+
+.side-video {
+    transform: scale(0.9);
+    z-index: 2;
+}
+
+.left-video {
+    transform: scale(0.9) translateX(10px);
+}
+
+.right-video {
+    transform: scale(0.9) translateX(-10px);
 }
 
