@@ -1,0 +1,12 @@
+
+<button class="app-btn" onclick="(function(){
+    const urls = [
+        'https://www.netflix.com/il-en/browse/genre/83',
+        'https://www.netflix.com/il-en/browse/genre/34399'
+    ];
+    window.location.href = urls[Math.floor(Math.random() * urls.length)];
+})();">
+    <img src="{{ url_for('static', filename='assets/icons/netflix-64x64.png') }}" class="app-icon">
+    <span>Netflix</span>
+</button>
+
