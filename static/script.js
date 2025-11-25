@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const newPlayer = doc.getElementById('persistent-player');
 
         if (newPlayer && newPlayer.innerHTML.trim()) {
-            // ONLY replace player if it's NOT the first preload
             if (!playerPreloaded) {
                 player.innerHTML = newPlayer.innerHTML;
             }
