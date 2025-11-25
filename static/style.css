@@ -201,4 +201,8 @@ html, body {
     transform: translateX(-20%);
 }
 
+iframe {
+    border: none !important;
+    outline: none !important;
+}
 
