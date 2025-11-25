@@ -135,7 +135,6 @@ html, body {
 
 .carousel-wrapper {
     display: flex;
-    justify-content: center;
     align-items: center;
     margin-left: -120px;
     width: calc(100vw - 220px);
@@ -146,8 +145,8 @@ html, body {
 
 .carousel {
     display: grid;
-    grid-template-columns: 1fr 1.2fr 1fr;
-    gap: 40px;
+    grid-template-columns: auto auto auto;
+    gap: 0;
     width: 100%;
     align-items: center;
 }
@@ -169,11 +168,11 @@ html, body {
 }
 
 .left-video {
-    transform: scale(0.9) translateX(10px);
+    transform: scale(0.9);
 }
 
 .right-video {
-    transform: scale(0.9) translateX(-10px);
+    transform: scale(0.9);
 }
 
 .carousel-btn {
@@ -189,10 +188,13 @@ html, body {
 }
 
 .left-btn {
-    left: 0;
+    margin-right: 0;
+    transform: translateX(20%);
 }
 
 .right-btn {
-    right: 0;
+    margin-left: 0;
+    transform: translateX(-20%);
 }
+
 
