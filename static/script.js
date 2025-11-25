@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarItems = document.querySelectorAll('#sidebar li[data-url]');
     const player = document.getElementById('persistent-player');
 
-    // preload persistent player from the curated page so video starts playing immediately in the background
     (async () => {
         try {
             const res = await fetch('/curated');
@@ -11,9 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const doc = parser.parseFromString(txt, 'text/html');
             const pp = doc.getElementById('persistent-player');
             if (pp && pp.innerHTML.trim()) {
-                // inject the player iframe
                 player.innerHTML = pp.innerHTML;
-                // briefly make it visible but hidden to trigger loading
                 player.style.display = 'block';
                 player.style.visibility = 'hidden';
                 requestAnimationFrame(() => {
