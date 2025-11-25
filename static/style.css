@@ -129,6 +129,10 @@ html, body {
     max-width: 1500px;
 }
 
+#persistent-player .carousel-btn {
+    pointer-events: auto;
+}
+
 #persistent-player iframe {
     border-radius: 0;
 }
