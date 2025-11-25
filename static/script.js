@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarItems = document.querySelectorAll('#sidebar li[data-url]');
     const player = document.getElementById('persistent-player');
 
+    let playerPreloaded = false;
+
     document.addEventListener('click', e => {
         if (e.target && e.target.id === 'left-carousel-btn') {
             console.log("Pressed Left Carousel Button!");
@@ -18,19 +20,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(txt, 'text/html');
             const pp = doc.getElementById('persistent-player');
+
             if (pp && pp.innerHTML.trim()) {
                 player.innerHTML = pp.innerHTML;
                 player.style.display = 'block';
                 player.style.visibility = 'hidden';
+
                 requestAnimationFrame(() => {
                     player.style.display = 'none';
                     player.style.visibility = '';
+                    playerPreloaded = true;
                 });
             }
         } catch (e) {
             console.error(e);
         }
     })();
+
 
     async function loadPage(url, clickedItem) {
         const response = await fetch(url);
@@ -44,8 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const newPlayer = doc.getElementById('persistent-player');
+
         if (newPlayer && newPlayer.innerHTML.trim()) {
-            player.innerHTML = newPlayer.innerHTML;
+            // ONLY replace player if it's NOT the first preload
+            if (!playerPreloaded) {
+                player.innerHTML = newPlayer.innerHTML;
+            }
             player.style.display = 'block';
         } else {
             player.style.display = 'none';
