@@ -2,6 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarItems = document.querySelectorAll('#sidebar li[data-url]');
     const player = document.getElementById('persistent-player');
 
+    document.addEventListener('click', e => {
+        if (e.target && e.target.id === 'left-carousel-btn') {
+            console.log("Pressed Left Carousel Button!");
+        }
+        if (e.target && e.target.id === 'right-carousel-btn') {
+            console.log("Pressed Right Carousel Button!");
+        }
+    });
+
     (async () => {
         try {
             const res = await fetch('/curated');
@@ -36,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newPlayer = doc.getElementById('persistent-player');
         if (newPlayer && newPlayer.innerHTML.trim()) {
+            player.innerHTML = newPlayer.innerHTML;
             player.style.display = 'block';
         } else {
             player.style.display = 'none';
