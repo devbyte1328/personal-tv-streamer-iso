@@ -138,9 +138,10 @@ html, body {
     justify-content: center;
     align-items: center;
     margin-left: -120px;
-    margin-top: -320px;
     width: calc(100vw - 220px);
     position: relative;
+    top: -15vh;
+    transform: translateY(-50%);
 }
 
 .carousel {
