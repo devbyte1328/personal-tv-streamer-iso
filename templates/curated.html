@@ -2,31 +2,27 @@
 
 {% block persistent_player %}
 <div class="carousel-wrapper">
-    <button class="carousel-btn left-btn">&#10094;</button>
+    <button class="carousel-btn left-btn" id="left-carousel-btn">&#10094;</button>
     <div class="carousel">
         <iframe
             class="side-video left-video"
-            src="https://www.youtube.com/embed/on1pjsxYOwc?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=on1pjsxYOwc"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen>
+            id="left-video"
+            src="https://www.youtube.com/embed/on1pjsxYOwc?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=on1pjsxYOwc">
         </iframe>
+
         <iframe
             class="center-video"
-            src="https://www.youtube.com/embed/5BPTO2_-zUs?autoplay=1&mute=1&controls=0&modestbranding=1;rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=5BPTO2_-zUs"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen>
+            id="center-video"
+            src="https://www.youtube.com/embed/5BPTO2_-zUs?autoplay=1&mute=1&controls=0&modestbranding=1;rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=5BPTO2_-zUs">
         </iframe>
+
         <iframe
             class="side-video right-video"
-            src="https://www.youtube.com/embed/FHPKkKc2hE4?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=FHPKkKc2hE4"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen>
+            id="right-video"
+            src="https://www.youtube.com/embed/FHPKkKc2hE4?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=FHPKkKc2hE4">
         </iframe>
     </div>
-    <button class="carousel-btn right-btn">&#10095;</button>
+    <button class="carousel-btn right-btn" id="right-carousel-btn">&#10095;</button>
 </div>
 {% endblock %}
 
