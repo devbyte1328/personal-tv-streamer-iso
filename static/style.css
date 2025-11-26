@@ -206,3 +206,14 @@ iframe {
     outline: none !important;
 }
 
+.hidden-video {
+  position: absolute !important;
+  top: -5000px !important;
+  left: -5000px !important;
+  width: 320px !important;
+  height: 180px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+

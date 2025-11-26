@@ -12,49 +12,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const left = carousel.querySelector('#left-video');
     const center = carousel.querySelector('#center-video');
     const right = carousel.querySelector('#right-video');
-    if (!left || !center || !right) return null;
+    const hidden = carousel.querySelector('#hidden-video');
+    if (!left || !center || !right || !hidden) return null;
 
-    if (
-      carouselState &&
-      carouselState.carousel === carousel &&
-      carousel.contains(carouselState.left) &&
-      carousel.contains(carouselState.center) &&
-      carousel.contains(carouselState.right)
-    ) {
-      return carouselState;
-    }
-
-    carouselState = { carousel, left, center, right };
+    carouselState = { carousel, videos: [left, center, right, hidden] };
     return carouselState;
   };
 
   const setRole = (el, role, order) => {
-    el.className = role === 'center' ? 'center-video' : `side-video ${role}-video`;
+    if (role === 'center') el.className = 'center-video';
+    else if (role === 'left') el.className = 'side-video left-video';
+    else if (role === 'right') el.className = 'side-video right-video';
+    else el.className = 'hidden-video';
     el.id = `${role}-video`;
     el.style.order = String(order);
   };
 
-  const applyRoles = (left, center, right) => {
-    setRole(left, 'left', 0);
-    setRole(center, 'center', 1);
-    setRole(right, 'right', 2);
-    carouselState = { ...(carouselState || {}), left, center, right };
+  const applyRoles = (videos) => {
+    setRole(videos[0], 'left', 0);
+    setRole(videos[1], 'center', 1);
+    setRole(videos[2], 'right', 2);
+    setRole(videos[3], 'hidden', 3);
   };
 
   function rotateLeft() {
     const state = getCarouselState();
     if (!state) return;
-
-    const { left, center, right } = state;
-    applyRoles(right, left, center);
+    const v = state.videos;
+    const rotated = [v[1], v[2], v[3], v[0]];
+    state.videos = rotated;
+    applyRoles(rotated);
   }
 
   function rotateRight() {
     const state = getCarouselState();
     if (!state) return;
-
-    const { left, center, right } = state;
-    applyRoles(left, right, center);
+    const v = state.videos;
+    const rotated = [v[3], v[0], v[1], v[2]];
+    state.videos = rotated;
+    applyRoles(rotated);
   }
 
   document.addEventListener('click', (e) => {
