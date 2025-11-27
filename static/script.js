@@ -9,13 +9,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const carousel = document.querySelector('.carousel');
     if (!carousel) return null;
 
+    const hiddenLeft = carousel.querySelector('#hidden-left-video');
     const left = carousel.querySelector('#left-video');
     const center = carousel.querySelector('#center-video');
     const right = carousel.querySelector('#right-video');
-    const hidden = carousel.querySelector('#hidden-video');
-    if (!left || !center || !right || !hidden) return null;
+    const hiddenRight = carousel.querySelector('#hidden-video');
+    if (!hiddenLeft || !left || !center || !right || !hiddenRight) return null;
 
-    carouselState = { carousel, videos: [left, center, right, hidden] };
+    carouselState = {
+      carousel,
+      videos: [hiddenLeft, left, center, right, hiddenRight]
+    };
     return carouselState;
   };
 
@@ -28,18 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.order = String(order);
   };
 
-  const applyRoles = (videos) => {
-    setRole(videos[0], 'left', 0);
-    setRole(videos[1], 'center', 1);
-    setRole(videos[2], 'right', 2);
-    setRole(videos[3], 'hidden', 3);
+  const applyRoles = (v) => {
+    setRole(v[0], 'hidden-left', 0);
+    setRole(v[1], 'left', 1);
+    setRole(v[2], 'center', 2);
+    setRole(v[3], 'right', 3);
+    setRole(v[4], 'hidden', 4);
   };
 
   function rotateLeft() {
     const state = getCarouselState();
     if (!state) return;
     const v = state.videos;
-    const rotated = [v[1], v[2], v[3], v[0]];
+    const rotated = [v[1], v[2], v[3], v[4], v[0]];
     state.videos = rotated;
     applyRoles(rotated);
   }
@@ -48,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const state = getCarouselState();
     if (!state) return;
     const v = state.videos;
-    const rotated = [v[3], v[0], v[1], v[2]];
+    const rotated = [v[4], v[0], v[1], v[2], v[3]];
     state.videos = rotated;
     applyRoles(rotated);
   }
