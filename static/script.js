@@ -9,11 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const carousel = document.querySelector('.carousel');
     if (!carousel) return null;
 
-    const hiddenLeft = carousel.querySelector('#hidden-left-video');
+    const hiddenLeft = carousel.querySelector('#hidden-preloaded-left-video');
     const left = carousel.querySelector('#left-video');
     const center = carousel.querySelector('#center-video');
     const right = carousel.querySelector('#right-video');
-    const hiddenRight = carousel.querySelector('#hidden-video');
+    const hiddenRight = carousel.querySelector('#hidden-preloaded-right-video');
     if (!hiddenLeft || !left || !center || !right || !hiddenRight) return null;
 
     carouselState = {
@@ -33,11 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const applyRoles = (v) => {
-    setRole(v[0], 'hidden-left', 0);
+    setRole(v[0], 'hidden-preloaded-left', 0);
     setRole(v[1], 'left', 1);
     setRole(v[2], 'center', 2);
     setRole(v[3], 'right', 3);
-    setRole(v[4], 'hidden', 4);
+    setRole(v[4], 'hidden-preloaded-right', 4);
   };
 
   function rotateLeft() {
