@@ -114,12 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const list = info.frameList;
     const reordered = [
-      list[1],
-      list[2],
-      list[3],
-      list[4],
-      ...list.slice(5),
-      list[0]
+      list[list.length - 1],
+      ...list.slice(0, list.length - 1)
     ];
 
     info.frameList = reordered;
@@ -133,18 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const list = info.frameList;
     const reordered = [
-      list[list.length - 1],
-      list[0],
-      list[1],
-      list[2],
-      list[3],
-      ...list.slice(4, list.length - 1)
+      ...list.slice(1),
+      list[0]
     ];
 
     info.frameList = reordered;
     assignCarouselPositions(reordered);
     ensureFrameSourcesMatchPositions(reordered);
   };
+
 
   const createStandaloneTrailerIfAbsent = () => {
     const trailerFrameElement = document.getElementById("standalone-trailer-frame");

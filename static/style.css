@@ -220,13 +220,13 @@ iframe {
 .trailer-wrapper {
     width: calc(100vw - 220px);
     margin-left: -60px;
-    margin-top: 5vh;     /* move trailer up/down */
+    margin-top: 5vh;
     display: flex;
-    justify-content: left;  /* left / center / right */
+    justify-content: left;
 }
 
 #standalone-trailer-frame {
-    width: 40vw;         /* make bigger/smaller */
+    width: 40vw;
     max-width: 1200px;
     aspect-ratio: 16/9;
 }
