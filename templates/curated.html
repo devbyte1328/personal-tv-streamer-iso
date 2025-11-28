@@ -3,44 +3,8 @@
 {% block persistent_player %}
 <div class="carousel-wrapper">
     <button class="carousel-btn left-btn" id="left-carousel-btn">&#10094;</button>
-    <div class="carousel">
-        <iframe
-            class="hidden-video"
-            id="hidden-preloaded-left-video"
-            src="https://www.youtube.com/embed/jH5Gq7G4X-s?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=jH5Gq7G4X-s">
-        </iframe>
-
-        <iframe
-            class="side-video left-video"
-            id="left-video"
-            src="https://www.youtube.com/embed/on1pjsxYOwc?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=on1pjsxYOwc">
-        </iframe>
-
-        <iframe
-            class="center-video"
-            id="center-video"
-            src="https://www.youtube.com/embed/5BPTO2_-zUs?autoplay=1&mute=1&controls=0&modestbranding=1;rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=5BPTO2_-zUs">
-        </iframe>
-
-        <iframe
-            class="side-video right-video"
-            id="right-video"
-            src="https://www.youtube.com/embed/FHPKkKc2hE4?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=FHPKkKc2hE4">
-        </iframe>
-
-        <iframe
-            class="hidden-video"
-            id="hidden-preloaded-right-video"
-            src="https://www.youtube.com/embed/2rVvvu7aMQQ?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=2rVvvu7aMQQ">
-        </iframe>
-        
-        <iframe
-            class="hidden-video"
-            id="hidden-unloaded-right-video"
-            src="https://i.ytimg.com/vi/STZCFSWRDq8/hqdefault.jpg">
-        </iframe>
-        
-    </div>
+    <div class="carousel" id="carousel-container"></div>
     <button class="carousel-btn right-btn" id="right-carousel-btn">&#10095;</button>
 </div>
 {% endblock %}
+
