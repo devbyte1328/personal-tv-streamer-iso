@@ -14,8 +14,32 @@ document.addEventListener("DOMContentLoaded", () => {
     "STZCFSWRDq8",
     "k3u4uUaiH_4",
     "dP-81C_tckU",
-    "OlbOOzX_fDs"
+    "OlbOOzX_fDs",
+    "HRiCRmPYAl8",
+    "rilFfbm7j8k"
   ];
+
+  const generateVideoSource = identifier =>
+    "https://www.youtube.com/embed/" +
+    identifier +
+    "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=" +
+    identifier;
+
+  const generateThumbnailSource = identifier =>
+    "https://i.ytimg.com/vi/" + identifier + "/hqdefault.jpg";
+
+  const ensureFrameSourcesMatchPositions = frameList => {
+    frameList.forEach((frameElement, index) => {
+      const identifier = frameElement.dataset.videoId;
+      if (index < 5) {
+        const desiredSource = generateVideoSource(identifier);
+        if (frameElement.src !== desiredSource) frameElement.src = desiredSource;
+      } else {
+        const desiredSource = generateThumbnailSource(identifier);
+        if (frameElement.src !== desiredSource) frameElement.src = desiredSource;
+      }
+    });
+  };
 
   const createCarouselIfAbsent = () => {
     const carouselContainerElement = document.getElementById("carousel-container");
@@ -24,17 +48,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     carouselContainerElement.innerHTML = "";
 
-    youtubeVideoIdentifierList.forEach((currentVideoIdentifier, currentIndex) => {
+    youtubeVideoIdentifierList.forEach((identifier, index) => {
       const newFrameElement = document.createElement("iframe");
-      if (currentIndex < 5) {
-        newFrameElement.src =
-          "https://www.youtube.com/embed/" +
-          currentVideoIdentifier +
-          "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=" +
-          currentVideoIdentifier;
+      newFrameElement.dataset.videoId = identifier;
+      if (index < 5) {
+        newFrameElement.src = generateVideoSource(identifier);
       } else {
-        newFrameElement.src =
-          "https://i.ytimg.com/vi/" + currentVideoIdentifier + "/hqdefault.jpg";
+        newFrameElement.src = generateThumbnailSource(identifier);
       }
       carouselContainerElement.appendChild(newFrameElement);
     });
@@ -49,20 +69,20 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     assignCarouselPositions(carouselFrameList);
+    ensureFrameSourcesMatchPositions(carouselFrameList);
   };
 
   const assignPositionToElement = (element, positionName, orderNumber) => {
-    if (positionName === "center") {
-      element.className = "center-video";
-    } else if (positionName === "left") {
-      element.className = "side-video left-video";
-    } else if (positionName === "right") {
-      element.className = "side-video right-video";
-    } else {
-      element.className = "hidden-video";
-    }
+    element.className =
+      positionName === "center"
+        ? "center-video"
+        : positionName === "left"
+        ? "side-video left-video"
+        : positionName === "right"
+        ? "side-video right-video"
+        : "hidden-video";
 
-    element.id = positionName + "-video";
+    element.dataset.position = positionName;
     element.style.order = String(orderNumber);
   };
 
@@ -90,69 +110,55 @@ document.addEventListener("DOMContentLoaded", () => {
     const info = carouselInformation;
     if (!info) return;
 
-    const frameList = info.frameList;
-
-    const reorderedList = [
-      frameList[1],
-      frameList[2],
-      frameList[3],
-      frameList[4],
-      ...frameList.slice(5),
-      frameList[0]
+    const list = info.frameList;
+    const reordered = [
+      list[1],
+      list[2],
+      list[3],
+      list[4],
+      ...list.slice(5),
+      list[0]
     ];
 
-    info.frameList = reorderedList;
-    assignCarouselPositions(reorderedList);
+    info.frameList = reordered;
+    assignCarouselPositions(reordered);
+    ensureFrameSourcesMatchPositions(reordered);
   };
 
   const rotateCarouselRight = () => {
     const info = carouselInformation;
     if (!info) return;
 
-    const frameList = info.frameList;
-
-    const reorderedList = [
-      frameList[frameList.length - 1],
-      frameList[0],
-      frameList[1],
-      frameList[2],
-      frameList[3],
-      ...frameList.slice(4, frameList.length - 1)
+    const list = info.frameList;
+    const reordered = [
+      list[list.length - 1],
+      list[0],
+      list[1],
+      list[2],
+      list[3],
+      ...list.slice(4, list.length - 1)
     ];
 
-    info.frameList = reorderedList;
-    assignCarouselPositions(reorderedList);
+    info.frameList = reordered;
+    assignCarouselPositions(reordered);
+    ensureFrameSourcesMatchPositions(reordered);
   };
 
   document.addEventListener("click", event => {
-    if (event.target && event.target.id === "left-carousel-btn") {
-      rotateCarouselLeft();
-    }
-    if (event.target && event.target.id === "right-carousel-btn") {
-      rotateCarouselRight();
-    }
+    if (event.target && event.target.id === "left-carousel-btn") rotateCarouselLeft();
+    if (event.target && event.target.id === "right-carousel-btn") rotateCarouselRight();
   });
 
   (async () => {
     try {
       const response = await fetch("/curated");
-      const responseText = await response.text();
+      const text = await response.text();
 
-      const parsedDocument = new DOMParser().parseFromString(
-        responseText,
-        "text/html"
-      );
+      const parsed = new DOMParser().parseFromString(text, "text/html");
+      const loaded = parsed.getElementById("persistent-player");
 
-      const loadedPersistentPlayerElement =
-        parsedDocument.getElementById("persistent-player");
-
-      if (
-        loadedPersistentPlayerElement &&
-        loadedPersistentPlayerElement.innerHTML.trim()
-      ) {
-        persistentVideoPlayerElement.innerHTML =
-          loadedPersistentPlayerElement.innerHTML;
-
+      if (loaded && loaded.innerHTML.trim()) {
+        persistentVideoPlayerElement.innerHTML = loaded.innerHTML;
         persistentVideoPlayerElement.style.display = "block";
         persistentVideoPlayerElement.style.visibility = "hidden";
 
@@ -169,26 +175,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadRequestedPage(requestedUrl, clickedNavigationItem) {
     const response = await fetch(requestedUrl);
-    const responseText = await response.text();
+    const text = await response.text();
 
-    const parsedDocument = new DOMParser().parseFromString(
-      responseText,
-      "text/html"
-    );
-
-    const newContentElement = parsedDocument.querySelector("#content");
+    const parsed = new DOMParser().parseFromString(text, "text/html");
+    const newContentElement = parsed.querySelector("#content");
     if (newContentElement) {
-      document.getElementById("content").innerHTML =
-        newContentElement.innerHTML;
+      document.getElementById("content").innerHTML = newContentElement.innerHTML;
     }
 
-    const newlyLoadedPersistentPlayer =
-      parsedDocument.getElementById("persistent-player");
+    const newlyLoadedPersistentPlayer = parsed.getElementById("persistent-player");
 
-    if (
-      newlyLoadedPersistentPlayer &&
-      newlyLoadedPersistentPlayer.innerHTML.trim()
-    ) {
+    if (newlyLoadedPersistentPlayer && newlyLoadedPersistentPlayer.innerHTML.trim()) {
       if (!persistentPlayerHasBeenPreloaded) {
         persistentVideoPlayerElement.innerHTML =
           newlyLoadedPersistentPlayer.innerHTML;
@@ -198,11 +195,9 @@ document.addEventListener("DOMContentLoaded", () => {
       persistentVideoPlayerElement.style.display = "none";
     }
 
-    document.title = parsedDocument.title;
+    document.title = parsed.title;
 
-    sidebarNavigationItems.forEach(item =>
-      item.classList.remove("active-tab")
-    );
+    sidebarNavigationItems.forEach(item => item.classList.remove("active-tab"));
     clickedNavigationItem.classList.add("active-tab");
 
     createCarouselIfAbsent();
