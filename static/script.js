@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let persistentPlayerHasBeenPreloaded = false;
   let carouselInformation = null;
 
-  const youtubeVideoIdentifierList = [
+  const youtubeGeneralVideoIdentifierList = [
     "jH5Gq7G4X-s",
     "on1pjsxYOwc",
     "5BPTO2_-zUs",
@@ -18,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "HRiCRmPYAl8",
     "rilFfbm7j8k"
   ];
+
+  const youtubeTrailerVideoIdentifierList = ["EXV_WAKwGc4"];
 
   const generateVideoSource = identifier =>
     "https://www.youtube.com/embed/" +
@@ -48,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     carouselContainerElement.innerHTML = "";
 
-    youtubeVideoIdentifierList.forEach((identifier, index) => {
+    youtubeGeneralVideoIdentifierList.forEach((identifier, index) => {
       const newFrameElement = document.createElement("iframe");
       newFrameElement.dataset.videoId = identifier;
       if (index < 5) {
@@ -144,6 +146,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ensureFrameSourcesMatchPositions(reordered);
   };
 
+  const createStandaloneTrailerIfAbsent = () => {
+    const trailerFrameElement = document.getElementById("standalone-trailer-frame");
+    if (!trailerFrameElement) return;
+    if (trailerFrameElement.src && trailerFrameElement.src.trim() !== "") return;
+    const trailerIdentifier = youtubeTrailerVideoIdentifierList[0];
+    trailerFrameElement.src = generateVideoSource(trailerIdentifier);
+  };
+
   document.addEventListener("click", event => {
     if (event.target && event.target.id === "left-carousel-btn") rotateCarouselLeft();
     if (event.target && event.target.id === "right-carousel-btn") rotateCarouselRight();
@@ -170,6 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       createCarouselIfAbsent();
+      createStandaloneTrailerIfAbsent();
     } catch {}
   })();
 
@@ -201,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clickedNavigationItem.classList.add("active-tab");
 
     createCarouselIfAbsent();
+    createStandaloneTrailerIfAbsent();
   }
 
   sidebarNavigationItems.forEach(navigationItem => {
@@ -211,5 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   createCarouselIfAbsent();
+  createStandaloneTrailerIfAbsent();
 });
 
