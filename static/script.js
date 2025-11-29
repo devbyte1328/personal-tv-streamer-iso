@@ -1,221 +1,211 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const sidebarNavigationItems = document.querySelectorAll("#sidebar li[data-url]");
-  const persistentVideoPlayerElement = document.getElementById("persistent-player");
+    const navigationItems = document.querySelectorAll("#sidebar li[data-url]");
+    const persistentPlayer = document.getElementById("persistent-player");
+    let persistentPlayerIsReady = false;
+    let carouselState = null;
 
-  let persistentPlayerHasBeenPreloaded = false;
-  let carouselInformation = null;
+    const generalVideoList = [
+        "jH5Gq7G4X-s",
+        "on1pjsxYOwc",
+        "5BPTO2_-zUs",
+        "FHPKkKc2hE4",
+        "2rVvvu7aMQQ",
+        "STZCFSWRDq8",
+        "k3u4uUaiH_4",
+        "dP-81C_tckU",
+        "OlbOOzX_fDs",
+        "HRiCRmPYAl8",
+        "rilFfbm7j8k"
+    ];
 
-  const youtubeGeneralVideoIdentifierList = [
-    "jH5Gq7G4X-s",
-    "on1pjsxYOwc",
-    "5BPTO2_-zUs",
-    "FHPKkKc2hE4",
-    "2rVvvu7aMQQ",
-    "STZCFSWRDq8",
-    "k3u4uUaiH_4",
-    "dP-81C_tckU",
-    "OlbOOzX_fDs",
-    "HRiCRmPYAl8",
-    "rilFfbm7j8k"
-  ];
+    const trailerVideoList = [
+        "EXV_WAKwGc4"
+    ];
 
-  const youtubeTrailerVideoIdentifierList = ["EXV_WAKwGc4"];
+    const thumbnailVideoList = [
+        "TNlEtPJPjJk",
+        "T7oExc711xE",
+        "dP-81C_tckU",
+        "GeEvVO7Op1E",
+        "k3u4uUaiH_4",
+        "r6DPYgsmAXY",
+        "ILkj5qbbfDM",
+        "WxCbrOo1mnE",
+        "6NnLfbTCM2I",
+        "STZCFSWRDq8",
+        "19TTjiSXVac",
+        "2rVvvu7aMQQ",
+        "hr-NaxerMqg",
+        "fhyHNqxLrTs",
+        "fiqTPjhNywI",
+        "MfRzxFhqLLo",
+        "_uiUiYBJrIA",
+        "UxjKu7cpFa4",
+        "8NzjH64Ukq8",
+        "x1k4pWasm3E"
+    ];
 
-  const generateVideoSource = identifier =>
-    "https://www.youtube.com/embed/" +
-    identifier +
-    "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=" +
-    identifier;
+    const buildFullVideoSource = id =>
+        "https://www.youtube.com/embed/" + id +
+        "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=" + id;
 
-  const generateThumbnailSource = identifier =>
-    "https://i.ytimg.com/vi/" + identifier + "/hqdefault.jpg";
+    const buildThumbnailSource = id =>
+        "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg";
 
-  const ensureFrameSourcesMatchPositions = frameList => {
-    frameList.forEach((frameElement, index) => {
-      const identifier = frameElement.dataset.videoId;
-      if (index < 5) {
-        const desiredSource = generateVideoSource(identifier);
-        if (frameElement.src !== desiredSource) frameElement.src = desiredSource;
-      } else {
-        const desiredSource = generateThumbnailSource(identifier);
-        if (frameElement.src !== desiredSource) frameElement.src = desiredSource;
-      }
-    });
-  };
-
-  const createCarouselIfAbsent = () => {
-    const carouselContainerElement = document.getElementById("carousel-container");
-    if (!carouselContainerElement) return;
-    if (carouselContainerElement.children.length > 0) return;
-
-    carouselContainerElement.innerHTML = "";
-
-    youtubeGeneralVideoIdentifierList.forEach((identifier, index) => {
-      const newFrameElement = document.createElement("iframe");
-      newFrameElement.dataset.videoId = identifier;
-      if (index < 5) {
-        newFrameElement.src = generateVideoSource(identifier);
-      } else {
-        newFrameElement.src = generateThumbnailSource(identifier);
-      }
-      carouselContainerElement.appendChild(newFrameElement);
-    });
-
-    const carouselFrameList = Array.from(
-      carouselContainerElement.querySelectorAll("iframe")
-    );
-
-    carouselInformation = {
-      carouselElement: carouselContainerElement,
-      frameList: carouselFrameList
+    const buildThumbnailGrid = () => {
+        const grid = document.getElementById("thumbnail-grid-container");
+        if (!grid) return;
+        if (grid.children.length > 0) return;
+        thumbnailVideoList.forEach(id => {
+            const imgElement = document.createElement("img");
+            imgElement.src = buildThumbnailSource(id);
+            imgElement.dataset.videoId = id;
+            grid.appendChild(imgElement);
+        });
     };
 
-    assignCarouselPositions(carouselFrameList);
-    ensureFrameSourcesMatchPositions(carouselFrameList);
-  };
-
-  const assignPositionToElement = (element, positionName, orderNumber) => {
-    element.className =
-      positionName === "center"
-        ? "center-video"
-        : positionName === "left"
-        ? "side-video left-video"
-        : positionName === "right"
-        ? "side-video right-video"
-        : "hidden-video";
-
-    element.dataset.position = positionName;
-    element.style.order = String(orderNumber);
-  };
-
-  const assignCarouselPositions = frameList => {
-    if (frameList.length < 5) return;
-
-    assignPositionToElement(frameList[0], "hidden-preloaded-left", 0);
-    assignPositionToElement(frameList[1], "left", 1);
-    assignPositionToElement(frameList[2], "center", 2);
-    assignPositionToElement(frameList[3], "right", 3);
-    assignPositionToElement(frameList[4], "hidden-preloaded-right", 4);
-
-    let positionCounter = 5;
-    for (let index = 5; index < frameList.length; index++) {
-      assignPositionToElement(
-        frameList[index],
-        "hidden-unloaded-" + (index - 4),
-        positionCounter
-      );
-      positionCounter++;
-    }
-  };
-
-  const rotateCarouselLeft = () => {
-    const info = carouselInformation;
-    if (!info) return;
-
-    const list = info.frameList;
-    const reordered = [
-      list[list.length - 1],
-      ...list.slice(0, list.length - 1)
-    ];
-
-    info.frameList = reordered;
-    assignCarouselPositions(reordered);
-    ensureFrameSourcesMatchPositions(reordered);
-  };
-
-  const rotateCarouselRight = () => {
-    const info = carouselInformation;
-    if (!info) return;
-
-    const list = info.frameList;
-    const reordered = [
-      ...list.slice(1),
-      list[0]
-    ];
-
-    info.frameList = reordered;
-    assignCarouselPositions(reordered);
-    ensureFrameSourcesMatchPositions(reordered);
-  };
-
-
-  const createStandaloneTrailerIfAbsent = () => {
-    const trailerFrameElement = document.getElementById("standalone-trailer-frame");
-    if (!trailerFrameElement) return;
-    if (trailerFrameElement.src && trailerFrameElement.src.trim() !== "") return;
-    const trailerIdentifier = youtubeTrailerVideoIdentifierList[0];
-    trailerFrameElement.src = generateVideoSource(trailerIdentifier);
-  };
-
-  document.addEventListener("click", event => {
-    if (event.target && event.target.id === "left-carousel-btn") rotateCarouselLeft();
-    if (event.target && event.target.id === "right-carousel-btn") rotateCarouselRight();
-  });
-
-  (async () => {
-    try {
-      const response = await fetch("/curated");
-      const text = await response.text();
-
-      const parsed = new DOMParser().parseFromString(text, "text/html");
-      const loaded = parsed.getElementById("persistent-player");
-
-      if (loaded && loaded.innerHTML.trim()) {
-        persistentVideoPlayerElement.innerHTML = loaded.innerHTML;
-        persistentVideoPlayerElement.style.display = "block";
-        persistentVideoPlayerElement.style.visibility = "hidden";
-
-        requestAnimationFrame(() => {
-          persistentVideoPlayerElement.style.display = "none";
-          persistentVideoPlayerElement.style.visibility = "";
-          persistentPlayerHasBeenPreloaded = true;
+    const refreshFrameSources = frames => {
+        frames.forEach((frame, index) => {
+            const frameId = frame.dataset.videoId;
+            if (index < 5) {
+                const fullSource = buildFullVideoSource(frameId);
+                if (frame.src !== fullSource) frame.src = fullSource;
+            } else {
+                const thumbnail = buildThumbnailSource(frameId);
+                if (frame.src !== thumbnail) frame.src = thumbnail;
+            }
         });
-      }
+    };
 
-      createCarouselIfAbsent();
-      createStandaloneTrailerIfAbsent();
-    } catch {}
-  })();
+    const buildCarousel = () => {
+        const container = document.getElementById("carousel-container");
+        if (!container) return;
+        if (container.children.length > 0) return;
 
-  async function loadRequestedPage(requestedUrl, clickedNavigationItem) {
-    const response = await fetch(requestedUrl);
-    const text = await response.text();
+        container.innerHTML = "";
+        generalVideoList.forEach((id, index) => {
+            const frame = document.createElement("iframe");
+            frame.dataset.videoId = id;
+            frame.src = index < 5 ? buildFullVideoSource(id) : buildThumbnailSource(id);
+            container.appendChild(frame);
+        });
 
-    const parsed = new DOMParser().parseFromString(text, "text/html");
-    const newContentElement = parsed.querySelector("#content");
-    if (newContentElement) {
-      document.getElementById("content").innerHTML = newContentElement.innerHTML;
-    }
+        const frames = Array.from(container.querySelectorAll("iframe"));
+        carouselState = { container, frames };
 
-    const newlyLoadedPersistentPlayer = parsed.getElementById("persistent-player");
+        assignCarouselPositions(frames);
+        refreshFrameSources(frames);
+    };
 
-    if (newlyLoadedPersistentPlayer && newlyLoadedPersistentPlayer.innerHTML.trim()) {
-      if (!persistentPlayerHasBeenPreloaded) {
-        persistentVideoPlayerElement.innerHTML =
-          newlyLoadedPersistentPlayer.innerHTML;
-      }
-      persistentVideoPlayerElement.style.display = "block";
-    } else {
-      persistentVideoPlayerElement.style.display = "none";
-    }
+    const assignVisualPosition = (element, role, orderValue) => {
+        element.className =
+            role === "center" ? "center-video" :
+            role === "left" ? "side-video left-video" :
+            role === "right" ? "side-video right-video" :
+            "hidden-video";
+        element.dataset.position = role;
+        element.style.order = String(orderValue);
+    };
 
-    document.title = parsed.title;
+    const assignCarouselPositions = frames => {
+        if (frames.length < 5) return;
+        assignVisualPosition(frames[0], "hidden-preloaded-left", 0);
+        assignVisualPosition(frames[1], "left", 1);
+        assignVisualPosition(frames[2], "center", 2);
+        assignVisualPosition(frames[3], "right", 3);
+        assignVisualPosition(frames[4], "hidden-preloaded-right", 4);
+        let counter = 5;
+        for (let i = 5; i < frames.length; i++) {
+            assignVisualPosition(frames[i], "hidden-unloaded-" + (i - 4), counter);
+            counter++;
+        }
+    };
 
-    sidebarNavigationItems.forEach(item => item.classList.remove("active-tab"));
-    clickedNavigationItem.classList.add("active-tab");
+    const shiftCarouselLeft = () => {
+        if (!carouselState) return;
+        const frames = carouselState.frames;
+        const rotated = [frames[frames.length - 1], ...frames.slice(0, frames.length - 1)];
+        carouselState.frames = rotated;
+        assignCarouselPositions(rotated);
+        refreshFrameSources(rotated);
+    };
 
-    createCarouselIfAbsent();
-    createStandaloneTrailerIfAbsent();
-  }
+    const shiftCarouselRight = () => {
+        if (!carouselState) return;
+        const frames = carouselState.frames;
+        const rotated = [...frames.slice(1), frames[0]];
+        carouselState.frames = rotated;
+        assignCarouselPositions(rotated);
+        refreshFrameSources(rotated);
+    };
 
-  sidebarNavigationItems.forEach(navigationItem => {
-    navigationItem.addEventListener("click", event => {
-      event.preventDefault();
-      loadRequestedPage(navigationItem.dataset.url, navigationItem);
+    const buildTrailer = () => {
+        const trailerFrame = document.getElementById("standalone-trailer-frame");
+        if (!trailerFrame) return;
+        if (trailerFrame.src && trailerFrame.src.trim() !== "") return;
+        trailerFrame.src = buildFullVideoSource(trailerVideoList[0]);
+    };
+
+    document.addEventListener("click", event => {
+        if (event.target && event.target.id === "left-carousel-btn") shiftCarouselLeft();
+        if (event.target && event.target.id === "right-carousel-btn") shiftCarouselRight();
     });
-  });
 
-  createCarouselIfAbsent();
-  createStandaloneTrailerIfAbsent();
+    (async () => {
+        try {
+            const response = await fetch("/curated");
+            const raw = await response.text();
+            const parsed = new DOMParser().parseFromString(raw, "text/html");
+            const embeddedPlayer = parsed.getElementById("persistent-player");
+            if (embeddedPlayer && embeddedPlayer.innerHTML.trim()) {
+                persistentPlayer.innerHTML = embeddedPlayer.innerHTML;
+                persistentPlayer.style.display = "block";
+                persistentPlayer.style.visibility = "hidden";
+                requestAnimationFrame(() => {
+                    persistentPlayer.style.display = "none";
+                    persistentPlayer.style.visibility = "";
+                    persistentPlayerIsReady = true;
+                });
+            }
+            buildCarousel();
+            buildTrailer();
+            buildThumbnailGrid();
+        } catch {}
+    })();
+
+    async function loadPage(url, navigationItem) {
+        const reply = await fetch(url);
+        const raw = await reply.text();
+        const parsed = new DOMParser().parseFromString(raw, "text/html");
+        const freshContent = parsed.querySelector("#content");
+        if (freshContent) {
+            document.getElementById("content").innerHTML = freshContent.innerHTML;
+        }
+        const freshPlayer = parsed.getElementById("persistent-player");
+        if (freshPlayer && freshPlayer.innerHTML.trim()) {
+            if (!persistentPlayerIsReady) {
+                persistentPlayer.innerHTML = freshPlayer.innerHTML;
+            }
+            persistentPlayer.style.display = "block";
+        } else {
+            persistentPlayer.style.display = "none";
+        }
+        document.title = parsed.title;
+        navigationItems.forEach(x => x.classList.remove("active-tab"));
+        navigationItem.classList.add("active-tab");
+        buildCarousel();
+        buildTrailer();
+        buildThumbnailGrid();
+    }
+
+    navigationItems.forEach(item => {
+        item.addEventListener("click", event => {
+            event.preventDefault();
+            loadPage(item.dataset.url, item);
+        });
+    });
+
+    buildCarousel();
+    buildTrailer();
+    buildThumbnailGrid();
 });
-
