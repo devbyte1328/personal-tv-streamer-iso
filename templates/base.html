@@ -28,7 +28,8 @@
     <div id="content">
         {% block content %}{% endblock %}
     </div>
-
+    
+    <script src="{{ url_for('static', filename='base.js') }}"></script>
     <script src="{{ url_for('static', filename='curated.js') }}"></script>
 </body>
 </html>
