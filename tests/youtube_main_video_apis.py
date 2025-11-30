@@ -3,7 +3,7 @@ import json
 import requests
 import asyncio
 import aiohttp
-
+import os
 
 API_KEY = os.getenv("YT_DATA_API_KEY")
 if not API_KEY:
