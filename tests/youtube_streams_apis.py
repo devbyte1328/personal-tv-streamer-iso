@@ -5,7 +5,7 @@ import aiohttp
 import os
 
 API_KEY = os.getenv("YT_DATA_API_KEY")
-URL_CHANNEL_HANDLE = "FCBarcelona"
+URL_CHANNEL_HANDLE = "PFLMMA"
 
 cmd = ["curl", "-s", f"https://www.googleapis.com/youtube/v3/channels?part=id,contentDetails&forHandle={URL_CHANNEL_HANDLE}&key={API_KEY}"]
 data = json.loads(subprocess.check_output(cmd).decode())
@@ -35,21 +35,20 @@ async def main(ids):
         archived = []
         for item in data.get("items", []):
             vid = item["id"]
-            ls = item.get("liveStreamingDetails")
             state = item["snippet"]["liveBroadcastContent"]
+            ls = item.get("liveStreamingDetails")
             if state == "live":
                 live.append(vid)
             elif ls is not None:
-                archived.append(vid)
-        return live, archived
+                archived.append((vid, ls.get("actualStartTime")))
+        if live:
+            print("https://www.youtube.com/watch?v=" + live[0])
+            return
+        archived_sorted = sorted(archived, key=lambda x: x[1], reverse=True)
+        if archived_sorted:
+            print("https://www.youtube.com/watch?v=" + archived_sorted[0][0])
+        else:
+            print(None)
 
-live_ids, archived_ids = asyncio.run(main(video_ids))
-
-print("LIVE STREAMS:")
-for v in live_ids:
-    print("https://www.youtube.com/watch?v=" + v)
-
-print("\nARCHIVED LIVESTREAMS:")
-for v in archived_ids:
-    print("https://www.youtube.com/watch?v=" + v)
+asyncio.run(main(video_ids))
 
