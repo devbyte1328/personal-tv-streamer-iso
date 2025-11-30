@@ -8,11 +8,11 @@ api_key = os.getenv("YT_DATA_API_KEY")
 if not api_key:
     raise RuntimeError("YT_DATA_API_KEY is not set in your environment!")
 
-general_source_file = "../database/curated/curated_general_youtube_channels.txt"
-trailer_source_file = "../database/curated/curated_trailers_youtube_channels.txt"
+general_source_file = "database/curated/curated_general_youtube_channels.txt"
+trailer_source_file = "database/curated/curated_trailers_youtube_channels.txt"
 
-general_output_file = "../database/pulled/curated-youtube-general-videos"
-trailer_output_file = "../database/pulled/curated-youtube-trailer-videos"
+general_output_file = "database/pulled/curated-youtube-general-videos"
+trailer_output_file = "database/pulled/curated-youtube-trailer-videos"
 
 def load_channel_handles(path):
     channel_handles = []
@@ -139,5 +139,6 @@ async def main():
         for video_id in trailer_results:
             file.write(video_id + "\n")
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 
