@@ -1,7 +1,6 @@
 import os
 import json
 import random
-import subprocess
 import asyncio
 import aiohttp
 
@@ -26,34 +25,32 @@ def load_channel_handles(path):
                 channel_handles.append(stripped)
     return channel_handles
 
-def get_channel_id(channel_handle):
-    command = [
-        "curl", "-s",
-        f"https://www.googleapis.com/youtube/v3/channels?part=id,contentDetails&forHandle={channel_handle}&key={api_key}"
-    ]
-    response = json.loads(subprocess.check_output(command).decode())
-    if not response.get("items"):
+async def get_channel_id(session, handle):
+    url = f"https://www.googleapis.com/youtube/v3/channels?part=id,contentDetails&forHandle={handle}&key={api_key}"
+    async with session.get(url) as response:
+        data = await response.json()
+    if not data.get("items"):
         return None, None
-    return response["items"][0]["id"], response["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+    item = data["items"][0]
+    return item["id"], item["contentDetails"]["relatedPlaylists"]["uploads"]
 
-def get_recent_video_ids(playlist_id):
-    command = [
-        "curl", "-s",
-        f"https://www.googleapis.com/youtube/v3/playlistItems?"
+async def get_recent_video_ids(session, playlist_id):
+    url = (
+        "https://www.googleapis.com/youtube/v3/playlistItems?"
         f"part=contentDetails&playlistId={playlist_id}&maxResults=10&key={api_key}"
-    ]
-    response = json.loads(subprocess.check_output(command).decode())
-    return [item["contentDetails"]["videoId"] for item in response.get("items", [])]
+    )
+    async with session.get(url) as response:
+        data = await response.json()
+    return [i["contentDetails"]["videoId"] for i in data.get("items", [])]
 
 async def check_if_short_or_redirect(session, video_id):
     url = f"https://www.youtube.com/shorts/{video_id}"
     async with session.get(url, allow_redirects=False) as response:
         if 300 <= response.status < 400 and "Location" in response.headers:
             redirected = response.headers["Location"]
-            split_point = redirected.find("v=")
-            if split_point != -1:
-                video_only = redirected.split("v=")[1].split("&")[0]
-                return ("normal", video_only)
+            idx = redirected.find("v=")
+            if idx != -1:
+                return ("normal", redirected.split("v=")[1].split("&")[0])
             return ("normal", None)
         return ("short", None)
 
@@ -66,10 +63,11 @@ async def fetch_stream_data(session, video_ids):
         return await response.json()
 
 async def pick_normal_video(session, video_ids):
-    for video_id in video_ids[:5]:
-        result, redirect_id = await check_if_short_or_redirect(session, video_id)
-        if result == "normal" and redirect_id:
-            return redirect_id
+    tasks = [check_if_short_or_redirect(session, vid) for vid in video_ids[:5]]
+    results = await asyncio.gather(*tasks)
+    for result, redirect in results:
+        if result == "normal" and redirect:
+            return redirect
     return None
 
 async def pick_stream_video(session, video_ids):
@@ -86,62 +84,52 @@ async def pick_stream_video(session, video_ids):
             archived_items.append((vid, details.get("actualStartTime")))
     if live_items:
         return live_items[0]
-    archived_sorted = sorted(archived_items, key=lambda x: x[1], reverse=True)
-    if archived_sorted:
-        return archived_sorted[0][0]
+    archived_items.sort(key=lambda x: x[1] or "", reverse=True)
+    if archived_items:
+        return archived_items[0][0]
     return None
 
-async def collect_general(session, handles):
-    collected = []
-    for handle in handles:
-        if "/streams" in handle:
-            clean_handle = handle.replace("/streams", "")
-            channel_id, uploads = get_channel_id(clean_handle)
-            if not uploads:
-                continue
-            video_ids = get_recent_video_ids(uploads)
-            if not video_ids:
-                continue
-            found = await pick_stream_video(session, video_ids)
-            if found:
-                collected.append(found)
-        else:
-            channel_id, uploads = get_channel_id(handle)
-            if not uploads:
-                continue
-            video_ids = get_recent_video_ids(uploads)
-            if not video_ids:
-                continue
-            found = await pick_normal_video(session, video_ids)
-            if found:
-                collected.append(found)
-    return collected
-
-async def collect_trailers(session, handles):
-    collected = []
-    for handle in handles:
-        channel_id, uploads = get_channel_id(handle)
+async def collect_general_one(session, handle):
+    if "/streams" in handle:
+        clean = handle.replace("/streams", "")
+        channel_id, uploads = await get_channel_id(session, clean)
         if not uploads:
-            continue
-        video_ids = get_recent_video_ids(uploads)
+            return None
+        video_ids = await get_recent_video_ids(session, uploads)
         if not video_ids:
-            continue
-        found_video = None
-        for vid in video_ids[:5]:
-            kind, redirect_id = await check_if_short_or_redirect(session, vid)
-            if kind == "normal" and redirect_id:
-                found_video = redirect_id
-                break
-        if found_video:
-            collected.append(found_video)
-    return collected
+            return None
+        return await pick_stream_video(session, video_ids)
+    else:
+        channel_id, uploads = await get_channel_id(session, handle)
+        if not uploads:
+            return None
+        video_ids = await get_recent_video_ids(session, uploads)
+        if not video_ids:
+            return None
+        return await pick_normal_video(session, video_ids)
+
+async def collect_trailers_one(session, handle):
+    channel_id, uploads = await get_channel_id(session, handle)
+    if not uploads:
+        return None
+    video_ids = await get_recent_video_ids(session, uploads)
+    if not video_ids:
+        return None
+    tasks = [check_if_short_or_redirect(session, vid) for vid in video_ids[:5]]
+    results = await asyncio.gather(*tasks)
+    for kind, redirect_id in results:
+        if kind == "normal" and redirect_id:
+            return redirect_id
+    return None
 
 async def main():
     general_handles = load_channel_handles(general_source_file)
     trailer_handles = load_channel_handles(trailer_source_file)
     async with aiohttp.ClientSession() as session:
-        general_results = await collect_general(session, general_handles)
-        trailer_results = await collect_trailers(session, trailer_handles)
+        general_tasks = [collect_general_one(session, h) for h in general_handles]
+        trailer_tasks = [collect_trailers_one(session, h) for h in trailer_handles]
+        general_results = [r for r in await asyncio.gather(*general_tasks) if r]
+        trailer_results = [r for r in await asyncio.gather(*trailer_tasks) if r]
     random.shuffle(general_results)
     random.shuffle(trailer_results)
     with open(general_output_file, "w") as file:
