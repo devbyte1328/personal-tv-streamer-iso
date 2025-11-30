@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='curated.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='apps.css') }}">
 </head>
 <body>
     <video autoplay muted loop id="bgvideo">
@@ -27,7 +29,7 @@
         {% block content %}{% endblock %}
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='curated.js') }}"></script>
 </body>
 </html>
 

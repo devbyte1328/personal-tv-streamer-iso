@@ -1,0 +1,41 @@
+
+.app-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 30px;
+    justify-items: center;
+    align-items: center;
+    padding-right: 30px;
+}
+
+.app-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.app-btn:hover { opacity: 0.8; }
+
+.app-icon {
+    margin-bottom: 10px;
+    border-radius: 12px;
+    width: 64px;
+    height: 64px;
+}
+
+.app-btn span {
+    display: block;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
