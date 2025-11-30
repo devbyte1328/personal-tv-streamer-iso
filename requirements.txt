@@ -1,3 +1,5 @@
 flask
 pyautogui
 websockets
+asyncio
+aiohttp
