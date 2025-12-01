@@ -117,21 +117,18 @@
     color: #ffffff;
     line-height: 1.35;
     letter-spacing: 1px;
-
     text-shadow:
         0 0 4px rgba(0,0,0,0.8),
         0 0 6px rgba(0,0,0,0.6);
-
     background: rgba(0,0,0,0.35);
     padding: 16px 22px;
     border-radius: 10px;
     backdrop-filter: blur(3px);
 }
 
-
 .thumbnail-grid-container {
     margin-top: 4%;
-    margin-right: 11%;
+    margin-right: 8%;
     display: grid;
     grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
     gap: 20px;
@@ -140,6 +137,10 @@
 
 .thumbnail-grid-container img {
     width: 100%;
+    height: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    object-position: center;
     transition: transform .3s ease;
 }
 
