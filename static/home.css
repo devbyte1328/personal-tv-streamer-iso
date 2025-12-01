@@ -92,3 +92,35 @@
     opacity: 0.9;
 }
 
+
+.home-video-wrapper {
+    width: 100%;
+    margin-top: 4%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 30px;
+}
+
+#standalone-home-video-frame {
+    width: 40vw;
+    max-width: 1400px;
+    aspect-ratio: 16/9;
+    border: none;
+}
+
+#standalone-home-video-title {
+    font-size: 32px;
+    font-weight: 700;
+    max-width: 40%;
+    color: #ffffff;
+    line-height: 1.35;
+    letter-spacing: 1px;
+    text-shadow:
+        0 0 4px rgba(0,0,0,0.8),
+        0 0 6px rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.35);
+    padding: 16px 22px;
+    border-radius: 10px;
+    backdrop-filter: blur(3px);
+}
