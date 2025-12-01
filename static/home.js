@@ -3,22 +3,22 @@ if (!window.globalTimeAlreadyRunning) {
     window.globalTimeValue = "";
 
     function updateTime() {
-        const time = new Date().toLocaleString(window.globalLocale, {
+        const formattedTime = new Date().toLocaleString(window.globalLocale, {
             timeZone: window.globalTimezone,
             hour12: false
         });
-        window.globalTimeValue = time;
-        const el = document.getElementById("current-time");
-        if (el) el.textContent = time;
+        window.globalTimeValue = formattedTime;
+        const timeElement = document.getElementById("current-time");
+        if (timeElement) timeElement.textContent = formattedTime;
     }
 
     fetch("/database/location")
-        .then(r => r.text())
-        .then(t => {
-            const locale = t.match(/LocaleString:\s*"([^"]+)"/);
-            const zone = t.match(/Timezone:\s*"([^"]+)"/);
-            window.globalLocale = locale ? locale[1] : undefined;
-            window.globalTimezone = zone ? zone[1] : undefined;
+        .then(response => response.text())
+        .then(fileText => {
+            const localeMatch = fileText.match(/LocaleString:\s*"([^"]+)"/);
+            const timezoneMatch = fileText.match(/Timezone:\s*"([^"]+)"/);
+            window.globalLocale = localeMatch ? localeMatch[1] : undefined;
+            window.globalTimezone = timezoneMatch ? timezoneMatch[1] : undefined;
             updateTime();
             setInterval(updateTime, 1000);
         });
@@ -28,10 +28,10 @@ if (!window.globalTimeAlreadyRunning) {
 
     function fetchWeatherAndStore() {
         fetch("/weather")
-            .then(r => r.json())
-            .then(j => {
-                if (j && j.locations && j.locations.length > 0) {
-                    window.globalWeatherData = j.locations;
+            .then(response => response.json())
+            .then(weatherJson => {
+                if (weatherJson && weatherJson.locations && weatherJson.locations.length > 0) {
+                    window.globalWeatherData = weatherJson.locations;
                     window.globalWeatherLoaded = true;
                 } else {
                     window.globalWeatherData = [];
@@ -46,22 +46,23 @@ if (!window.globalTimeAlreadyRunning) {
 }
 
 function tryAttachTimeToHomePage() {
-    const el = document.getElementById("current-time");
-    if (el) el.textContent = window.globalTimeValue;
+    const timeElement = document.getElementById("current-time");
+    if (timeElement) timeElement.textContent = window.globalTimeValue;
 }
 
 tryAttachTimeToHomePage();
 
 function attachWeatherToHomePage() {
-    const el = document.getElementById("weather-container");
-    if (!el) return;
-    el.innerHTML = "";
+    const containerElement = document.getElementById("weather-container");
+    if (!containerElement) return;
+    containerElement.innerHTML = "";
     if (!window.globalWeatherLoaded) return;
-    window.globalWeatherData.forEach(loc => {
-        const box = document.createElement("div");
-        box.className = "weather-box";
-        box.textContent = loc.name + " " + loc.temperature + "°C | Wind " + loc.windspeed + " km/h";
-        el.appendChild(box);
+
+    window.globalWeatherData.forEach(locationObject => {
+        const weatherBox = document.createElement("div");
+        weatherBox.className = "weather-box";
+        weatherBox.textContent = locationObject.location_name + " " + locationObject.temperature + "°C | Wind " + locationObject.wind_speed + " km/h";
+        containerElement.appendChild(weatherBox);
     });
 }
 
