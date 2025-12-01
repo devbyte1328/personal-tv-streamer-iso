@@ -15,6 +15,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
         navigationItems.forEach(x => x.classList.remove("active-tab"));
         navigationItem.classList.add("active-tab");
+
+        if (url.endsWith("/")) window.dispatchEvent(new Event("home-page-loaded"));
     };
 
     navigationItems.forEach(item => {
