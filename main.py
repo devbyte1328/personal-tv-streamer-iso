@@ -67,29 +67,25 @@ def fetch_weather_for_location(location_text):
 
 def weather_thread_function():
     global weather_data
+    location_file_path = os.path.join(app.root_path, "database", "location.txt")
     while True:
-        path = os.path.join(app.root_path, "database", "location.txt")
-        if os.path.isfile(path):
-            with open(path) as f:
-                t = f.read()
-            w1 = ""
-            w2 = ""
-            m1 = t.split('WeatherLocation1: "')
-            if len(m1) > 1:
-                w1 = m1[1].split('"')[0].strip()
-            m2 = t.split('WeatherLocation2: "')
-            if len(m2) > 1:
-                w2 = m2[1].split('"')[0].strip()
-            locations_list = []
-            if w1:
-                d1 = fetch_weather_for_location(w1)
-                if d1:
-                    locations_list.append(d1)
-            if w2:
-                d2 = fetch_weather_for_location(w2)
-                if d2:
-                    locations_list.append(d2)
-            weather_data = {"locations": locations_list}
+        collected_weather = []
+        if os.path.isfile(location_file_path):
+            with open(location_file_path, "r", encoding="utf-8") as file:
+                file_text = file.read()
+            def read_location(label_name):
+                search_text = f'{label_name}: "'
+                if search_text in file_text:
+                    return file_text.split(search_text)[1].split('"')[0].strip()
+                return ""
+            first_location_name = read_location("WeatherLocation1")
+            second_location_name = read_location("WeatherLocation2")
+            for location_name in (first_location_name, second_location_name):
+                if location_name:
+                    weather_result = fetch_weather_for_location(location_name)
+                    if weather_result:
+                        collected_weather.append(weather_result)
+        weather_data = {"locations": collected_weather}
         time.sleep(900)
 
 @app.route('/')
@@ -134,6 +130,6 @@ if __name__ == "__main__":
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
     threading.Thread(target=weather_thread_function, daemon=True).start()
-    #threading.Thread(target=run_youtube_api, daemon=True).start()
+    threading.Thread(target=run_youtube_api, daemon=True).start()
     app.run(host='0.0.0.0', port=8080)
 
