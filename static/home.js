@@ -11,131 +11,176 @@ if (!window.globalTimeAlreadyRunning) {
     window.globalWeatherLoaded = false;
 
     function updateDisplayedTimeAndDate() {
-        if (!window.globalLocale || !window.globalTimezone) return;
+        if (!window.globalLocale || !window.globalTimezone) {
+            return;
+        }
 
-        const now = new Date();
+        var currentMomentInTime = new Date();
 
-        const timeText = now.toLocaleTimeString(window.globalLocale, {
-            timeZone: window.globalTimezone,
-            hour12: false
-        });
+        var writtenTime = currentMomentInTime.toLocaleTimeString(
+            window.globalLocale,
+            { timeZone: window.globalTimezone, hour12: false }
+        );
 
-        const dateText = now.toLocaleDateString(window.globalLocale, {
-            timeZone: window.globalTimezone
-        });
+        var writtenDate = currentMomentInTime.toLocaleDateString(
+            window.globalLocale,
+            { timeZone: window.globalTimezone }
+        );
 
-        const weekdayText = now.toLocaleDateString(window.globalLocale, {
-            timeZone: window.globalTimezone,
-            weekday: "long"
-        });
+        var writtenWeekday = currentMomentInTime.toLocaleDateString(
+            window.globalLocale,
+            { timeZone: window.globalTimezone, weekday: "long" }
+        );
 
-        const monthText = now.toLocaleDateString(window.globalLocale, {
-            timeZone: window.globalTimezone,
-            month: "long"
-        });
+        var writtenMonth = currentMomentInTime.toLocaleDateString(
+            window.globalLocale,
+            { timeZone: window.globalTimezone, month: "long" }
+        );
 
-        window.globalTimeValue = timeText;
-        window.globalDateValue = dateText;
-        window.globalDayMonthValue = weekdayText + " | " + monthText;
+        window.globalTimeValue = writtenTime;
+        window.globalDateValue = writtenDate;
+        window.globalDayMonthValue = writtenWeekday + " | " + writtenMonth;
 
-        const timeElement = document.getElementById("current-time");
-        const dateElement = document.getElementById("current-date");
-        const dayMonthElement = document.getElementById("current-day-month");
+        var timeElementOnPage = document.getElementById("current-time");
+        var dateElementOnPage = document.getElementById("current-date");
+        var dayAndMonthElementOnPage = document.getElementById("current-day-month");
 
-        if (timeElement) timeElement.textContent = timeText;
-        if (dateElement) dateElement.textContent = dateText;
-        if (dayMonthElement) dayMonthElement.textContent = window.globalDayMonthValue;
+        if (timeElementOnPage !== null) {
+            timeElementOnPage.textContent = writtenTime;
+        }
+        if (dateElementOnPage !== null) {
+            dateElementOnPage.textContent = writtenDate;
+        }
+        if (dayAndMonthElementOnPage !== null) {
+            dayAndMonthElementOnPage.textContent = window.globalDayMonthValue;
+        }
     }
 
     fetch("/database/location")
-        .then(r => r.text())
-        .then(text => {
-            const localeMatch = text.match(/LocaleString:\s*"([^"]+)"/);
-            const timezoneMatch = text.match(/Timezone:\s*"([^"]+)"/);
-            window.globalLocale = localeMatch ? localeMatch[1] : undefined;
-            window.globalTimezone = timezoneMatch ? timezoneMatch[1] : undefined;
+        .then(function(receivedResponse) {
+            return receivedResponse.text();
+        })
+        .then(function(receivedText) {
+            var foundLocale = receivedText.match(/LocaleString:\s*"([^"]+)"/);
+            var foundTimezone = receivedText.match(/Timezone:\s*"([^"]+)"/);
+
+            if (foundLocale) {
+                window.globalLocale = foundLocale[1];
+            } else {
+                window.globalLocale = undefined;
+            }
+
+            if (foundTimezone) {
+                window.globalTimezone = foundTimezone[1];
+            } else {
+                window.globalTimezone = undefined;
+            }
+
             updateDisplayedTimeAndDate();
             setInterval(updateDisplayedTimeAndDate, 1000);
         });
 
-    function storeWeatherData(value) {
-        window.globalWeatherData = value;
+    function storeWeatherDataInMemory(weatherList) {
+        window.globalWeatherData = weatherList;
         window.globalWeatherLoaded = true;
     }
 
-    function requestWeather() {
+    function requestWeatherInformation() {
         fetch("/weather")
-            .then(r => r.json())
-            .then(weather => {
-                if (weather && weather.locations) {
-                    storeWeatherData(weather.locations);
+            .then(function(receivedResponse) {
+                return receivedResponse.json();
+            })
+            .then(function(receivedWeatherData) {
+                if (receivedWeatherData && receivedWeatherData.locations) {
+                    storeWeatherDataInMemory(receivedWeatherData.locations);
                 }
                 attachWeather();
             });
     }
 
-    requestWeather();
+    requestWeatherInformation();
 }
 
 function attachTime() {
-    const t = document.getElementById("current-time");
-    const d = document.getElementById("current-date");
-    const m = document.getElementById("current-day-month");
+    var timeElementOnPage = document.getElementById("current-time");
+    var dateElementOnPage = document.getElementById("current-date");
+    var dayAndMonthElementOnPage = document.getElementById("current-day-month");
 
-    if (t) t.textContent = window.globalTimeValue;
-    if (d) d.textContent = window.globalDateValue;
-    if (m) m.textContent = window.globalDayMonthValue;
+    if (timeElementOnPage !== null) {
+        timeElementOnPage.textContent = window.globalTimeValue;
+    }
+    if (dateElementOnPage !== null) {
+        dateElementOnPage.textContent = window.globalDateValue;
+    }
+    if (dayAndMonthElementOnPage !== null) {
+        dayAndMonthElementOnPage.textContent = window.globalDayMonthValue;
+    }
 }
 
-function determineWeatherIcon(temp) {
-    if (temp <= 0) return "❄️";
-    if (temp <= 10) return "🌥️";
-    if (temp <= 20) return "⛅";
-    if (temp <= 30) return "☀️";
+function determineWeatherIcon(temperatureValue) {
+    if (temperatureValue <= 0) {
+        return "❄️";
+    }
+    if (temperatureValue <= 10) {
+        return "🌥️";
+    }
+    if (temperatureValue <= 20) {
+        return "⛅";
+    }
+    if (temperatureValue <= 30) {
+        return "☀️";
+    }
     return "🔥";
 }
 
 function attachWeather() {
-    const container = document.getElementById("weather-container");
-    if (!container) return;
-
-    container.innerHTML = "";
-
-    if (!window.globalWeatherLoaded) {
-        container.textContent = "Loading...";
+    var weatherContainerOnPage = document.getElementById("weather-container");
+    if (weatherContainerOnPage === null) {
         return;
     }
 
-    window.globalWeatherData.forEach(item => {
-        const box = document.createElement("div");
-        box.className = "weather-box";
+    weatherContainerOnPage.innerHTML = "";
 
-        const icon = determineWeatherIcon(item.temperature);
+    if (window.globalWeatherLoaded === false) {
+        weatherContainerOnPage.textContent = "Loading...";
+        return;
+    }
 
-        const location = document.createElement("div");
-        location.className = "weather-location";
-        location.textContent = item.location_name;
+    var currentIndex = 0;
+    while (currentIndex < window.globalWeatherData.length) {
+        var currentWeatherItem = window.globalWeatherData[currentIndex];
 
-        const details = document.createElement("div");
-        details.className = "weather-details";
-        details.textContent =
-            icon +
+        var weatherBoxElement = document.createElement("div");
+        weatherBoxElement.className = "weather-box";
+
+        var chosenWeatherSymbol = determineWeatherIcon(currentWeatherItem.temperature);
+
+        var locationElement = document.createElement("div");
+        locationElement.className = "weather-location";
+        locationElement.textContent = currentWeatherItem.location_name;
+
+        var detailElement = document.createElement("div");
+        detailElement.className = "weather-details";
+        detailElement.textContent =
+            chosenWeatherSymbol +
             " " +
-            item.temperature +
+            currentWeatherItem.temperature +
             "°C | Wind " +
-            item.wind_speed +
+            currentWeatherItem.wind_speed +
             " km/h";
 
-        box.appendChild(location);
-        box.appendChild(details);
-        container.appendChild(box);
-    });
+        weatherBoxElement.appendChild(locationElement);
+        weatherBoxElement.appendChild(detailElement);
+        weatherContainerOnPage.appendChild(weatherBoxElement);
+
+        currentIndex = currentIndex + 1;
+    }
 }
 
 attachTime();
 attachWeather();
 
-window.addEventListener("home-page-loaded", () => {
+window.addEventListener("home-page-loaded", function() {
     attachTime();
     attachWeather();
 });
