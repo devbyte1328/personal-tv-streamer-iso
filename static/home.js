@@ -10,46 +10,51 @@ if (!window.globalTimeAlreadyRunning) {
     window.globalWeatherData = [];
     window.globalWeatherLoaded = false;
 
+    window.globalHomeVideoInformationHasLoaded = false;
+    window.globalHomeVideoAvailableList = [];
+    window.globalHomeVideoChosenIdentifier = "";
+    window.globalHomeVideoChosenTitle = "";
+
     function updateDisplayedTimeAndDate() {
-        if (!window.globalLocale || !window.globalTimezone) {
+        if (window.globalLocale === undefined || window.globalTimezone === undefined) {
             return;
         }
 
-        var currentMomentInTime = new Date();
+        var currentPointInTime = new Date();
 
-        var writtenTime = currentMomentInTime.toLocaleTimeString(
+        var displayedTime = currentPointInTime.toLocaleTimeString(
             window.globalLocale,
             { timeZone: window.globalTimezone, hour12: false }
         );
 
-        var writtenDate = currentMomentInTime.toLocaleDateString(
+        var displayedDate = currentPointInTime.toLocaleDateString(
             window.globalLocale,
             { timeZone: window.globalTimezone }
         );
 
-        var writtenWeekday = currentMomentInTime.toLocaleDateString(
+        var displayedWeekday = currentPointInTime.toLocaleDateString(
             window.globalLocale,
             { timeZone: window.globalTimezone, weekday: "long" }
         );
 
-        var writtenMonth = currentMomentInTime.toLocaleDateString(
+        var displayedMonth = currentPointInTime.toLocaleDateString(
             window.globalLocale,
             { timeZone: window.globalTimezone, month: "long" }
         );
 
-        window.globalTimeValue = writtenTime;
-        window.globalDateValue = writtenDate;
-        window.globalDayMonthValue = writtenWeekday + " | " + writtenMonth;
+        window.globalTimeValue = displayedTime;
+        window.globalDateValue = displayedDate;
+        window.globalDayMonthValue = displayedWeekday + " | " + displayedMonth;
 
         var timeElementOnPage = document.getElementById("current-time");
         var dateElementOnPage = document.getElementById("current-date");
         var dayAndMonthElementOnPage = document.getElementById("current-day-month");
 
         if (timeElementOnPage !== null) {
-            timeElementOnPage.textContent = writtenTime;
+            timeElementOnPage.textContent = displayedTime;
         }
         if (dateElementOnPage !== null) {
-            dateElementOnPage.textContent = writtenDate;
+            dateElementOnPage.textContent = displayedDate;
         }
         if (dayAndMonthElementOnPage !== null) {
             dayAndMonthElementOnPage.textContent = window.globalDayMonthValue;
@@ -99,6 +104,115 @@ if (!window.globalTimeAlreadyRunning) {
     }
 
     requestWeatherInformation();
+
+    function buildFullHomeVideoSource(sourceIdentifier) {
+        var combinedAddress = "";
+        combinedAddress += "https://www.youtube.com/embed/";
+        combinedAddress += sourceIdentifier;
+        combinedAddress += "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0";
+        combinedAddress += "&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=";
+        combinedAddress += sourceIdentifier;
+        return combinedAddress;
+    }
+
+    function startHomeVideoListRetrievalProcess() {
+        var retrievalShouldContinue = true;
+
+        function attemptToRetrieveList() {
+            if (retrievalShouldContinue === false) {
+                return;
+            }
+
+            fetch("http://localhost:8080/database/pulled/curated-youtube-trailer-videos")
+                .then(function(receivedResponse) {
+                    if (!receivedResponse.ok) {
+                        throw new Error("Unacceptable response");
+                    }
+                    return receivedResponse.text();
+                })
+                .then(function(receivedText) {
+                    var trimmedTextBlock = receivedText.trim();
+                    var separatedTextLines = trimmedTextBlock.split("\n");
+                    var cleanedList = [];
+                    var walkingIndex = 0;
+
+                    while (walkingIndex < separatedTextLines.length) {
+                        var currentLine = separatedTextLines[walkingIndex];
+                        var trimmedCurrentLine = currentLine.trim();
+                        if (trimmedCurrentLine !== "") {
+                            cleanedList.push(trimmedCurrentLine);
+                        }
+                        walkingIndex = walkingIndex + 1;
+                    }
+
+                    if (cleanedList.length === 0) {
+                        throw new Error("Empty collection");
+                    }
+
+                    var parsedList = [];
+                    var readingIndex = 0;
+
+                    while (readingIndex < cleanedList.length) {
+                        var currentRawLine = cleanedList[readingIndex];
+                        var locationOfFirstSpace = currentRawLine.indexOf(" ");
+                        var extractedIdentifier = currentRawLine.slice(0, locationOfFirstSpace).trim();
+                        var extractedTitle = currentRawLine.slice(locationOfFirstSpace + 1).trim();
+
+                        parsedList.push({
+                            videoIdentifier: extractedIdentifier,
+                            videoTitle: extractedTitle
+                        });
+
+                        readingIndex = readingIndex + 1;
+                    }
+
+                    window.globalHomeVideoAvailableList = parsedList;
+                    retrievalShouldContinue = false;
+                    chooseHomeVideoForDisplay();
+                    updateHomeVideoOnPage();
+                })
+                .catch(function() {
+                    setTimeout(function() {
+                        attemptToRetrieveList();
+                    }, 1000);
+                });
+        }
+
+        attemptToRetrieveList();
+    }
+
+    function chooseHomeVideoForDisplay() {
+        if (window.globalHomeVideoAvailableList.length === 0) {
+            return;
+        }
+
+        var totalCount = window.globalHomeVideoAvailableList.length;
+        var randomIndex = Math.floor(Math.random() * totalCount);
+        var selectedVideo = window.globalHomeVideoAvailableList[randomIndex];
+
+        window.globalHomeVideoChosenIdentifier = selectedVideo.videoIdentifier;
+        window.globalHomeVideoChosenTitle = selectedVideo.videoTitle;
+        window.globalHomeVideoInformationHasLoaded = true;
+    }
+
+    function updateHomeVideoOnPage() {
+        var videoFrameElement = document.getElementById("standalone-home-video-frame");
+        var videoTitleElement = document.getElementById("standalone-home-video-title");
+
+        if (videoFrameElement === null || videoTitleElement === null) {
+            return;
+        }
+
+        if (window.globalHomeVideoInformationHasLoaded === false) {
+            return;
+        }
+
+        var constructedAddress = buildFullHomeVideoSource(window.globalHomeVideoChosenIdentifier);
+        videoFrameElement.src = constructedAddress;
+        videoTitleElement.textContent = window.globalHomeVideoChosenTitle;
+    }
+
+    startHomeVideoListRetrievalProcess();
 }
 
 function attachTime() {
@@ -146,9 +260,9 @@ function attachWeather() {
         return;
     }
 
-    var currentIndex = 0;
-    while (currentIndex < window.globalWeatherData.length) {
-        var currentWeatherItem = window.globalWeatherData[currentIndex];
+    var walkingIndex = 0;
+    while (walkingIndex < window.globalWeatherData.length) {
+        var currentWeatherItem = window.globalWeatherData[walkingIndex];
 
         var weatherBoxElement = document.createElement("div");
         weatherBoxElement.className = "weather-box";
@@ -173,7 +287,7 @@ function attachWeather() {
         weatherBoxElement.appendChild(detailElement);
         weatherContainerOnPage.appendChild(weatherBoxElement);
 
-        currentIndex = currentIndex + 1;
+        walkingIndex = walkingIndex + 1;
     }
 }
 
