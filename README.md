@@ -196,4 +196,18 @@ Vendor links (read the above warning first):
     ``` 
     
 ## Credits
-- The icons in the **"App"** section of the streamer were sourced and modified. Several of them require attribution under their respective licenses. I have compiled a list of the icon asset origins, which is located at **"/static/assets/asset-origins.txt"**. Link: [https://github.com/devbyte1328/personal-tv-streamer-iso/tree/static/assets/asset-origin.txt](https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)
+
+### Application Services
+- **YouTube Data API** — Used to retrieve video information, thumbnails, titles, and metadata.
+- **Open-Meteo Weather API (https://open-meteo.com/)** — Provides all weather and forecast data displayed in the application.
+
+### System & Platform
+- **Manjaro Linux (Cinnamon Edition)** — The application runs on Manjaro Cinnamon and uses the local system clock/time services for real-time clock updates.
+- **Network Time Protocol (NTP)** — System time is synchronized via the operating system’s configured NTP sources (typically pool.ntp.org or Manjaro/Arch Linux regional time servers).
+
+### Assets & Icons
+- Several icons used in the **"App"** section of the streamer interface are sourced and modified from third-party creators.  
+  A full list of original icon sources and licenses is maintained at:  
+  **`/static/assets/asset-origins.txt`**  
+  GitHub link:  
+  https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt
