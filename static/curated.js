@@ -23,12 +23,19 @@ window.addEventListener("DOMContentLoaded", () => {
                 const generalText = (await generalResponse.text()).trim();
                 const trailerText = (await trailerResponse.text()).trim();
 
-                const generalIds = generalText.split("\n").map(s => s.trim()).filter(Boolean);
+                const generalRawLines = generalText.split("\n").map(s => s.trim()).filter(Boolean);
                 const trailerRawLines = trailerText.split("\n").map(s => s.trim()).filter(Boolean);
 
-                if (generalIds.length === 0 || trailerRawLines.length === 0) throw new Error();
+                if (generalRawLines.length === 0 || trailerRawLines.length === 0) throw new Error();
 
-                generalVideoList = [...generalIds];
+                const parsedGeneralList = generalRawLines.map(line => {
+                    const firstSpaceIndex = line.indexOf(" ");
+                    const videoId = line.slice(0, firstSpaceIndex).trim();
+                    const videoTitle = line.slice(firstSpaceIndex + 1).trim();
+                    return { videoId, videoTitle };
+                });
+
+                generalVideoList = [...parsedGeneralList];
 
                 const parsedTrailerList = trailerRawLines.map(line => {
                     const firstSpaceIndex = line.indexOf(" ");
@@ -37,10 +44,13 @@ window.addEventListener("DOMContentLoaded", () => {
                     return { videoId, videoTitle };
                 });
 
-                const picked = parsedTrailerList[Math.floor(Math.random() * parsedTrailerList.length)];
-                trailerVideoList = [picked];
+                const pickedTrailer = parsedTrailerList[Math.floor(Math.random() * parsedTrailerList.length)];
+                trailerVideoList = [pickedTrailer];
 
-                thumbnailVideoList = [...generalIds, ...parsedTrailerList.map(x => x.videoId)];
+                thumbnailVideoList = [
+                    ...parsedGeneralList.map(x => x.videoId),
+                    ...parsedTrailerList.map(x => x.videoId)
+                ];
 
                 break;
             } catch {
@@ -72,11 +82,11 @@ window.addEventListener("DOMContentLoaded", () => {
         frames.forEach((frame, index) => {
             const id = frame.dataset.videoId;
             if (index < 5) {
-                const full = buildFullVideoSource(id);
-                if (frame.src !== full) frame.src = full;
+                const fullSource = buildFullVideoSource(id);
+                if (frame.src !== fullSource) frame.src = fullSource;
             } else {
-                const thumb = buildThumbnailSource(id);
-                if (frame.src !== thumb) frame.src = thumb;
+                const thumbnailSource = buildThumbnailSource(id);
+                if (frame.src !== thumbnailSource) frame.src = thumbnailSource;
             }
         });
     };
@@ -88,10 +98,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
         container.innerHTML = "";
 
-        generalVideoList.forEach((id, index) => {
+        generalVideoList.forEach((item, index) => {
             const frame = document.createElement("iframe");
-            frame.dataset.videoId = id;
-            frame.src = index < 5 ? buildFullVideoSource(id) : buildThumbnailSource(id);
+            frame.dataset.videoId = item.videoId;
+            frame.dataset.videoTitle = item.videoTitle;
+            frame.src = index < 5 ? buildFullVideoSource(item.videoId) : buildThumbnailSource(item.videoId);
             container.appendChild(frame);
         });
 
@@ -145,14 +156,14 @@ window.addEventListener("DOMContentLoaded", () => {
     };
 
     const buildTrailer = () => {
-        const trailerFrame = document.getElementById("standalone-trailer-frame");
-        const trailerTitleBox = document.getElementById("standalone-trailer-title");
-        if (!trailerFrame || !trailerTitleBox) return;
-        if (trailerFrame.src.trim() !== "") return;
+        const frame = document.getElementById("standalone-trailer-frame");
+        const titleBox = document.getElementById("standalone-trailer-title");
+        if (!frame || !titleBox) return;
+        if (frame.src.trim() !== "") return;
 
         const { videoId, videoTitle } = trailerVideoList[0];
-        trailerFrame.src = buildFullVideoSource(videoId);
-        trailerTitleBox.textContent = videoTitle;
+        frame.src = buildFullVideoSource(videoId);
+        titleBox.textContent = videoTitle;
     };
 
     document.addEventListener("click", event => {

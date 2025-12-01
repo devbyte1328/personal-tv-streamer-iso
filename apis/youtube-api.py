@@ -148,6 +148,7 @@ async def main():
         general_results = [r for r in await asyncio.gather(*general_tasks) if r]
         trailer_results = [r for r in await asyncio.gather(*trailer_tasks) if r]
 
+        general_titles = await fetch_video_titles(session, general_results)
         trailer_titles = await fetch_video_titles(session, trailer_results)
 
     random.shuffle(general_results)
@@ -155,7 +156,8 @@ async def main():
 
     with open(general_output_file, "w") as file:
         for video_id in general_results:
-            file.write(video_id + "\n")
+            title = general_titles.get(video_id, "")
+            file.write(f"{video_id} {title}\n")
 
     with open(trailer_output_file, "w") as file:
         for video_id in trailer_results:
