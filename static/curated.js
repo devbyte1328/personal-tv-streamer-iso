@@ -5,46 +5,40 @@ window.addEventListener("DOMContentLoaded", () => {
     let persistentPlayerIsReady = false;
     let carouselState = null;
 
-    const generalVideoList = [
-        "jH5Gq7G4X-s",
-        "on1pjsxYOwc",
-        "5BPTO2_-zUs",
-        "FHPKkKc2hE4",
-        "2rVvvu7aMQQ",
-        "STZCFSWRDq8",
-        "k3u4uUaiH_4",
-        "dP-81C_tckU",
-        "OlbOOzX_fDs",
-        "HRiCRmPYAl8",
-        "rilFfbm7j8k"
-    ];
+    let generalVideoList = [];
+    let trailerVideoList = [];
+    let thumbnailVideoList = [];
 
-    const trailerVideoList = [
-        "EXV_WAKwGc4"
-    ];
+    const generalVideosUrl = "http://localhost:8080/database/pulled/curated-youtube-general-videos";
+    const trailerVideosUrl = "http://localhost:8080/database/pulled/curated-youtube-trailer-videos";
 
-    const thumbnailVideoList = [
-        "TNlEtPJPjJk",
-        "T7oExc711xE",
-        "dP-81C_tckU",
-        "GeEvVO7Op1E",
-        "k3u4uUaiH_4",
-        "r6DPYgsmAXY",
-        "ILkj5qbbfDM",
-        "WxCbrOo1mnE",
-        "6NnLfbTCM2I",
-        "STZCFSWRDq8",
-        "19TTjiSXVac",
-        "2rVvvu7aMQQ",
-        "hr-NaxerMqg",
-        "fhyHNqxLrTs",
-        "fiqTPjhNywI",
-        "MfRzxFhqLLo",
-        "_uiUiYBJrIA",
-        "UxjKu7cpFa4",
-        "8NzjH64Ukq8",
-        "x1k4pWasm3E"
-    ];
+    const pullCuratedVideos = async () => {
+        for (;;) {
+            try {
+                const generalResponse = await fetch(generalVideosUrl);
+                const trailerResponse = await fetch(trailerVideosUrl);
+
+                if (!generalResponse.ok || !trailerResponse.ok) throw new Error();
+
+                const generalText = (await generalResponse.text()).trim();
+                const trailerText = (await trailerResponse.text()).trim();
+
+                const generalIds = generalText.split("\n").map(s => s.trim()).filter(Boolean);
+                const trailerIds = trailerText.split("\n").map(s => s.trim()).filter(Boolean);
+
+                if (generalIds.length === 0 || trailerIds.length === 0) throw new Error();
+
+                generalVideoList = [...generalIds];
+                const randomTrailerId = trailerIds[Math.floor(Math.random() * trailerIds.length)];
+                trailerVideoList = [randomTrailerId];
+                thumbnailVideoList = [...generalIds, ...trailerIds];
+
+                break;
+            } catch {
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+    };
 
     const buildFullVideoSource = id =>
         "https://www.youtube.com/embed/" + id +
@@ -154,6 +148,8 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     (async () => {
+        await pullCuratedVideos();
+
         try {
             const response = await fetch("/curated");
             const raw = await response.text();
@@ -202,8 +198,11 @@ window.addEventListener("DOMContentLoaded", () => {
         buildThumbnailGrid();
     };
 
-    buildCarousel();
-    buildTrailer();
-    buildThumbnailGrid();
+    (async () => {
+        await pullCuratedVideos();
+        buildCarousel();
+        buildTrailer();
+        buildThumbnailGrid();
+    })();
 });
 
