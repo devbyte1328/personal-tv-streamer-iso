@@ -1,70 +1,80 @@
 if (!window.globalTimeAlreadyRunning) {
     window.globalTimeAlreadyRunning = true;
+
     window.globalTimeValue = "";
-
-    function updateTime() {
-        const formattedTime = new Date().toLocaleString(window.globalLocale, {
-            timeZone: window.globalTimezone,
-            hour12: false
-        });
-        window.globalTimeValue = formattedTime;
-        const timeElement = document.getElementById("current-time");
-        if (timeElement) timeElement.textContent = formattedTime;
-    }
-
-    fetch("/database/location")
-        .then(response => response.text())
-        .then(fileText => {
-            const localeMatch = fileText.match(/LocaleString:\s*"([^"]+)"/);
-            const timezoneMatch = fileText.match(/Timezone:\s*"([^"]+)"/);
-            window.globalLocale = localeMatch ? localeMatch[1] : undefined;
-            window.globalTimezone = timezoneMatch ? timezoneMatch[1] : undefined;
-            updateTime();
-            setInterval(updateTime, 1000);
-        });
+    window.globalLocale = undefined;
+    window.globalTimezone = undefined;
 
     window.globalWeatherData = [];
     window.globalWeatherLoaded = false;
 
-    function fetchWeatherAndStore() {
+    function updateTimeText() {
+        if (!window.globalLocale || !window.globalTimezone) return;
+        const t = new Date().toLocaleString(window.globalLocale, {
+            timeZone: window.globalTimezone,
+            hour12: false
+        });
+        window.globalTimeValue = t;
+        const x = document.getElementById("current-time");
+        if (x) x.textContent = t;
+    }
+
+    fetch("/database/location")
+        .then(r => r.text())
+        .then(t => {
+            const locale = t.match(/LocaleString:\s*"([^"]+)"/);
+            const zone = t.match(/Timezone:\s*"([^"]+)"/);
+            window.globalLocale = locale ? locale[1] : undefined;
+            window.globalTimezone = zone ? zone[1] : undefined;
+            updateTimeText();
+            setInterval(updateTimeText, 1000);
+        });
+
+    function cacheWeather(v) {
+        window.globalWeatherData = v;
+        window.globalWeatherLoaded = true;
+    }
+
+    function fetchWeather() {
+        if (window.globalWeatherLoaded) return;
         fetch("/weather")
-            .then(response => response.json())
-            .then(weatherJson => {
-                if (weatherJson && weatherJson.locations && weatherJson.locations.length > 0) {
-                    window.globalWeatherData = weatherJson.locations;
-                    window.globalWeatherLoaded = true;
-                } else {
-                    window.globalWeatherData = [];
-                    window.globalWeatherLoaded = false;
+            .then(r => r.json())
+            .then(j => {
+                if (j && j.locations && j.locations.length) {
+                    cacheWeather(j.locations);
                 }
-                attachWeatherToHomePage();
+                attachWeather();
             });
     }
 
-    fetchWeatherAndStore();
-    setInterval(fetchWeatherAndStore, 60000);
+    fetchWeather();
 }
 
-function tryAttachTimeToHomePage() {
-    const timeElement = document.getElementById("current-time");
-    if (timeElement) timeElement.textContent = window.globalTimeValue;
+function attachTime() {
+    const x = document.getElementById("current-time");
+    if (x) x.textContent = window.globalTimeValue;
 }
 
-tryAttachTimeToHomePage();
+function attachWeather() {
+    const box = document.getElementById("weather-container");
+    if (!box) return;
 
-function attachWeatherToHomePage() {
-    const containerElement = document.getElementById("weather-container");
-    if (!containerElement) return;
-    containerElement.innerHTML = "";
+    box.innerHTML = "";
     if (!window.globalWeatherLoaded) return;
 
-    window.globalWeatherData.forEach(locationObject => {
-        const weatherBox = document.createElement("div");
-        weatherBox.className = "weather-box";
-        weatherBox.textContent = locationObject.location_name + " " + locationObject.temperature + "°C | Wind " + locationObject.wind_speed + " km/h";
-        containerElement.appendChild(weatherBox);
+    window.globalWeatherData.forEach(w => {
+        const e = document.createElement("div");
+        e.className = "weather-box";
+        e.textContent = w.location_name + " " + w.temperature + "°C | Wind " + w.wind_speed + " km/h";
+        box.appendChild(e);
     });
 }
 
-attachWeatherToHomePage();
+attachTime();
+attachWeather();
+
+window.addEventListener("home-page-loaded", () => {
+    attachTime();
+    attachWeather();
+});
 
