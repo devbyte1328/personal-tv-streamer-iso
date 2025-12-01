@@ -1,2 +1,4 @@
 LocaleString: "en-US"
 Timezone: "America/New_York"
+WeatherLocation1: "New York"
+WeatherLocation2: "Dallas"
