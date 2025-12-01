@@ -1,10 +1,10 @@
 window.addEventListener("DOMContentLoaded", () => {
     const navigationItems = document.querySelectorAll("#sidebar li[data-url]");
 
-    window.loadPage = async function (url, navigationItem) {
+    window.loadPage = async function (url, clickedItem) {
         const reply = await fetch(url);
-        const raw = await reply.text();
-        const parsed = new DOMParser().parseFromString(raw, "text/html");
+        const text = await reply.text();
+        const parsed = new DOMParser().parseFromString(text, "text/html");
 
         const freshContent = parsed.querySelector("#content");
         if (freshContent) {
@@ -13,10 +13,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
         document.title = parsed.title;
 
-        navigationItems.forEach(x => x.classList.remove("active-tab"));
-        navigationItem.classList.add("active-tab");
+        navigationItems.forEach(item => item.classList.remove("active-tab"));
+        clickedItem.classList.add("active-tab");
 
-        if (url.endsWith("/")) window.dispatchEvent(new Event("home-page-loaded"));
+        if (url.endsWith("/")) {
+            window.dispatchEvent(new Event("home-page-loaded"));
+        }
     };
 
     navigationItems.forEach(item => {
