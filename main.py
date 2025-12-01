@@ -44,25 +44,28 @@ def start_ws():
 def run_youtube_api():
     subprocess.Popen(["python3", "apis/youtube-api.py"])
 
-def fetch_weather_for_location(location_text):
-    r = requests.get(f"https://geocoding-api.open-meteo.com/v1/search?name={location_text}&count=1")
-    j = r.json()
-    if "results" not in j:
+def fetch_weather_for_location(location_name):
+    search_response = requests.get(
+        f"https://geocoding-api.open-meteo.com/v1/search?name={location_name}&count=1"
+    )
+    search_data = search_response.json()
+    if "results" not in search_data or not search_data["results"]:
         return None
-    if not j["results"]:
+    first_result = search_data["results"][0]
+    latitude_value = first_result["latitude"]
+    longitude_value = first_result["longitude"]
+    weather_response = requests.get(
+        f"https://api.open-meteo.com/v1/forecast?latitude={latitude_value}&longitude={longitude_value}&current_weather=true"
+    )
+    weather_data = weather_response.json()
+    if "current_weather" not in weather_data:
         return None
-    item = j["results"][0]
-    lat = item["latitude"]
-    lon = item["longitude"]
-    r2 = requests.get(f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current_weather=true")
-    j2 = r2.json()
-    if "current_weather" not in j2:
-        return None
+    current_weather = weather_data["current_weather"]
     return {
-        "name": item["name"],
-        "temperature": j2["current_weather"]["temperature"],
-        "windspeed": j2["current_weather"]["windspeed"],
-        "time": j2["current_weather"]["time"]
+        "location_name": first_result["name"],
+        "temperature": current_weather["temperature"],
+        "wind_speed": current_weather["windspeed"],
+        "timestamp": current_weather["time"]
     }
 
 def weather_thread_function():
