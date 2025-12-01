@@ -1,4 +1,4 @@
-if (!window.globalTimeAlreadyRunning) {
+if (window.globalTimeAlreadyRunning === undefined || window.globalTimeAlreadyRunning === null) {
     window.globalTimeAlreadyRunning = true;
 
     window.globalTimeValue = "";
@@ -61,29 +61,33 @@ if (!window.globalTimeAlreadyRunning) {
         }
     }
 
-    fetch("/database/location")
-        .then(function(receivedResponse) {
-            return receivedResponse.text();
-        })
-        .then(function(receivedText) {
-            var foundLocale = receivedText.match(/LocaleString:\s*"([^"]+)"/);
-            var foundTimezone = receivedText.match(/Timezone:\s*"([^"]+)"/);
+    function beginLocationRetrieval() {
+        fetch("/database/location")
+            .then(function(receivedResponse) {
+                return receivedResponse.text();
+            })
+            .then(function(receivedText) {
+                var foundLocaleMatch = receivedText.match(/LocaleString:\s*"([^"]+)"/);
+                var foundTimezoneMatch = receivedText.match(/Timezone:\s*"([^"]+)"/);
 
-            if (foundLocale) {
-                window.globalLocale = foundLocale[1];
-            } else {
-                window.globalLocale = undefined;
-            }
+                if (foundLocaleMatch) {
+                    window.globalLocale = foundLocaleMatch[1];
+                } else {
+                    window.globalLocale = undefined;
+                }
 
-            if (foundTimezone) {
-                window.globalTimezone = foundTimezone[1];
-            } else {
-                window.globalTimezone = undefined;
-            }
+                if (foundTimezoneMatch) {
+                    window.globalTimezone = foundTimezoneMatch[1];
+                } else {
+                    window.globalTimezone = undefined;
+                }
 
-            updateDisplayedTimeAndDate();
-            setInterval(updateDisplayedTimeAndDate, 1000);
-        });
+                updateDisplayedTimeAndDate();
+                setInterval(updateDisplayedTimeAndDate, 1000);
+            });
+    }
+
+    beginLocationRetrieval();
 
     function storeWeatherDataInMemory(weatherList) {
         window.globalWeatherData = weatherList;
@@ -96,7 +100,10 @@ if (!window.globalTimeAlreadyRunning) {
                 return receivedResponse.json();
             })
             .then(function(receivedWeatherData) {
-                if (receivedWeatherData && receivedWeatherData.locations) {
+                if (receivedWeatherData !== null &&
+                    receivedWeatherData !== undefined &&
+                    receivedWeatherData.locations !== undefined &&
+                    receivedWeatherData.locations !== null) {
                     storeWeatherDataInMemory(receivedWeatherData.locations);
                 }
                 attachWeather();
@@ -105,25 +112,23 @@ if (!window.globalTimeAlreadyRunning) {
 
     requestWeatherInformation();
 
-    function buildFullHomeVideoSource(sourceIdentifier) {
-        var combinedAddress = "";
-        combinedAddress += "https://www.youtube.com/embed/";
-        combinedAddress += sourceIdentifier;
-        combinedAddress += "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0";
-        combinedAddress += "&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=";
-        combinedAddress += sourceIdentifier;
-        return combinedAddress;
+    function buildFullHomeVideoSource(fullVideoIdentifier) {
+        var constructedAddress = "";
+        constructedAddress = constructedAddress +
+            "https://www.youtube.com/embed/" +
+            fullVideoIdentifier +
+            "?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0" +
+            "&iv_load_policy=3&disablekb=1&playsinline=1&loop=1&playlist=" +
+            fullVideoIdentifier;
+        return constructedAddress;
     }
 
     function startHomeVideoListRetrievalProcess() {
-        var retrievalShouldContinue = true;
+        var generalVideosUrl = "http://localhost:8080/database/pulled/curated-youtube-general-videos";
+        var trailerVideosUrl = "http://localhost:8080/database/pulled/curated-youtube-trailer-videos";
 
-        function attemptToRetrieveList() {
-            if (retrievalShouldContinue === false) {
-                return;
-            }
-
-            fetch("http://localhost:8080/database/pulled/curated-youtube-trailer-videos")
+        function loadVideoListFromUrl(fullUrl, finalCallback) {
+            fetch(fullUrl)
                 .then(function(receivedResponse) {
                     if (!receivedResponse.ok) {
                         throw new Error("Unacceptable response");
@@ -133,65 +138,81 @@ if (!window.globalTimeAlreadyRunning) {
                 .then(function(receivedText) {
                     var trimmedTextBlock = receivedText.trim();
                     var separatedTextLines = trimmedTextBlock.split("\n");
-                    var cleanedList = [];
-                    var walkingIndex = 0;
 
-                    while (walkingIndex < separatedTextLines.length) {
-                        var currentLine = separatedTextLines[walkingIndex];
+                    var cleanedList = [];
+                    var cleaningIndex = 0;
+
+                    while (cleaningIndex < separatedTextLines.length) {
+                        var currentLine = separatedTextLines[cleaningIndex];
                         var trimmedCurrentLine = currentLine.trim();
                         if (trimmedCurrentLine !== "") {
                             cleanedList.push(trimmedCurrentLine);
                         }
-                        walkingIndex = walkingIndex + 1;
-                    }
-
-                    if (cleanedList.length === 0) {
-                        throw new Error("Empty collection");
+                        cleaningIndex = cleaningIndex + 1;
                     }
 
                     var parsedList = [];
-                    var readingIndex = 0;
+                    var parsingIndex = 0;
 
-                    while (readingIndex < cleanedList.length) {
-                        var currentRawLine = cleanedList[readingIndex];
-                        var locationOfFirstSpace = currentRawLine.indexOf(" ");
-                        var extractedIdentifier = currentRawLine.slice(0, locationOfFirstSpace).trim();
-                        var extractedTitle = currentRawLine.slice(locationOfFirstSpace + 1).trim();
+                    while (parsingIndex < cleanedList.length) {
+                        var currentRawLine = cleanedList[parsingIndex];
+                        var indexOfSpace = currentRawLine.indexOf(" ");
+
+                        var extractedIdentifier = currentRawLine.slice(
+                            0,
+                            indexOfSpace
+                        ).trim();
+
+                        var extractedTitle = currentRawLine.slice(
+                            indexOfSpace + 1
+                        ).trim();
 
                         parsedList.push({
                             videoIdentifier: extractedIdentifier,
                             videoTitle: extractedTitle
                         });
 
-                        readingIndex = readingIndex + 1;
+                        parsingIndex = parsingIndex + 1;
                     }
 
-                    window.globalHomeVideoAvailableList = parsedList;
-                    retrievalShouldContinue = false;
-                    chooseHomeVideoForDisplay();
-                    updateHomeVideoOnPage();
+                    finalCallback(parsedList);
                 })
                 .catch(function() {
-                    setTimeout(function() {
-                        attemptToRetrieveList();
-                    }, 1000);
+                    finalCallback([]);
                 });
         }
 
-        attemptToRetrieveList();
+        function fetchBothLists(finalCallback) {
+            loadVideoListFromUrl(generalVideosUrl, function(generalList) {
+                loadVideoListFromUrl(trailerVideosUrl, function(trailerList) {
+                    var combinedList = generalList.concat(trailerList);
+                    finalCallback(combinedList);
+                });
+            });
+        }
+
+        fetchBothLists(function(fullCombinedList) {
+            window.globalHomeVideoAvailableList = fullCombinedList;
+            window.globalHomeVideoInformationHasLoaded = false;
+            chooseHomeVideoForDisplay();
+            updateHomeVideoOnPage();
+        });
     }
+
+    startHomeVideoListRetrievalProcess();
 
     function chooseHomeVideoForDisplay() {
         if (window.globalHomeVideoAvailableList.length === 0) {
             return;
         }
 
-        var totalCount = window.globalHomeVideoAvailableList.length;
-        var randomIndex = Math.floor(Math.random() * totalCount);
-        var selectedVideo = window.globalHomeVideoAvailableList[randomIndex];
+        var totalNumberOfVideos = window.globalHomeVideoAvailableList.length;
+        var selectedRandomIndex = Math.floor(Math.random() * totalNumberOfVideos);
 
-        window.globalHomeVideoChosenIdentifier = selectedVideo.videoIdentifier;
-        window.globalHomeVideoChosenTitle = selectedVideo.videoTitle;
+        var chosenVideoObject = window.globalHomeVideoAvailableList[selectedRandomIndex];
+
+        window.globalHomeVideoChosenIdentifier = chosenVideoObject.videoIdentifier;
+        window.globalHomeVideoChosenTitle = chosenVideoObject.videoTitle;
         window.globalHomeVideoInformationHasLoaded = true;
     }
 
@@ -207,12 +228,13 @@ if (!window.globalTimeAlreadyRunning) {
             return;
         }
 
-        var constructedAddress = buildFullHomeVideoSource(window.globalHomeVideoChosenIdentifier);
-        videoFrameElement.src = constructedAddress;
+        var fullyConstructedAddress = buildFullHomeVideoSource(
+            window.globalHomeVideoChosenIdentifier
+        );
+
+        videoFrameElement.src = fullyConstructedAddress;
         videoTitleElement.textContent = window.globalHomeVideoChosenTitle;
     }
-
-    startHomeVideoListRetrievalProcess();
 }
 
 function attachTime() {
@@ -249,6 +271,7 @@ function determineWeatherIcon(temperatureValue) {
 
 function attachWeather() {
     var weatherContainerOnPage = document.getElementById("weather-container");
+
     if (weatherContainerOnPage === null) {
         return;
     }
@@ -285,6 +308,7 @@ function attachWeather() {
 
         weatherBoxElement.appendChild(locationElement);
         weatherBoxElement.appendChild(detailElement);
+
         weatherContainerOnPage.appendChild(weatherBoxElement);
 
         walkingIndex = walkingIndex + 1;
@@ -297,5 +321,8 @@ attachWeather();
 window.addEventListener("home-page-loaded", function() {
     attachTime();
     attachWeather();
+    window.globalHomeVideoInformationHasLoaded = false;
+    chooseHomeVideoForDisplay();
+    updateHomeVideoOnPage();
 });
 
