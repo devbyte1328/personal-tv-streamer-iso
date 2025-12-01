@@ -61,6 +61,17 @@ def serve_pulled_files(filename):
     if not os.path.isfile(file_path):
         abort(404)
     return send_from_directory(base, filename, mimetype="text/plain")
+    
+@app.route('/database/location')
+def serve_location_file():
+    file_path = os.path.join(app.root_path, "database", "location.txt")
+    if not os.path.isfile(file_path):
+        abort(404)
+    return send_from_directory(
+        os.path.join(app.root_path, "database"),
+        "location.txt",
+        mimetype="text/plain"
+    )
 
 if __name__ == "__main__":
     pulled_folder_path = os.path.join(app.root_path, "database", "pulled")
