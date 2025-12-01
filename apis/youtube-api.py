@@ -62,6 +62,22 @@ async def fetch_stream_data(session, video_ids):
     async with session.get(url) as response:
         return await response.json()
 
+async def fetch_video_titles(session, video_ids):
+    if not video_ids:
+        return {}
+    url = (
+        "https://www.googleapis.com/youtube/v3/videos?"
+        f"part=snippet&id={','.join(video_ids)}&key={api_key}"
+    )
+    async with session.get(url) as response:
+        data = await response.json()
+    titles = {}
+    for item in data.get("items", []):
+        vid = item["id"]
+        title = item["snippet"]["title"]
+        titles[vid] = title
+    return titles
+
 async def pick_normal_video(session, video_ids):
     tasks = [check_if_short_or_redirect(session, vid) for vid in video_ids[:5]]
     results = await asyncio.gather(*tasks)
@@ -128,16 +144,23 @@ async def main():
     async with aiohttp.ClientSession() as session:
         general_tasks = [collect_general_one(session, h) for h in general_handles]
         trailer_tasks = [collect_trailers_one(session, h) for h in trailer_handles]
+
         general_results = [r for r in await asyncio.gather(*general_tasks) if r]
         trailer_results = [r for r in await asyncio.gather(*trailer_tasks) if r]
+
+        trailer_titles = await fetch_video_titles(session, trailer_results)
+
     random.shuffle(general_results)
     random.shuffle(trailer_results)
+
     with open(general_output_file, "w") as file:
         for video_id in general_results:
             file.write(video_id + "\n")
+
     with open(trailer_output_file, "w") as file:
         for video_id in trailer_results:
-            file.write(video_id + "\n")
+            title = trailer_titles.get(video_id, "")
+            file.write(f"{video_id} {title}\n")
 
 if __name__ == "__main__":
     asyncio.run(main())
