@@ -24,14 +24,23 @@ window.addEventListener("DOMContentLoaded", () => {
                 const trailerText = (await trailerResponse.text()).trim();
 
                 const generalIds = generalText.split("\n").map(s => s.trim()).filter(Boolean);
-                const trailerIds = trailerText.split("\n").map(s => s.trim()).filter(Boolean);
+                const trailerRawLines = trailerText.split("\n").map(s => s.trim()).filter(Boolean);
 
-                if (generalIds.length === 0 || trailerIds.length === 0) throw new Error();
+                if (generalIds.length === 0 || trailerRawLines.length === 0) throw new Error();
 
                 generalVideoList = [...generalIds];
-                const randomTrailerId = trailerIds[Math.floor(Math.random() * trailerIds.length)];
-                trailerVideoList = [randomTrailerId];
-                thumbnailVideoList = [...generalIds, ...trailerIds];
+
+                const parsedTrailerList = trailerRawLines.map(line => {
+                    const firstSpaceIndex = line.indexOf(" ");
+                    const videoId = line.slice(0, firstSpaceIndex).trim();
+                    const videoTitle = line.slice(firstSpaceIndex + 1).trim();
+                    return { videoId, videoTitle };
+                });
+
+                const picked = parsedTrailerList[Math.floor(Math.random() * parsedTrailerList.length)];
+                trailerVideoList = [picked];
+
+                thumbnailVideoList = [...generalIds, ...parsedTrailerList.map(x => x.videoId)];
 
                 break;
             } catch {
@@ -137,9 +146,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const buildTrailer = () => {
         const trailerFrame = document.getElementById("standalone-trailer-frame");
-        if (!trailerFrame) return;
+        const trailerTitleBox = document.getElementById("standalone-trailer-title");
+        if (!trailerFrame || !trailerTitleBox) return;
         if (trailerFrame.src.trim() !== "") return;
-        trailerFrame.src = buildFullVideoSource(trailerVideoList[0]);
+
+        const { videoId, videoTitle } = trailerVideoList[0];
+        trailerFrame.src = buildFullVideoSource(videoId);
+        trailerTitleBox.textContent = videoTitle;
     };
 
     document.addEventListener("click", event => {
