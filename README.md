@@ -198,12 +198,12 @@ Vendor links (read the above warning first):
 ## Credits
 
 ### Application Services
-- **YouTube Data API** — Used to retrieve video information, thumbnails, titles, and metadata.
-- **Open-Meteo Weather API (https://open-meteo.com/)** — Provides all weather and forecast data displayed in the application.
+- **YouTube Data API** - Used to retrieve video information, thumbnails, titles, and metadata.
+- **Open-Meteo Weather API (https://open-meteo.com/)** - Provides all weather and forecast data.
 
 ### System & Platform
-- **Manjaro Linux (Cinnamon Edition)** — The application runs on Manjaro Cinnamon and uses the local system clock/time services for real-time clock updates.
-- **Network Time Protocol (NTP)** — System time is synchronized via the operating system’s configured NTP sources (typically pool.ntp.org or Manjaro/Arch Linux regional time servers).
+- **Manjaro Linux (Cinnamon Edition)** - The application runs on Manjaro Cinnamon and uses the local system clock/time services for real-time clock updates.
+- **Network Time Protocol (NTP)** - System time is synchronized via the operating system’s configured NTP sources (typically pool.ntp.org or Manjaro/Arch Linux regional time servers).
 
 ### Assets & Icons
 - Several icons used in the **"App"** section of the streamer interface are sourced and modified from third-party creators.  
