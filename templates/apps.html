@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="app-buttons">
+<div class="application_buttons_container">
 
-    {% for file in app_files %}
-        {% include 'apps/' ~ file %}
+    {% for application_file_name in app_files %}
+        {% include 'apps/' ~ application_file_name %}
     {% endfor %}
 
 </div>
