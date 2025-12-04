@@ -12,24 +12,11 @@
     scrolling: false
   };
 
-  const selectors = [
-    'a[href]',
-    'button:not([disabled])',
-    'input:not([disabled])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
-    '[tabindex]:not([tabindex="-1"])',
-    '[contenteditable="true"]',
-    'ytd-thumbnail',
-    'ytd-playlist-panel-video-renderer',
-    '.yt-lockup-view-model',
-    'a.videostream__link.link',
-    'li',
-    '[role="button"]',
-    '[role="link"]',
-    'ytmusic-responsive-list-item-renderer .title',
-    'div.rgpl-btn-play'
-  ];
+    const selectors =
+    (window.STNAV_TARGETS && Array.isArray(window.STNAV_TARGETS.selectors) && window.STNAV_TARGETS.selectors.length
+      ? window.STNAV_TARGETS.selectors
+      : []);
+
 
   function isVisible(el) {
     if (!(el instanceof Element)) return false;
