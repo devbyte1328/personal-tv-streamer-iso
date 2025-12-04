@@ -15,7 +15,8 @@
     justify-content: center;
     position: relative;
     pointer-events: none;
-    margin-top: 8%;
+    margin-top: 9%;
+    margin-left: 4%;
 }
 
 .carousel-btn {
@@ -96,10 +97,10 @@
 
 .trailer-wrapper {
     width: 100%;
-    margin-top: 8%;
+    margin-top: 10%;
     display: flex;
     justify-content: flex-start;
-    margin-left: 3%;
+    margin-left: 6%;
     align-items: center;
     gap: 30px;
     position: relative;
@@ -121,9 +122,7 @@
     color: #ffffff;
     line-height: 1.35;
     letter-spacing: 1px;
-    text-shadow:
-        0 0 4px rgba(0,0,0,0.8),
-        0 0 6px rgba(0,0,0,0.6);
+    text-shadow: 0 0 4px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6);
     background: rgba(0,0,0,0.35);
     padding: 16px 22px;
     border-radius: 10px;
@@ -140,25 +139,29 @@
 
 .thumbnail-grid-container {
     margin-top: 4%;
-    margin-right: 8%;
+    padding-left: 4%;
+    padding-right: 4%;
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
-    gap: 20px;
-    overflow: visible;
+    justify-content: center;
+    justify-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
 }
 
 .thumbnail-wrapper {
     position: relative;
     width: 100%;
-    height: 100%;
+    max-width: 320px;
+    height: auto;
 }
 
 .thumbnail-grid-container img {
-    width: 100%;
-    height: 100%;
+    width: 102%;
+    height: 102%;
     aspect-ratio: 16/9;
     object-fit: cover;
     object-position: center;
+    transform: scale(1.02);
     transition: transform .3s ease;
 }
 
@@ -170,7 +173,6 @@
     height: 100%;
     cursor: pointer;
     z-index: 10;
-    background: transparent;
 }
 
 .carousel-overlay {
@@ -180,3 +182,4 @@
     background: transparent;
     pointer-events: auto;
 }
+

@@ -3,30 +3,30 @@
 
   const {
     state,
-    highlight: origHighlight,
+    highlight,
     getFocusableList,
     findNextItem,
     updateOverlay
   } = window.STNAV_CORE;
 
-  function highlight(item) {
-    origHighlight(item);
+  function highlightAgain(item) {
+    highlight(item);
     requestAnimationFrame(() => updateOverlay(item));
   }
 
-  function move(dir) {
-    if (state.scrolling) return;
+  function move(direction) {
+    if (state.isScrolling) return;
     const list = getFocusableList();
     if (!list.length) return;
-    let next = findNextItem(state.currentItem || list[0], list, dir);
+    const next = findNextItem(state.activeElement || list[0], list, direction);
     if (!next) {
-      const sd = dir === 'down' ? 1 : dir === 'up' ? -1 : 0;
-      if (sd !== 0) {
-        window.scrollBy({ top: sd * state.scrollStep, behavior: 'smooth' });
+      const factor = direction === 'down' ? 1 : direction === 'up' ? -1 : 0;
+      if (factor !== 0) {
+        window.scrollBy({ top: factor * state.scrollDistance, behavior: 'smooth' });
         return;
       }
     }
-    highlight(next);
+    highlightAgain(next);
   }
 
   window.STNAV_FOCUS = { move };
