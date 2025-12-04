@@ -1,182 +1,200 @@
 (function () {
   'use strict';
 
-  const scrollStep = window.innerHeight * 0.25;
+  const scrollDistance = window.innerHeight * 0.25;
 
-  const state = {
-    ws: new WebSocket("ws://127.0.0.1:8765"),
-    navEnabled: true,
-    typingMode: false,
-    currentItem: null,
-    scrollStep,
-    scrolling: false
+  const engineState = {
+    websocketLink: new WebSocket("ws://127.0.0.1:8765"),
+    navigationEnabled: true,
+    keyboardEntryMode: false,
+    activeElement: null,
+    scrollDistance,
+    isScrolling: false
   };
 
-    const selectors =
-    (window.STNAV_TARGETS && Array.isArray(window.STNAV_TARGETS.selectors) && window.STNAV_TARGETS.selectors.length
-      ? window.STNAV_TARGETS.selectors
-      : []);
+  const selectorList =
+    (window.STNAV_TARGETS &&
+     Array.isArray(window.STNAV_TARGETS.selectors) &&
+     window.STNAV_TARGETS.selectors.length
+       ? window.STNAV_TARGETS.selectors
+       : []);
 
-
-  function isVisible(el) {
+  function isAllowedElement(el) {
     if (!(el instanceof Element)) return false;
+    if (el.closest('.html5-video-player')) return false;
+    if (el.closest('.ytp-chrome-bottom')) return false;
+    if (el.closest('.ytp-chrome-top')) return false;
+    if (el.closest('.ytp-tooltip')) return false;
+    if (el.closest('.ytp-player-content')) return false;
+
     const r = el.getBoundingClientRect();
     const cs = getComputedStyle(el);
     if (r.width <= 0 || r.height <= 0) return false;
     if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
-    return r.bottom > 0 && r.top < window.innerHeight && r.right > 0 && r.left < window.innerWidth;
+    return r.bottom > 0 &&
+           r.top < window.innerHeight &&
+           r.right > 0 &&
+           r.left < window.innerWidth;
   }
 
-  function getFocusableList() {
-    return Array.from(document.querySelectorAll(selectors.join(','))).filter(isVisible);
+  function collectFocusableElements() {
+    return Array.from(document.querySelectorAll(selectorList.join(','))).filter(isAllowedElement);
   }
 
-  let overlayEl;
-  let scrollTimer;
+  let overlayBox;
+  let scrollDelay;
 
-  function createOverlay() {
-    overlayEl = document.createElement('div');
-    overlayEl.style.position = 'fixed';
-    overlayEl.style.zIndex = '2147483647';
-    overlayEl.style.pointerEvents = 'none';
-    overlayEl.style.boxSizing = 'border-box';
-    overlayEl.style.border = '6px solid cyan';
-    overlayEl.style.boxShadow = '0 0 20px 6px rgba(0, 255, 255, 0.95)';
-    overlayEl.style.backgroundColor = 'rgba(0, 255, 255, 0.25)';
-    overlayEl.style.display = 'none';
-    document.body.appendChild(overlayEl);
+  function prepareOverlay() {
+    overlayBox = document.createElement('div');
+    overlayBox.style.position = 'fixed';
+    overlayBox.style.zIndex = '2147483647';
+    overlayBox.style.pointerEvents = 'none';
+    overlayBox.style.boxSizing = 'border-box';
+    overlayBox.style.border = '6px solid cyan';
+    overlayBox.style.boxShadow = '0 0 20px 6px rgba(0,255,255,0.95)';
+    overlayBox.style.backgroundColor = 'rgba(0,255,255,0.25)';
+    overlayBox.style.display = 'none';
+    document.body.appendChild(overlayBox);
   }
 
-  function updateOverlay(el) {
-    if (!overlayEl || !el) return;
-    const rect = el.getBoundingClientRect();
-    const border = 6;
-    const offset = 4;
-    const top = rect.top - offset - border;
-    const left = rect.left - offset - border;
-    const width = rect.width + offset * 2 + border * 2;
-    const height = rect.height + offset * 2 + border * 2;
-    overlayEl.style.top = `${top}px`;
-    overlayEl.style.left = `${left}px`;
-    overlayEl.style.width = `${width}px`;
-    overlayEl.style.height = `${height}px`;
-    overlayEl.style.display = 'block';
+  function drawOverlay(el) {
+    if (!overlayBox || !el) return;
+    const r = el.getBoundingClientRect();
+    const b = 6, m = 4;
+    overlayBox.style.top = (r.top - m - b) + "px";
+    overlayBox.style.left = (r.left - m - b) + "px";
+    overlayBox.style.width = (r.width + m * 2 + b * 2) + "px";
+    overlayBox.style.height = (r.height + m * 2 + b * 2) + "px";
+    overlayBox.style.display = 'block';
   }
 
-  function clearHighlight() {
-    if (overlayEl) overlayEl.style.display = 'none';
+  function hideOverlay() {
+    if (overlayBox) overlayBox.style.display = 'none';
   }
 
-  function highlight(el) {
-    clearHighlight();
+  function highlightItem(el) {
+    hideOverlay();
     if (!el) return;
     const r = el.getBoundingClientRect();
     const m = 40;
     if (r.top < m || r.bottom > window.innerHeight - m) {
       el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    state.currentItem = el;
-    updateOverlay(el);
+    engineState.activeElement = el;
+    drawOverlay(el);
   }
 
-  function findNextItem(current, list, dir) {
+  function searchDirectional(current, list, direction) {
     if (!current) return list[0] || null;
-    const focusSet = new Set(list);
-    const cr = current.getBoundingClientRect();
-    const cx = cr.left + cr.width / 2;
-    const cy = cr.top + cr.height / 2;
-    const step = 20;
-    const maxDist = Math.max(window.innerWidth, window.innerHeight) * 2;
+    const set = new Set(list);
+    const r = current.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const distStep = 20;
+    const limit = Math.max(window.innerWidth, window.innerHeight) * 2;
     let dx = 0, dy = 0;
-    switch (dir) {
-      case 'left': dx = -step; break;
-      case 'right': dx = step; break;
-      case 'up': dy = -step; break;
-      case 'down': dy = step; break;
-    }
-    for (let dist = step; dist < maxDist; dist += step) {
-      const x = cx + dx * (dist / step);
-      const y = cy + dy * (dist / step);
+    if (direction === 'left') dx = -distStep;
+    if (direction === 'right') dx = distStep;
+    if (direction === 'up') dy = -distStep;
+    if (direction === 'down') dy = distStep;
+
+    for (let d = distStep; d < limit; d += distStep) {
+      const x = cx + dx * (d / distStep);
+      const y = cy + dy * (d / distStep);
       if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) break;
-      let el = document.elementFromPoint(x, y);
-      if (!el) continue;
-      if (el === current || current.contains(el)) continue;
-      let candidate = el;
-      while (candidate && candidate !== document.body) {
-        if (focusSet.has(candidate)) return candidate;
-        candidate = candidate.parentElement;
+      let found = document.elementFromPoint(x, y);
+      if (!found) continue;
+      if (found === current || current.contains(found)) continue;
+      let walker = found;
+      while (walker && walker !== document.body) {
+        if (set.has(walker)) return walker;
+        walker = walker.parentElement;
       }
     }
+
     let best = null;
     let bestScore = Infinity;
+
     for (const el of list) {
       if (el === current) continue;
-      const r = el.getBoundingClientRect();
-      const x = r.left + r.width / 2;
-      const y = r.top + r.height / 2;
-      const dx2 = x - cx;
-      const dy2 = y - cy;
-      switch (dir) {
-        case 'up': if (dy2 >= -1) continue; break;
-        case 'down': if (dy2 <= 1) continue; break;
-        case 'left': if (dx2 >= -1) continue; break;
-        case 'right': if (dx2 <= 1) continue; break;
-      }
-      const primary = (dir === 'left' || dir === 'right') ? Math.abs(dx2) : Math.abs(dy2);
-      const secondary = (dir === 'left' || dir === 'right') ? Math.abs(dy2) : Math.abs(dx2);
+      const b = el.getBoundingClientRect();
+      const ix = b.left + b.width / 2;
+      const iy = b.top + b.height / 2;
+      const dx2 = ix - cx;
+      const dy2 = iy - cy;
+
+      if (direction === 'up' && dy2 >= -1) continue;
+      if (direction === 'down' && dy2 <= 1) continue;
+      if (direction === 'left' && dx2 >= -1) continue;
+      if (direction === 'right' && dx2 <= 1) continue;
+
+      const primary = (direction === 'left' || direction === 'right')
+                      ? Math.abs(dx2)
+                      : Math.abs(dy2);
+      const secondary = (direction === 'left' || direction === 'right')
+                        ? Math.abs(dy2)
+                        : Math.abs(dx2);
+
       const score = primary * 100 + secondary;
-      if (score < bestScore) { bestScore = score; best = el; }
+      if (score < bestScore) {
+        bestScore = score;
+        best = el;
+      }
     }
     return best;
   }
 
   window.addEventListener('scroll', () => {
-    state.scrolling = true;
-    clearHighlight();
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(() => {
-      state.scrolling = false;
+    engineState.isScrolling = true;
+    hideOverlay();
+    clearTimeout(scrollDelay);
+    scrollDelay = setTimeout(() => {
+      engineState.isScrolling = false;
     }, 180);
   }, { passive: true });
 
   window.STNAV_CORE = {
-    state,
-    highlight,
-    clearHighlight,
-    getFocusableList,
-    findNextItem,
-    updateOverlay
+    state: engineState,
+    highlight: highlightItem,
+    clearHighlight: hideOverlay,
+    getFocusableList: collectFocusableElements,
+    findNextItem: searchDirectional,
+    updateOverlay: drawOverlay
   };
 
-  function init() {
-    createOverlay();
-    const list = getFocusableList();
-    if (list.length > 0) highlight(list[0]);
+  function begin() {
+    prepareOverlay();
+    const list = collectFocusableElements();
+    if (list.length > 0) highlightItem(list[0]);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else init();
+    document.addEventListener('DOMContentLoaded', begin);
+  } else begin();
 
   document.addEventListener('fullscreenchange', () => {
     if (document.fullscreenElement) {
-      state.navEnabled = false;
-      clearHighlight();
+      engineState.navigationEnabled = false;
+      hideOverlay();
     } else {
-      state.navEnabled = true;
-      const all = getFocusableList();
-      if (all.length > 0) highlight(all[0]);
+      engineState.navigationEnabled = true;
+      const all = collectFocusableElements();
+      if (all.length > 0) highlightItem(all[0]);
     }
   });
 
-  const obs = new MutationObserver(() => {
-    if (!state.navEnabled || state.typingMode || state.scrolling) return;
-    if (state.currentItem && !document.contains(state.currentItem)) {
-      const all = getFocusableList();
-      highlight(all[0]);
+  const mut = new MutationObserver(() => {
+    if (!engineState.navigationEnabled ||
+        engineState.keyboardEntryMode ||
+        engineState.isScrolling) return;
+
+    if (engineState.activeElement &&
+        !document.contains(engineState.activeElement)) {
+      const list = collectFocusableElements();
+      highlightItem(list[0]);
     }
   });
 
-  obs.observe(document.body, { childList: true, subtree: true });
+  mut.observe(document.body, { childList: true, subtree: true });
 })();
 

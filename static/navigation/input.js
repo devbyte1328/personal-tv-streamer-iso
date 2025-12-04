@@ -10,36 +10,43 @@
 
   const { move } = window.STNAV_FOCUS;
 
-  function activate(el) {
-    if (!el) return;
-    const t = el.tagName.toLowerCase();
-    if (el.matches('ytd-playlist-panel-video-renderer, .yt-lockup-view-model')) {
-      const link = el.querySelector('a[href]');
+  function activate(item) {
+    if (!item) return;
+    const tag = item.tagName.toLowerCase();
+    if (item.matches('ytd-playlist-panel-video-renderer, .yt-lockup-view-model')) {
+      const link = item.querySelector('a[href]');
       if (link) return link.click();
     }
-    if (['input', 'textarea', 'select'].includes(t) || el.isContentEditable) {
-      state.typingMode = true;
-      el.focus();
+    if (['input', 'textarea', 'select'].includes(tag) || item.isContentEditable) {
+      state.keyboardEntryMode = true;
+      item.focus();
       return;
     }
-    try { el.click(); }
-    catch { el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); }
+    try {
+      item.click();
+    } catch {
+      item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    }
   }
 
-  function exitTyping() {
-    state.typingMode = false;
-    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-    if (!state.scrolling && state.currentItem) highlight(state.currentItem);
+  function leaveTyping() {
+    state.keyboardEntryMode = false;
+    if (document.activeElement && document.activeElement.blur) {
+      document.activeElement.blur();
+    }
+    if (!state.isScrolling && state.activeElement) {
+      highlight(state.activeElement);
+    }
   }
 
   document.addEventListener('fullscreenchange', () => {
     if (document.fullscreenElement) {
-      state.navEnabled = false;
+      state.navigationEnabled = false;
       clearHighlight();
     } else {
-      state.navEnabled = true;
-      const all = getFocusableList();
-      if (all.length > 0) highlight(all[0]);
+      state.navigationEnabled = true;
+      const list = getFocusableList();
+      if (list.length > 0) highlight(list[0]);
     }
   });
 
@@ -54,11 +61,11 @@
     }
   ];
 
-  function tryFullscreen() {
-    const url = location.href;
-    for (const site of fullscreenSites) {
-      if (url.startsWith(site.domain)) {
-        const btn = document.querySelector(site.selector);
+  function autoFullscreen() {
+    const here = location.href;
+    for (const s of fullscreenSites) {
+      if (here.startsWith(s.domain)) {
+        const btn = document.querySelector(s.selector);
         if (btn) btn.click();
         return true;
       }
@@ -66,51 +73,50 @@
     return false;
   }
 
-  function handle(e) {
+  function keyHandler(e) {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
 
-    if (!state.typingMode && e.key.toLowerCase() === 'f') {
-      if (tryFullscreen()) return;
+    if (!state.keyboardEntryMode && e.key.toLowerCase() === 'f') {
+      if (autoFullscreen()) return;
     }
 
-    if (state.typingMode) {
+    if (state.keyboardEntryMode) {
       if (e.key === 'Escape') {
         e.preventDefault();
-        exitTyping();
+        leaveTyping();
       }
       return;
     }
 
-    if (state.scrolling) return;
+    if (state.isScrolling) return;
 
     if (e.key.toLowerCase() === 'p') {
-      if (!state.navEnabled) {
+      if (!state.navigationEnabled) {
         e.preventDefault();
-        state.ws.send("VideoPlayPause");
+        state.websocketLink.send("VideoPlayPause");
       }
       return;
     }
 
-    if (!state.navEnabled) {
+    if (!state.navigationEnabled) {
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
       return;
     }
 
     if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
       e.preventDefault();
-      const dir = {
+      move({
         ArrowUp: 'up',
         ArrowDown: 'down',
         ArrowLeft: 'left',
         ArrowRight: 'right'
-      }[e.key];
-      move(dir);
+      }[e.key]);
       return;
     }
 
     if (['Enter',' '].includes(e.key)) {
       e.preventDefault();
-      activate(state.currentItem);
+      activate(state.activeElement);
       return;
     }
 
@@ -128,6 +134,6 @@
     }
   }
 
-  window.addEventListener('keydown', handle, true);
+  window.addEventListener('keydown', keyHandler, true);
 })();
 
