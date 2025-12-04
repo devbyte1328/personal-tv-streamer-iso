@@ -123,6 +123,14 @@ if (window.globalTimeAlreadyRunning === undefined || window.globalTimeAlreadyRun
         return constructedAddress;
     }
 
+    function buildNavigableVideoAddress(fullVideoIdentifier) {
+        var constructedAddress = "";
+        constructedAddress = constructedAddress +
+            "https://www.youtube.com/watch?v=" +
+            fullVideoIdentifier;
+        return constructedAddress;
+    }
+
     function startHomeVideoListRetrievalProcess() {
         var generalVideosUrl = "http://localhost:8080/database/pulled/curated-youtube-general-videos";
         var trailerVideosUrl = "http://localhost:8080/database/pulled/curated-youtube-trailer-videos";
@@ -219,8 +227,9 @@ if (window.globalTimeAlreadyRunning === undefined || window.globalTimeAlreadyRun
     function updateHomeVideoOnPage() {
         var videoFrameElement = document.getElementById("standalone-home-video-frame");
         var videoTitleElement = document.getElementById("standalone-home-video-title");
+        var overlayElement = document.getElementById("standalone-home-video-overlay");
 
-        if (videoFrameElement === null || videoTitleElement === null) {
+        if (videoFrameElement === null || videoTitleElement === null || overlayElement === null) {
             return;
         }
 
@@ -228,12 +237,22 @@ if (window.globalTimeAlreadyRunning === undefined || window.globalTimeAlreadyRun
             return;
         }
 
-        var fullyConstructedAddress = buildFullHomeVideoSource(
+        var embeddedAddress = buildFullHomeVideoSource(
             window.globalHomeVideoChosenIdentifier
         );
 
-        videoFrameElement.src = fullyConstructedAddress;
+        var navigableAddress = buildNavigableVideoAddress(
+            window.globalHomeVideoChosenIdentifier
+        );
+
+        videoFrameElement.src = embeddedAddress;
         videoTitleElement.textContent = window.globalHomeVideoChosenTitle;
+
+        function handleOverlayPress() {
+            window.location.href = navigableAddress;
+        }
+
+        overlayElement.onclick = handleOverlayPress;
     }
 }
 
