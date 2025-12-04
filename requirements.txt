@@ -3,3 +3,4 @@ pyautogui
 websockets
 asyncio
 aiohttp
+requests
