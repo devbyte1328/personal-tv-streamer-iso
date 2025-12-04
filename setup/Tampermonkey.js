@@ -10,25 +10,79 @@
 (function () {
   'use strict';
 
-  const files = [
-    "http://localhost:8080/static/navigation/core.js",
-    "http://localhost:8080/static/navigation/focus.js",
-    "http://localhost:8080/static/navigation/input.js",
-    "http://localhost:8080/static/navigation/virtual_keyboard.js"
-  ];
+  function determineActiveTargetScript() {
+    var currentLocationHostname = window.location.hostname.toLowerCase();
+    var mappingList = [
+      {
+        domainText: "youtube.com",
+        scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube.js"
+      },
+      {
+        domainText: "localhost",
+        scriptPath: "http://localhost:8080/static/navigation/target_websites/localhost.js"
+      },
+      {
+        domainText: "127.0.0.1",
+        scriptPath: "http://localhost:8080/static/navigation/target_websites/localhost.js"
+      }
+    ];
+    var selectedPath = "http://localhost:8080/static/navigation/target_websites/default.js";
+    var mappingIndex = 0;
+    while (mappingIndex < mappingList.length) {
+      var entry = mappingList[mappingIndex];
+      if (currentLocationHostname.indexOf(entry.domainText) !== -1) {
+        selectedPath = entry.scriptPath;
+        break;
+      }
+      mappingIndex = mappingIndex + 1;
+    }
+    return selectedPath;
+  }
 
-  function loadFile(i) {
-    if (i >= files.length) return;
+  function retrieveFileContentAndInjectIntoDocument(fileAddress, completionProcedure) {
     GM_xmlhttpRequest({
       method: "GET",
-      url: files[i],
-      onload: res => {
-        GM_addElement(document.head, "script", { textContent: res.responseText });
-        loadFile(i + 1);
+      url: fileAddress,
+      onload: function (responseObject) {
+        GM_addElement(document.head, "script", { textContent: responseObject.responseText });
+        completionProcedure();
       }
     });
   }
 
-  loadFile(0);
+  function sequentiallyInjectCoreScripts() {
+    var scriptAddresses = [
+      "http://localhost:8080/static/navigation/core.js",
+      "http://localhost:8080/static/navigation/focus.js",
+      "http://localhost:8080/static/navigation/input.js",
+      "http://localhost:8080/static/navigation/virtual_keyboard.js"
+    ];
+
+    function beginSequentialInjection(currentIndex) {
+      if (currentIndex >= scriptAddresses.length) {
+        return;
+      }
+      retrieveFileContentAndInjectIntoDocument(
+        scriptAddresses[currentIndex],
+        function () {
+          beginSequentialInjection(currentIndex + 1);
+        }
+      );
+    }
+
+    beginSequentialInjection(0);
+  }
+
+  function beginLoadingProcedures() {
+    var chosenTargetScriptAddress = determineActiveTargetScript();
+    retrieveFileContentAndInjectIntoDocument(
+      chosenTargetScriptAddress,
+      function () {
+        sequentiallyInjectCoreScripts();
+      }
+    );
+  }
+
+  beginLoadingProcedures();
 })();
 
