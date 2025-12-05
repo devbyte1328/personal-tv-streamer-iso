@@ -9,14 +9,14 @@
 }
 
 .carousel-wrapper {
-    width: 100%;
+    width: 110%;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     pointer-events: none;
     margin-top: 9%;
-    margin-left: 4%;
+    margin-left: -5%;
 }
 
 .carousel-btn {
@@ -41,14 +41,14 @@
 
 .left-btn {
     position: absolute;
-    left: 60px;
+    left: 6%;
     top: 50%;
     transform: translateY(-50%);
 }
 
 .right-btn {
     position: absolute;
-    right: 60px;
+    right: 6%;
     top: 50%;
     transform: translateY(-50%);
 }
@@ -100,15 +100,15 @@
     margin-top: 10%;
     display: flex;
     justify-content: flex-start;
-    margin-left: 6%;
     align-items: center;
-    gap: 30px;
     position: relative;
+    gap: 1%;
+    padding-left: 5%;
+    padding-right: 5%;
 }
 
 #standalone-trailer-frame {
-    width: 40vw;
-    max-width: 1400px;
+    width: 50%;
     aspect-ratio: 16/9;
     border: none;
     position: relative;
@@ -118,7 +118,7 @@
 #standalone-trailer-title {
     font-size: 32px;
     font-weight: 700;
-    max-width: 40%;
+    max-width: 35%;
     color: #ffffff;
     line-height: 1.35;
     letter-spacing: 1px;
@@ -127,6 +127,8 @@
     padding: 16px 22px;
     border-radius: 10px;
     backdrop-filter: blur(3px);
+    white-space: normal;
+    overflow-wrap: break-word;
 }
 
 #standalone-trailer-overlay {
@@ -138,13 +140,15 @@
 }
 
 .thumbnail-grid-container {
+    width: 93%;
     margin-top: 4%;
+    margin-left: -5%;
     padding-left: 4%;
     padding-right: 4%;
     display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     justify-content: center;
     justify-items: center;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 24px;
 }
 
@@ -152,25 +156,24 @@
     position: relative;
     width: 100%;
     max-width: 320px;
-    height: auto;
+    aspect-ratio: 16/9;
 }
 
 .thumbnail-grid-container img {
-    width: 102%;
-    height: 102%;
-    aspect-ratio: 16/9;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     object-position: center;
-    transform: scale(1.02);
     transition: transform .3s ease;
+}
+
+.thumbnail-wrapper:hover img {
+    transform: scale(1.05);
 }
 
 .thumbnail-overlay {
     position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     cursor: pointer;
     z-index: 10;
 }

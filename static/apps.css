@@ -1,12 +1,8 @@
 .application_buttons_container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(12vw, 12vw));
-    grid-auto-rows: 10vw;
-    gap: 0.6vw;
-    padding-top: -4vw;
-    padding-bottom: 2vw;
-    padding-left: 5vw;
-    padding-right: 1.5vw;
+    grid-template-columns: repeat(auto-fit, minmax(15%, 15%));
+    grid-auto-rows: 35%;
+    gap: 1%;
     width: 100%;
     height: auto;
     box-sizing: border-box;
@@ -14,6 +10,8 @@
     align-content: start;
     justify-items: center;
     align-items: center;
+    margin-left: -1%;
+    margin-top: 2%;
 
 }
 
@@ -23,7 +21,7 @@
     padding: 0;
     cursor: pointer;
     color: white;
-    font-size: 1.1vw;
+    font-size: 100%;
     font-family: sans-serif;
     display: flex;
     flex-direction: column;
@@ -35,16 +33,11 @@
 }
 
 .app-icon {
-    margin-bottom: 0.5vw;
-    border-radius: 1vw;
-    width: 4.8vw;
-    height: 4.8vw;
+    margin-bottom: 20%;
 }
 
 .app-btn span {
     display: block;
-    height: 1.3vw;
-    line-height: 1.3vw;
     text-align: center;
     overflow: hidden;
     white-space: nowrap;
