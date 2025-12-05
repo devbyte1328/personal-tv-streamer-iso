@@ -16,7 +16,8 @@
     '.thumbnail-wrapper img',
     '.thumbnail-wrapper .thumbnail-overlay',
     '#left-carousel-btn',
-    '#right-carousel-btn'
+    '#right-carousel-btn',
+    '.application_buttons_container .app-btn',
   ];
 })();
 
