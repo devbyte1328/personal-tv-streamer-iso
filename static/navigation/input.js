@@ -10,30 +10,36 @@
 
   const { move } = window.STNAV_FOCUS;
 
-  function activate(item) {
-    if (!item) return;
-    const tag = item.tagName.toLowerCase();
-    if (item.matches('ytd-playlist-panel-video-renderer, .yt-lockup-view-model')) {
-      const link = item.querySelector('a[href]');
-      if (link) return link.click();
+  function activate(elementGiven) {
+    if (!elementGiven) return;
+
+    const tagNameLower = elementGiven.tagName.toLowerCase();
+
+    if (elementGiven.matches('ytd-playlist-panel-video-renderer, .yt-lockup-view-model')) {
+      const linkElement = elementGiven.querySelector('a[href]');
+      if (linkElement) return linkElement.click();
     }
-    if (['input', 'textarea', 'select'].includes(tag) || item.isContentEditable) {
+
+    if (['input', 'textarea', 'select'].includes(tagNameLower) || elementGiven.isContentEditable) {
       state.keyboardEntryMode = true;
-      item.focus();
+      elementGiven.focus();
       return;
     }
+
     try {
-      item.click();
+      elementGiven.click();
     } catch {
-      item.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      elementGiven.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     }
   }
 
   function leaveTyping() {
     state.keyboardEntryMode = false;
+
     if (document.activeElement && document.activeElement.blur) {
       document.activeElement.blur();
     }
+
     if (!state.isScrolling && state.activeElement) {
       highlight(state.activeElement);
     }
@@ -45,8 +51,8 @@
       clearHighlight();
     } else {
       state.navigationEnabled = true;
-      const list = getFocusableList();
-      if (list.length > 0) highlight(list[0]);
+      const elementList = getFocusableList();
+      if (elementList.length > 0) highlight(elementList[0]);
     }
   });
 
@@ -62,27 +68,29 @@
   ];
 
   function autoFullscreen() {
-    const here = location.href;
-    for (const s of fullscreenSites) {
-      if (here.startsWith(s.domain)) {
-        const btn = document.querySelector(s.selector);
-        if (btn) btn.click();
+    const addressHere = location.href;
+
+    for (const entry of fullscreenSites) {
+      if (addressHere.startsWith(entry.domain)) {
+        const buttonFound = document.querySelector(entry.selector);
+        if (buttonFound) buttonFound.click();
         return true;
       }
     }
+
     return false;
   }
 
-  function keyHandler(e) {
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
+  function keyHandler(eventObject) {
+    if (eventObject.altKey || eventObject.ctrlKey || eventObject.metaKey) return;
 
-    if (!state.keyboardEntryMode && e.key.toLowerCase() === 'f') {
+    if (!state.keyboardEntryMode && eventObject.key.toLowerCase() === 'f') {
       if (autoFullscreen()) return;
     }
 
     if (state.keyboardEntryMode) {
-      if (e.key === 'Escape') {
-        e.preventDefault();
+      if (eventObject.key === 'Escape') {
+        eventObject.preventDefault();
         leaveTyping();
       }
       return;
@@ -90,47 +98,47 @@
 
     if (state.isScrolling) return;
 
-    if (e.key.toLowerCase() === 'p') {
+    if (eventObject.key.toLowerCase() === 'p') {
       if (!state.navigationEnabled) {
-        e.preventDefault();
+        eventObject.preventDefault();
         state.websocketLink.send("VideoPlayPause");
       }
       return;
     }
 
     if (!state.navigationEnabled) {
-      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) return;
+      if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(eventObject.key)) return;
       return;
     }
 
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
-      e.preventDefault();
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(eventObject.key)) {
+      eventObject.preventDefault();
       move({
         ArrowUp: 'up',
         ArrowDown: 'down',
         ArrowLeft: 'left',
         ArrowRight: 'right'
-      }[e.key]);
+      }[eventObject.key]);
       return;
     }
 
-    if (['Enter',' '].includes(e.key)) {
-      e.preventDefault();
+    if (['Enter',' '].includes(eventObject.key)) {
+      eventObject.preventDefault();
       activate(state.activeElement);
       return;
     }
 
-    const list = getFocusableList();
-    if (!list.length) return;
+    const elementList = getFocusableList();
+    if (!elementList.length) return;
 
-    if (e.key === 'Home') {
-      e.preventDefault();
-      highlight(list[0]);
+    if (eventObject.key === 'Home') {
+      eventObject.preventDefault();
+      highlight(elementList[0]);
     }
 
-    if (e.key === 'End') {
-      e.preventDefault();
-      highlight(list[list.length - 1]);
+    if (eventObject.key === 'End') {
+      eventObject.preventDefault();
+      highlight(elementList[elementList.length - 1]);
     }
   }
 

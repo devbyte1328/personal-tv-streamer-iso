@@ -19,22 +19,25 @@
        ? window.STNAV_TARGETS.selectors
        : []);
 
-  function isAllowedElement(el) {
-    if (!(el instanceof Element)) return false;
-    if (el.closest('.html5-video-player')) return false;
-    if (el.closest('.ytp-chrome-bottom')) return false;
-    if (el.closest('.ytp-chrome-top')) return false;
-    if (el.closest('.ytp-tooltip')) return false;
-    if (el.closest('.ytp-player-content')) return false;
+  function isAllowedElement(elementGiven) {
+    if (!(elementGiven instanceof Element)) return false;
+    if (elementGiven.closest('.html5-video-player')) return false;
+    if (elementGiven.closest('.ytp-chrome-bottom')) return false;
+    if (elementGiven.closest('.ytp-chrome-top')) return false;
+    if (elementGiven.closest('.ytp-tooltip')) return false;
+    if (elementGiven.closest('.ytp-player-content')) return false;
 
-    const r = el.getBoundingClientRect();
-    const cs = getComputedStyle(el);
-    if (r.width <= 0 || r.height <= 0) return false;
-    if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0') return false;
-    return r.bottom > 0 &&
-           r.top < window.innerHeight &&
-           r.right > 0 &&
-           r.left < window.innerWidth;
+    const rectangle = elementGiven.getBoundingClientRect();
+    const computedStyleObject = getComputedStyle(elementGiven);
+    if (rectangle.width <= 0 || rectangle.height <= 0) return false;
+    if (computedStyleObject.display === 'none' ||
+        computedStyleObject.visibility === 'hidden' ||
+        computedStyleObject.opacity === '0') return false;
+
+    return rectangle.bottom > 0 &&
+           rectangle.top < window.innerHeight &&
+           rectangle.right > 0 &&
+           rectangle.left < window.innerWidth;
   }
 
   function collectFocusableElements() {
@@ -57,14 +60,15 @@
     document.body.appendChild(overlayBox);
   }
 
-  function drawOverlay(el) {
-    if (!overlayBox || !el) return;
-    const r = el.getBoundingClientRect();
-    const b = 6, m = 4;
-    overlayBox.style.top = (r.top - m - b) + "px";
-    overlayBox.style.left = (r.left - m - b) + "px";
-    overlayBox.style.width = (r.width + m * 2 + b * 2) + "px";
-    overlayBox.style.height = (r.height + m * 2 + b * 2) + "px";
+  function drawOverlay(elementGiven) {
+    if (!overlayBox || !elementGiven) return;
+    const rectangle = elementGiven.getBoundingClientRect();
+    const borderSize = 6;
+    const marginSize = 4;
+    overlayBox.style.top = (rectangle.top - marginSize - borderSize) + "px";
+    overlayBox.style.left = (rectangle.left - marginSize - borderSize) + "px";
+    overlayBox.style.width = (rectangle.width + marginSize * 2 + borderSize * 2) + "px";
+    overlayBox.style.height = (rectangle.height + marginSize * 2 + borderSize * 2) + "px";
     overlayBox.style.display = 'block';
   }
 
@@ -72,76 +76,90 @@
     if (overlayBox) overlayBox.style.display = 'none';
   }
 
-  function highlightItem(el) {
+  function highlightItem(elementGiven) {
     hideOverlay();
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const m = 40;
-    if (r.top < m || r.bottom > window.innerHeight - m) {
-      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    if (!elementGiven) return;
+
+    const rectangle = elementGiven.getBoundingClientRect();
+    const offsetThreshold = 40;
+
+    if (rectangle.top < offsetThreshold || rectangle.bottom > window.innerHeight - offsetThreshold) {
+      elementGiven.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
-    engineState.activeElement = el;
-    drawOverlay(el);
+
+    engineState.activeElement = elementGiven;
+    drawOverlay(elementGiven);
   }
 
-  function searchDirectional(current, list, direction) {
-    if (!current) return list[0] || null;
-    const set = new Set(list);
-    const r = current.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
-    const distStep = 20;
-    const limit = Math.max(window.innerWidth, window.innerHeight) * 2;
-    let dx = 0, dy = 0;
-    if (direction === 'left') dx = -distStep;
-    if (direction === 'right') dx = distStep;
-    if (direction === 'up') dy = -distStep;
-    if (direction === 'down') dy = distStep;
+  function searchDirectional(elementCurrent, elementList, directionName) {
+    if (!elementCurrent) return elementList[0] || null;
 
-    for (let d = distStep; d < limit; d += distStep) {
-      const x = cx + dx * (d / distStep);
-      const y = cy + dy * (d / distStep);
-      if (x < 0 || y < 0 || x > window.innerWidth || y > window.innerHeight) break;
-      let found = document.elementFromPoint(x, y);
-      if (!found) continue;
-      if (found === current || current.contains(found)) continue;
-      let walker = found;
-      while (walker && walker !== document.body) {
-        if (set.has(walker)) return walker;
-        walker = walker.parentElement;
+    const setElements = new Set(elementList);
+    const rectangle = elementCurrent.getBoundingClientRect();
+    const centerX = rectangle.left + rectangle.width / 2;
+    const centerY = rectangle.top + rectangle.height / 2;
+    const distanceStep = 20;
+    const searchLimit = Math.max(window.innerWidth, window.innerHeight) * 2;
+
+    let directionX = 0;
+    let directionY = 0;
+
+    if (directionName === 'left') directionX = -distanceStep;
+    if (directionName === 'right') directionX = distanceStep;
+    if (directionName === 'up') directionY = -distanceStep;
+    if (directionName === 'down') directionY = distanceStep;
+
+    for (let distance = distanceStep; distance < searchLimit; distance += distanceStep) {
+      const testX = centerX + directionX * (distance / distanceStep);
+      const testY = centerY + directionY * (distance / distanceStep);
+
+      if (testX < 0 || testY < 0 || testX > window.innerWidth || testY > window.innerHeight) break;
+
+      let foundElement = document.elementFromPoint(testX, testY);
+      if (!foundElement) continue;
+      if (foundElement === elementCurrent || elementCurrent.contains(foundElement)) continue;
+
+      let walkerElement = foundElement;
+      while (walkerElement && walkerElement !== document.body) {
+        if (setElements.has(walkerElement)) return walkerElement;
+        walkerElement = walkerElement.parentElement;
       }
     }
 
-    let best = null;
+    let bestElement = null;
     let bestScore = Infinity;
 
-    for (const el of list) {
-      if (el === current) continue;
-      const b = el.getBoundingClientRect();
-      const ix = b.left + b.width / 2;
-      const iy = b.top + b.height / 2;
-      const dx2 = ix - cx;
-      const dy2 = iy - cy;
+    for (const elementOption of elementList) {
+      if (elementOption === elementCurrent) continue;
 
-      if (direction === 'up' && dy2 >= -1) continue;
-      if (direction === 'down' && dy2 <= 1) continue;
-      if (direction === 'left' && dx2 >= -1) continue;
-      if (direction === 'right' && dx2 <= 1) continue;
+      const rectangleOption = elementOption.getBoundingClientRect();
+      const optionX = rectangleOption.left + rectangleOption.width / 2;
+      const optionY = rectangleOption.top + rectangleOption.height / 2;
 
-      const primary = (direction === 'left' || direction === 'right')
-                      ? Math.abs(dx2)
-                      : Math.abs(dy2);
-      const secondary = (direction === 'left' || direction === 'right')
-                        ? Math.abs(dy2)
-                        : Math.abs(dx2);
+      const deltaX = optionX - centerX;
+      const deltaY = optionY - centerY;
 
-      const score = primary * 100 + secondary;
-      if (score < bestScore) {
-        bestScore = score;
-        best = el;
+      if (directionName === 'up' && deltaY >= -1) continue;
+      if (directionName === 'down' && deltaY <= 1) continue;
+      if (directionName === 'left' && deltaX >= -1) continue;
+      if (directionName === 'right' && deltaX <= 1) continue;
+
+      const primaryValue = (directionName === 'left' || directionName === 'right')
+                           ? Math.abs(deltaX)
+                           : Math.abs(deltaY);
+
+      const secondaryValue = (directionName === 'left' || directionName === 'right')
+                             ? Math.abs(deltaY)
+                             : Math.abs(deltaX);
+
+      const scoreValue = primaryValue * 100 + secondaryValue;
+      if (scoreValue < bestScore) {
+        bestScore = scoreValue;
+        bestElement = elementOption;
       }
     }
-    return best;
+
+    return bestElement;
   }
 
   window.addEventListener('scroll', () => {
@@ -183,7 +201,7 @@
     }
   });
 
-  const mut = new MutationObserver(() => {
+  const observerGiven = new MutationObserver(() => {
     if (!engineState.navigationEnabled ||
         engineState.keyboardEntryMode ||
         engineState.isScrolling) return;
@@ -195,6 +213,6 @@
     }
   });
 
-  mut.observe(document.body, { childList: true, subtree: true });
+  observerGiven.observe(document.body, { childList: true, subtree: true });
 })();
 

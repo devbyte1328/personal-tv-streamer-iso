@@ -9,24 +9,41 @@
     updateOverlay
   } = window.STNAV_CORE;
 
-  function highlightAgain(item) {
-    highlight(item);
-    requestAnimationFrame(() => updateOverlay(item));
+  function highlightAgain(elementGiven) {
+    highlight(elementGiven);
+    requestAnimationFrame(() => updateOverlay(elementGiven));
   }
 
-  function move(direction) {
+  function move(directionName) {
     if (state.isScrolling) return;
-    const list = getFocusableList();
-    if (!list.length) return;
-    const next = findNextItem(state.activeElement || list[0], list, direction);
-    if (!next) {
-      const factor = direction === 'down' ? 1 : direction === 'up' ? -1 : 0;
-      if (factor !== 0) {
-        window.scrollBy({ top: factor * state.scrollDistance, behavior: 'smooth' });
+
+    const elementList = getFocusableList();
+    if (!elementList.length) return;
+
+    const nextElement = findNextItem(state.activeElement || elementList[0], elementList, directionName);
+
+    if (!nextElement) {
+      const scrollFactor =
+        directionName === 'down' ? 1 :
+        directionName === 'up' ? -1 : 0;
+
+      if (scrollFactor !== 0) {
+        window.scrollBy({
+          top: scrollFactor * state.scrollDistance,
+          behavior: 'smooth'
+        });
+
+        setTimeout(() => {
+          const updatedList = getFocusableList();
+          const updatedNext = findNextItem(state.activeElement, updatedList, directionName);
+          if (updatedNext) highlightAgain(updatedNext);
+        }, 260);
+
         return;
       }
     }
-    highlightAgain(next);
+
+    highlightAgain(nextElement);
   }
 
   window.STNAV_FOCUS = { move };
