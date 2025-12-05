@@ -1,22 +1,31 @@
 window.addEventListener("DOMContentLoaded", () => {
     const navigationItems = document.querySelectorAll("#sidebar li[data-url]");
 
-    window.loadPage = async function (url, clickedItem) {
-        const reply = await fetch(url);
-        const text = await reply.text();
-        const parsed = new DOMParser().parseFromString(text, "text/html");
+    const websocketLink = new WebSocket("ws://localhost:8765");
+    websocketLink.onopen = () => {
+        window.websocketLink = websocketLink;
+    };
 
-        const freshContent = parsed.querySelector("#content");
-        if (freshContent) {
-            document.getElementById("content").innerHTML = freshContent.innerHTML;
+    window.loadPage = async function (requestedPageUrl, selectedNavigationItem) {
+        const responseContent = await fetch(requestedPageUrl);
+        const responseText = await responseContent.text();
+        const parsedDocument = new DOMParser().parseFromString(responseText, "text/html");
+
+        const newContentElement = parsedDocument.querySelector("#content");
+        if (newContentElement) {
+            document.getElementById("content").innerHTML = newContentElement.innerHTML;
         }
 
-        document.title = parsed.title;
+        document.title = parsedDocument.title;
 
         navigationItems.forEach(item => item.classList.remove("active-tab"));
-        clickedItem.classList.add("active-tab");
+        selectedNavigationItem.classList.add("active-tab");
 
-        if (url.endsWith("/")) {
+        if (websocketLink && websocketLink.readyState === WebSocket.OPEN) {
+            websocketLink.send("FocusLocalhostBackground");
+        }
+
+        if (requestedPageUrl.endsWith("/")) {
             window.dispatchEvent(new Event("home-page-loaded"));
         }
     };
