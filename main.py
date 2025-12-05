@@ -21,10 +21,15 @@ async def ws_handler(ws):
     print("WS client connected")
     try:
         async for msg in ws:
-            if msg == "VideoPlayPause":
+            if msg == "FocusLocalhostBackground":
+                ### Hardcoded to work with two screens for now
+                time.sleep(0.1)
+                pyautogui.click(x=314, y=1012) # This needs to be resolved at some point
+                pyautogui.moveTo(0, height - 1)
+            elif msg == "VideoPlayPause":
                 ### Hardcoded to work with two screens for now, later will make this auto resolve resolution...
                 #pyautogui.click(center_x, center_y)
-                pyautogui.click(x=950, y=535)
+                pyautogui.click(x=950, y=535) # This needs to be resolved at some point
                 pyautogui.moveTo(0, height - 1)
             elif msg == "SearchEnter":
                 pyautogui.press('space')
