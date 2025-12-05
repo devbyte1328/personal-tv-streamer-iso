@@ -94,7 +94,7 @@
 
 .home-video-wrapper {
     width: 100%;
-    margin-left: 4%;
+    margin-left: -2%;
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -104,7 +104,7 @@
 
 #standalone-home-video-overlay {
     position: absolute;
-    width: 40vw;
+    width: 50%;
     max-width: 1400px;
     aspect-ratio: 16/9;
     cursor: pointer;
@@ -117,7 +117,7 @@
 }
 
 #standalone-home-video-frame {
-    width: 40vw;
+    width: 50%;
     max-width: 1400px;
     aspect-ratio: 16/9;
     border: none;
@@ -131,8 +131,7 @@
     color: #ffffff;
     line-height: 1.35;
     letter-spacing: 1px;
-    text-shadow:
-        0 0 4px rgba(0,0,0,0.8),
+    text-shadow: 0 0 4px rgba(0,0,0,0.8),
         0 0 6px rgba(0,0,0,0.6);
     background: rgba(0,0,0,0.35);
     padding: 16px 22px;
