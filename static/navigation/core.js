@@ -80,13 +80,6 @@
     hideOverlay();
     if (!elementGiven) return;
 
-    const rectangle = elementGiven.getBoundingClientRect();
-    const offsetThreshold = 40;
-
-    if (rectangle.top < offsetThreshold || rectangle.bottom > window.innerHeight - offsetThreshold) {
-      elementGiven.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-
     engineState.activeElement = elementGiven;
     drawOverlay(elementGiven);
   }
@@ -144,13 +137,15 @@
       if (directionName === 'left' && deltaX >= -1) continue;
       if (directionName === 'right' && deltaX <= 1) continue;
 
-      const primaryValue = (directionName === 'left' || directionName === 'right')
-                           ? Math.abs(deltaX)
-                           : Math.abs(deltaY);
+      const primaryValue =
+        (directionName === 'left' || directionName === 'right')
+          ? Math.abs(deltaX)
+          : Math.abs(deltaY);
 
-      const secondaryValue = (directionName === 'left' || directionName === 'right')
-                             ? Math.abs(deltaY)
-                             : Math.abs(deltaX);
+      const secondaryValue =
+        (directionName === 'left' || directionName === 'right')
+          ? Math.abs(deltaY)
+          : Math.abs(deltaX);
 
       const scoreValue = primaryValue * 100 + secondaryValue;
       if (scoreValue < bestScore) {
