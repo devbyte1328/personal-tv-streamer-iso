@@ -12,7 +12,12 @@
 
   function determineActiveTargetScript() {
     var currentLocationHostname = window.location.hostname.toLowerCase();
+    var currentLocationHref = window.location.href.toLowerCase();
     var mappingList = [
+      {
+        domainText: "youtube.com/shorts",
+        scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube-shorts.js"
+      },
       {
         domainText: "youtube.com",
         scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube.js"
@@ -30,7 +35,10 @@
     var mappingIndex = 0;
     while (mappingIndex < mappingList.length) {
       var entry = mappingList[mappingIndex];
-      if (currentLocationHostname.indexOf(entry.domainText) !== -1) {
+      if (
+        currentLocationHostname.indexOf(entry.domainText) !== -1 ||
+        currentLocationHref.indexOf(entry.domainText) !== -1
+      ) {
         selectedPath = entry.scriptPath;
         break;
       }
@@ -84,4 +92,3 @@
 
   beginLoadingProcedures();
 })();
-
