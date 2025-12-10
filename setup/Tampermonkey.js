@@ -15,11 +15,11 @@
     var currentLocationHref = window.location.href.toLowerCase();
     var mappingList = [
       {
-        domainText: "tiktok.com/",
+        domainText: "watch.plex.tv",
         scriptPath: "http://localhost:8080/static/navigation/target_websites/plex.js"
       },
       {
-        domainText: "tiktok.com/",
+        domainText: "tiktok.com",
         scriptPath: "http://localhost:8080/static/navigation/target_websites/tiktok.js"
       },
       {
