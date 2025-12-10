@@ -15,6 +15,10 @@
     var currentLocationHref = window.location.href.toLowerCase();
     var mappingList = [
       {
+        domainText: "tiktok.com/",
+        scriptPath: "http://localhost:8080/static/navigation/target_websites/tiktok.js"
+      },
+      {
         domainText: "music.youtube.com",
         scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube-music.js"
       },
