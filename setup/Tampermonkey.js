@@ -15,6 +15,10 @@
     var currentLocationHref = window.location.href.toLowerCase();
     var mappingList = [
       {
+        domainText: "music.youtube.com",
+        scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube-music.js"
+      },
+      {
         domainText: "youtube.com/shorts",
         scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube-shorts.js"
       },
