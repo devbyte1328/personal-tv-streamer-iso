@@ -10,12 +10,21 @@ import requests
 import time
 
 app = Flask(__name__)
+
 pyautogui.FAILSAFE = False
 width, height = pyautogui.size()
 center_x = width // 2
 center_y = height // 2
 
 weather_data = {"locations": []}
+
+@app.route('/static/navigation/target_websites/')
+def serve_target_website_directory():
+    directory_path = os.path.join(app.root_path, "static/navigation/target_websites")
+    if not os.path.isdir(directory_path):
+        abort(404)
+    files = [f for f in os.listdir(directory_path) if f.endswith(".js")]
+    return jsonify(files)
 
 async def ws_handler(ws):
     print("WS client connected")
@@ -62,10 +71,10 @@ def fetch_weather_for_location(location_name):
     weather_response = requests.get(
         f"https://api.open-meteo.com/v1/forecast?latitude={latitude_value}&longitude={longitude_value}&current_weather=true"
     )
-    weather_data = weather_response.json()
-    if "current_weather" not in weather_data:
+    weather_data_json = weather_response.json()
+    if "current_weather" not in weather_data_json:
         return None
-    current_weather = weather_data["current_weather"]
+    current_weather = weather_data_json["current_weather"]
     return {
         "location_name": first_result["name"],
         "temperature": current_weather["temperature"],
@@ -138,6 +147,5 @@ if __name__ == "__main__":
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
     threading.Thread(target=weather_thread_function, daemon=True).start()
-    threading.Thread(target=run_youtube_api, daemon=True).start()
     app.run(host='0.0.0.0', port=8080)
 
