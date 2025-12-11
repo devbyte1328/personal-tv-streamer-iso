@@ -7,100 +7,53 @@
 // @connect      localhost
 // ==/UserScript==
 
-(function () {
-  'use strict';
+(() => {
+  "use strict";
 
-  function determineActiveTargetScript() {
-    var currentLocationHostname = window.location.hostname.toLowerCase();
-    var currentLocationHref = window.location.href.toLowerCase();
-    var mappingList = [
-      {
-        domainText: "watch.plex.tv",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/plex.js"
-      },
-      {
-        domainText: "tiktok.com",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/tiktok.js"
-      },
-      {
-        domainText: "music.youtube.com",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube-music.js"
-      },
-      {
-        domainText: "youtube.com/shorts",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube-shorts.js"
-      },
-      {
-        domainText: "youtube.com",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/youtube.js"
-      },
-      {
-        domainText: "localhost",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/localhost.js"
-      },
-      {
-        domainText: "127.0.0.1",
-        scriptPath: "http://localhost:8080/static/navigation/target_websites/localhost.js"
-      }
-    ];
-    var selectedPath = "http://localhost:8080/static/navigation/target_websites/default.js";
-    var mappingIndex = 0;
-    while (mappingIndex < mappingList.length) {
-      var entry = mappingList[mappingIndex];
-      if (
-        currentLocationHostname.indexOf(entry.domainText) !== -1 ||
-        currentLocationHref.indexOf(entry.domainText) !== -1
-      ) {
-        selectedPath = entry.scriptPath;
-        break;
-      }
-      mappingIndex = mappingIndex + 1;
-    }
-    return selectedPath;
-  }
+  const fetchJson = url =>
+    new Promise(resolve =>
+      GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        onload: r => resolve(JSON.parse(r.responseText))
+      })
+    );
 
-  function retrieveFileContentAndInjectIntoDocument(fileAddress, completionProcedure) {
+  const injectScript = (url, next) =>
     GM_xmlhttpRequest({
       method: "GET",
-      url: fileAddress,
-      onload: function (responseObject) {
-        GM_addElement(document.head, "script", { textContent: responseObject.responseText });
-        completionProcedure();
+      url,
+      onload: r => {
+        GM_addElement(document.head, "script", { textContent: r.responseText });
+        next();
       }
     });
-  }
 
-  function sequentiallyInjectCoreScripts() {
-    var scriptAddresses = [
+  const domainMatch = filenames => {
+    const text = (location.hostname + location.href).toLowerCase();
+    let match = filenames.find(f => text.includes(f.replace(/_/g, ".").replace(/=/g, "/").replace(".js", "")));
+    return match || "default.js";
+  };
+
+  const loadCore = () => {
+    const queue = [
       "http://localhost:8080/static/navigation/core.js",
       "http://localhost:8080/static/navigation/focus.js",
       "http://localhost:8080/static/navigation/input.js",
       "http://localhost:8080/static/navigation/virtual_keyboard.js"
     ];
+    const run = index =>
+      index < queue.length &&
+      injectScript(queue[index], () => run(index + 1));
+    run(0);
+  };
 
-    function beginSequentialInjection(currentIndex) {
-      if (currentIndex >= scriptAddresses.length) {
-        return;
-      }
-      retrieveFileContentAndInjectIntoDocument(
-        scriptAddresses[currentIndex],
-        function () {
-          beginSequentialInjection(currentIndex + 1);
-        }
-      );
-    }
-    beginSequentialInjection(0);
-  }
+  const start = async () => {
+    const files = await fetchJson("http://localhost:8080/static/navigation/target_websites/");
+    const chosen = domainMatch(files);
+    injectScript(`http://localhost:8080/static/navigation/target_websites/${chosen}`, () => loadCore());
+  };
 
-  function beginLoadingProcedures() {
-    var chosenTargetScriptAddress = determineActiveTargetScript();
-    retrieveFileContentAndInjectIntoDocument(
-      chosenTargetScriptAddress,
-      function () {
-        sequentiallyInjectCoreScripts();
-      }
-    );
-  }
-
-  beginLoadingProcedures();
+  start();
 })();
+
