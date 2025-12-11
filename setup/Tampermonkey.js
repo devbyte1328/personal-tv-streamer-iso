@@ -31,7 +31,13 @@
 
   const domainMatch = filenames => {
     const text = (location.hostname + location.href).toLowerCase();
-    let match = filenames.find(f => text.includes(f.replace(/_/g, ".").replace(/=/g, "/").replace(".js", "")));
+    const match = filenames.find(f =>
+      text.includes(
+        f.replace(/_/g, ".")
+         .replace(/=/g, "/")
+         .replace(".js", "")
+      )
+    );
     return match || "default.js";
   };
 
@@ -51,7 +57,10 @@
   const start = async () => {
     const files = await fetchJson("http://localhost:8080/static/navigation/target_websites/");
     const chosen = domainMatch(files);
-    injectScript(`http://localhost:8080/static/navigation/target_websites/${chosen}`, () => loadCore());
+    injectScript(
+      `http://localhost:8080/static/navigation/target_websites/${chosen}`,
+      () => loadCore()
+    );
   };
 
   start();
