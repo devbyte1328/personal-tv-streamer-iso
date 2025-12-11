@@ -7,62 +7,93 @@
 // @connect      localhost
 // ==/UserScript==
 
-(() => {
+(function () {
   "use strict";
 
-  const fetchJson = url =>
-    new Promise(resolve =>
+  const fetchJsonFromUrl = function (requestedUrl) {
+    return new Promise(function (resolveJson) {
       GM_xmlhttpRequest({
         method: "GET",
-        url,
-        onload: r => resolve(JSON.parse(r.responseText))
-      })
-    );
-
-  const injectScript = (url, next) =>
-    GM_xmlhttpRequest({
-      method: "GET",
-      url,
-      onload: r => {
-        GM_addElement(document.head, "script", { textContent: r.responseText });
-        next();
-      }
+        url: requestedUrl,
+        onload: function (responseObject) {
+          const parsedJson = JSON.parse(responseObject.responseText);
+          resolveJson(parsedJson);
+        }
+      });
     });
-
-  const domainMatch = filenames => {
-    const text = (location.hostname + location.href).toLowerCase();
-    const match = filenames.find(f =>
-      text.includes(
-        f.replace(/_/g, ".")
-         .replace(/=/g, "/")
-         .replace(".js", "")
-      )
-    );
-    return match || "default.js";
   };
 
-  const loadCore = () => {
-    const queue = [
+  const injectScriptFromUrl = function (requestedUrl, callbackFunction) {
+    GM_xmlhttpRequest({
+      method: "GET",
+      url: requestedUrl,
+      onload: function (responseObject) {
+        GM_addElement(document.head, "script", {
+          textContent: responseObject.responseText
+        });
+        callbackFunction();
+      }
+    });
+  };
+
+  const chooseMatchingDomainFile = function (listOfFilenames) {
+    const combinedText = (location.hostname + location.href).toLowerCase();
+    let matchedFilename = null;
+
+    for (const currentFilename of listOfFilenames) {
+      const transformedFilename =
+        currentFilename
+          .replace(/_/g, ".")
+          .replace(/=/g, "/")
+          .replace(".js", "");
+
+      if (combinedText.includes(transformedFilename)) {
+        matchedFilename = currentFilename;
+        break;
+      }
+    }
+
+    if (matchedFilename === null) {
+      return "default.js";
+    }
+
+    return matchedFilename;
+  };
+
+  const loadCoreScripts = function () {
+    const scriptQueue = [
       "http://localhost:8080/static/navigation/core.js",
       "http://localhost:8080/static/navigation/focus.js",
       "http://localhost:8080/static/navigation/input.js",
       "http://localhost:8080/static/navigation/virtual_keyboard.js"
     ];
-    const run = index =>
-      index < queue.length &&
-      injectScript(queue[index], () => run(index + 1));
-    run(0);
+
+    const loadNextScript = function (indexValue) {
+      if (indexValue < scriptQueue.length) {
+        injectScriptFromUrl(scriptQueue[indexValue], function () {
+          loadNextScript(indexValue + 1);
+        });
+      }
+    };
+
+    loadNextScript(0);
   };
 
-  const start = async () => {
-    const files = await fetchJson("http://localhost:8080/static/navigation/target_websites/");
-    const chosen = domainMatch(files);
-    injectScript(
-      `http://localhost:8080/static/navigation/target_websites/${chosen}`,
-      () => loadCore()
+  const beginExecution = async function () {
+    const filenameList = await fetchJsonFromUrl(
+      "http://localhost:8080/static/navigation/target_websites/"
+    );
+
+    const selectedFilename = chooseMatchingDomainFile(filenameList);
+
+    injectScriptFromUrl(
+      "http://localhost:8080/static/navigation/target_websites/" + selectedFilename,
+      function () {
+        loadCoreScripts();
+      }
     );
   };
 
-  start();
+  beginExecution();
 })();
 
