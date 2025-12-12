@@ -98,14 +98,6 @@
 
     if (state.isScrolling) return;
 
-    if (eventObject.key.toLowerCase() === 'p') {
-      if (!state.navigationEnabled) {
-        eventObject.preventDefault();
-        state.websocketLink.send("VideoPlayPause");
-      }
-      return;
-    }
-
     if (!state.navigationEnabled) {
       if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(eventObject.key)) return;
       return;
