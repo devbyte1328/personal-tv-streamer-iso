@@ -28,6 +28,16 @@
     let panelVisible = false;
     let previousActiveElement = null;
 
+    const ensureStylesheetLoaded = function () {
+      if (document.getElementById('stnav-virtual-panel-css')) return;
+
+      const linkElement = document.createElement('link');
+      linkElement.id = 'stnav-virtual-panel-css';
+      linkElement.rel = 'stylesheet';
+      linkElement.href = 'http://localhost:8080/static/navigation/virtual_panel.css';
+      document.head.appendChild(linkElement);
+    };
+
     const dispatchKey = function (keyValue, codeValue) {
       const keyboardEvent = new KeyboardEvent('keydown', {
         key: keyValue,
@@ -39,52 +49,37 @@
     };
 
     const createPanel = function () {
+      ensureStylesheetLoaded();
+
       controlPanelElement = document.createElement('div');
       controlPanelElement.className = 'stnav-control-panel';
-      controlPanelElement.style.position = 'fixed';
-      controlPanelElement.style.bottom = '20px';
-      controlPanelElement.style.right = '20px';
-      controlPanelElement.style.background = 'rgba(0,0,0,0.75)';
-      controlPanelElement.style.color = 'white';
-      controlPanelElement.style.padding = '16px';
-      controlPanelElement.style.borderRadius = '12px';
-      controlPanelElement.style.zIndex = '2147483647';
-      controlPanelElement.style.display = 'flex';
-      controlPanelElement.style.flexDirection = 'column';
-      controlPanelElement.style.gap = '10px';
-      controlPanelElement.style.fontSize = '16px';
-      controlPanelElement.style.minWidth = '220px';
 
       const makeButton = function (labelText, clickHandler) {
         const buttonElement = document.createElement('button');
+        buttonElement.className = 'stnav-control-button';
         buttonElement.textContent = labelText;
-        buttonElement.style.background = 'rgba(255,255,255,0.1)';
-        buttonElement.style.color = 'white';
-        buttonElement.style.border = '1px solid rgba(255,255,255,0.4)';
-        buttonElement.style.padding = '10px 14px';
-        buttonElement.style.borderRadius = '8px';
-        buttonElement.style.cursor = 'pointer';
-        buttonElement.style.fontSize = '15px';
         buttonElement.onclick = clickHandler;
         return buttonElement;
       };
 
-      const refreshButton = makeButton('Refresh Page', function () {
-        dispatchKey('F5', 'F5');
-        location.reload();
-      });
+      controlPanelElement.appendChild(
+        makeButton('Refresh Page', function () {
+          dispatchKey('F5', 'F5');
+          location.reload();
+        })
+      );
 
-      const escapeButton = makeButton('Escape', function () {
-        dispatchKey('Escape', 'Escape');
-      });
+      controlPanelElement.appendChild(
+        makeButton('Escape', function () {
+          dispatchKey('Escape', 'Escape');
+        })
+      );
 
-      const closeButton = makeButton('Close', function () {
-        hidePanel();
-      });
-
-      controlPanelElement.appendChild(refreshButton);
-      controlPanelElement.appendChild(escapeButton);
-      controlPanelElement.appendChild(closeButton);
+      controlPanelElement.appendChild(
+        makeButton('Close', function () {
+          hidePanel();
+        })
+      );
 
       document.body.appendChild(controlPanelElement);
     };
@@ -100,31 +95,30 @@
     const showPanel = function () {
       if (!controlPanelElement) createPanel();
       previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
-      controlPanelElement.style.display = 'flex';
+      controlPanelElement.classList.add('stnav-visible');
       panelVisible = true;
       setTimeout(focusFirstPanelButton, 0);
     };
 
     const hidePanel = function () {
-      controlPanelElement.style.display = 'none';
+      controlPanelElement.classList.remove('stnav-visible');
       panelVisible = false;
       if (window.STNAV_CORE && previousActiveElement) {
         window.STNAV_CORE.highlight(previousActiveElement);
       }
     };
 
-    window.addEventListener('keydown', function (keyboardEvent) {
-      if (keyboardEvent.code === 'ControlRight') {
-        keyboardEvent.preventDefault();
-        keyboardEvent.stopPropagation();
-        if (panelVisible) {
-          hidePanel();
-        } else {
-          showPanel();
+    window.addEventListener(
+      'keydown',
+      function (keyboardEvent) {
+        if (keyboardEvent.code === 'ControlRight') {
+          keyboardEvent.preventDefault();
+          keyboardEvent.stopPropagation();
+          panelVisible ? hidePanel() : showPanel();
         }
-      }
-    }, true);
+      },
+      true
+    );
   }
-
 })();
 
