@@ -54,29 +54,39 @@
       controlPanelElement = document.createElement('div');
       controlPanelElement.className = 'stnav-control-panel';
 
-      const makeButton = function (labelText, clickHandler) {
+      const makeButton = function (labelText, iconName, clickHandler) {
         const buttonElement = document.createElement('button');
         buttonElement.className = 'stnav-control-button';
-        buttonElement.textContent = labelText;
+
+        const iconElement = document.createElement('img');
+        iconElement.className = 'stnav-control-icon';
+        iconElement.src = 'http://localhost:8080/static/assets/virtual_panel_icons/' + iconName;
+
+        const labelElement = document.createElement('span');
+        labelElement.textContent = labelText;
+
+        buttonElement.appendChild(iconElement);
+        buttonElement.appendChild(labelElement);
         buttonElement.onclick = clickHandler;
+
         return buttonElement;
       };
 
       controlPanelElement.appendChild(
-        makeButton('Refresh Page', function () {
+        makeButton('Refresh Page', 'refresh-32x32.png', function () {
           dispatchKey('F5', 'F5');
           location.reload();
         })
       );
 
       controlPanelElement.appendChild(
-        makeButton('Escape', function () {
+        makeButton('Escape', 'escape-32x32.png', function () {
           dispatchKey('Escape', 'Escape');
         })
       );
 
       controlPanelElement.appendChild(
-        makeButton('Close', function () {
+        makeButton('Close', 'close-32x32.png', function () {
           hidePanel();
         })
       );
