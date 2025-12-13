@@ -25,9 +25,19 @@
   border-radius: 8px;
   cursor: pointer;
   font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .stnav-control-button:focus {
   outline: none;
+}
+
+.stnav-control-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
