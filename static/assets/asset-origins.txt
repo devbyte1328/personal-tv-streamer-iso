@@ -13,3 +13,8 @@ https://icons8.com/icon/ITiDg1AcK044/imdb
 https://www.flaticon.com/free-icon/soundcloud_3256023?term=soundcloud&page=1&position=13&related_id=3256023
 https://icons8.com/icon/fb4ttr5hHYaV/dailymotion
 https://www.flaticon.com/free-icon/connection_15047593?term=crunchyroll&page=1&position=1&origin=search&related_id=15047593
+https://www.flaticon.com/free-icon/loading-arrow_10695869
+https://www.flaticon.com/free-icon/cancel_7216104
+https://www.flaticon.com/free-icon/video_7249490?term=video+settings&page=1&position=3&related_id=7249490
+https://www.flaticon.com/free-icon/closed-caption_565227?term=subtitles&page=1&position=2&origin=search&related_id=565227
+https://www.flaticon.com/free-icon/logout_483343?term=escape&page=1&position=58&origin=search&related_id=483343
