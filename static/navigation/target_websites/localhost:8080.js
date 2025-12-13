@@ -19,5 +19,16 @@
     '#right-carousel-btn',
     '.application_buttons_container .app-btn',
   ];
+
+  if (!window.__STNAV_RIGHT_CTRL_BOUND__) {
+    window.__STNAV_RIGHT_CTRL_BOUND__ = true;
+
+    window.addEventListener('keydown', function (keyboardEvent) {
+      if (keyboardEvent.code === 'ControlRight') {
+        console.log('Hello World');
+      }
+    }, true);
+  }
+  
 })();
 
