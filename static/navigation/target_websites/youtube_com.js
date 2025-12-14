@@ -78,6 +78,16 @@
       }
     };
 
+    const invokeYouTubeSubtitlesButton = function () {
+      const subtitlesIconContainer = document.querySelector('.ytp-subtitles-button-icon');
+      if (subtitlesIconContainer) {
+        const clickableButton = subtitlesIconContainer.closest('button');
+        if (clickableButton) {
+          clickableButton.click();
+        }
+      }
+    };
+
     const rebuildPanelContents = function () {
       if (!controlPanelElement) return;
 
@@ -111,10 +121,13 @@
 
         controlPanelElement.appendChild(
           makeButton('Subtitles', 'subtitles-32x32.png', function () {
-            const subtitlesButtonElement = document.querySelector('button.ytp-subtitles-button');
-            if (subtitlesButtonElement) {
-              subtitlesButtonElement.click();
-            }
+            invokeYouTubeSubtitlesButton();
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Video Settings', 'video_settings-32x32.png', function () {
+            console.log('hello world');
           })
         );
 

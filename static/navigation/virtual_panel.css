@@ -1,6 +1,7 @@
 .stnav-control-panel {
   position: fixed;
-  bottom: 40%;
+  top: 50%;
+  transform: translateY(-50%);
   right: 1%;
   background: rgba(0, 0, 0, 1);
   color: white;
