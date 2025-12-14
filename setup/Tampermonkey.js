@@ -10,8 +10,9 @@
 (function () {
   "use strict";
 
-  let lastAppliedTargetFilename = null;
-  let lastKnownLocationSignature = location.hostname + location.pathname + location.search;
+  let injectedTargetScriptElement = null;
+  let lastAppliedFilename = null;
+  let lastObservedLocationSignature = "";
 
   const fetchJsonFromUrl = function (requestedUrl) {
     return new Promise(function (resolveJson) {
@@ -19,56 +20,59 @@
         method: "GET",
         url: requestedUrl,
         onload: function (responseObject) {
-          const parsedJson = JSON.parse(responseObject.responseText);
-          resolveJson(parsedJson);
+          resolveJson(JSON.parse(responseObject.responseText));
         }
       });
     });
   };
 
-  const injectScriptFromUrl = function (requestedUrl, callbackFunction) {
-    GM_xmlhttpRequest({
-      method: "GET",
-      url: requestedUrl,
-      onload: function (responseObject) {
-        GM_addElement(document.head, "script", {
-          textContent: responseObject.responseText
-        });
-        callbackFunction();
-      }
+  const injectScriptFromText = function (scriptText) {
+    const scriptElement = document.createElement("script");
+    scriptElement.textContent = scriptText;
+    document.head.appendChild(scriptElement);
+    return scriptElement;
+  };
+
+  const injectScriptFromUrl = function (requestedUrl) {
+    return new Promise(function (resolveElement) {
+      GM_xmlhttpRequest({
+        method: "GET",
+        url: requestedUrl,
+        onload: function (responseObject) {
+          resolveElement(injectScriptFromText(responseObject.responseText));
+        }
+      });
     });
   };
 
-  const chooseMatchingDomainFile = function (listOfFilenames) {
-    const combinedText = (location.hostname + location.pathname + location.search).toLowerCase();
+  const normalizeFilenamePattern = function (filename) {
+    return filename
+      .replace(/_/g, ".")
+      .replace(/=/g, "/")
+      .replace(".js", "")
+      .toLowerCase();
+  };
+
+  const resolveBestMatchingFilename = function (filenameList) {
+    const comparisonString =
+      (location.host + location.pathname + location.search).toLowerCase();
+
     let bestMatch = null;
     let bestMatchLength = -1;
 
-    for (const currentFilename of listOfFilenames) {
-      const transformedFilename =
-        currentFilename
-          .replace(/_/g, ".")
-          .replace(/=/g, "/")
-          .replace(".js", "");
-
-      if (combinedText.includes(transformedFilename)) {
-        if (transformedFilename.length > bestMatchLength) {
-          bestMatch = currentFilename;
-          bestMatchLength = transformedFilename.length;
-        }
+    for (const filename of filenameList) {
+      const pattern = normalizeFilenamePattern(filename);
+      if (comparisonString.includes(pattern) && pattern.length > bestMatchLength) {
+        bestMatch = filename;
+        bestMatchLength = pattern.length;
       }
     }
 
-    if (bestMatch === null) {
-      return "default.js";
-    }
-
-    return bestMatch;
+    return bestMatch || "default.js";
   };
 
   const loadCoreScriptsOnce = (function () {
     let alreadyLoaded = false;
-
     return function () {
       if (alreadyLoaded) return;
       alreadyLoaded = true;
@@ -80,62 +84,64 @@
         "http://localhost:8080/static/navigation/virtual_keyboard.js"
       ];
 
-      const loadNextScript = function (indexValue) {
-        if (indexValue < scriptQueue.length) {
-          injectScriptFromUrl(scriptQueue[indexValue], function () {
-            loadNextScript(indexValue + 1);
-          });
-        }
+      const loadNextScript = function (index) {
+        if (index >= scriptQueue.length) return;
+        injectScriptFromUrl(scriptQueue[index]).then(function () {
+          loadNextScript(index + 1);
+        });
       };
 
       loadNextScript(0);
     };
   })();
 
-  const applyTargetScriptIfNeeded = async function () {
-    const currentSignature = location.hostname + location.pathname + location.search;
-    if (currentSignature === lastKnownLocationSignature) return;
+  const applyCorrectTargetScript = async function () {
+    const locationSignature =
+      location.host + location.pathname + location.search;
 
-    lastKnownLocationSignature = currentSignature;
+    if (locationSignature === lastObservedLocationSignature) return;
+    lastObservedLocationSignature = locationSignature;
 
     const filenameList = await fetchJsonFromUrl(
       "http://localhost:8080/static/navigation/target_websites/"
     );
 
-    const selectedFilename = chooseMatchingDomainFile(filenameList);
+    const resolvedFilename = resolveBestMatchingFilename(filenameList);
 
-    if (selectedFilename === lastAppliedTargetFilename) return;
+    if (resolvedFilename === lastAppliedFilename) return;
+    lastAppliedFilename = resolvedFilename;
 
-    lastAppliedTargetFilename = selectedFilename;
+    if (injectedTargetScriptElement) {
+      injectedTargetScriptElement.remove();
+      injectedTargetScriptElement = null;
+    }
 
-    injectScriptFromUrl(
-      "http://localhost:8080/static/navigation/target_websites/" + selectedFilename,
-      function () {
-        loadCoreScriptsOnce();
-      }
+    injectedTargetScriptElement = await injectScriptFromUrl(
+      "http://localhost:8080/static/navigation/target_websites/" + resolvedFilename
     );
+
+    loadCoreScriptsOnce();
   };
 
-  const beginExecution = async function () {
-    await applyTargetScriptIfNeeded();
-
+  const patchHistoryApi = function () {
     const originalPushState = history.pushState;
     const originalReplaceState = history.replaceState;
 
     history.pushState = function () {
       originalPushState.apply(this, arguments);
-      applyTargetScriptIfNeeded();
+      applyCorrectTargetScript();
     };
 
     history.replaceState = function () {
       originalReplaceState.apply(this, arguments);
-      applyTargetScriptIfNeeded();
+      applyCorrectTargetScript();
     };
 
-    window.addEventListener("popstate", applyTargetScriptIfNeeded);
-    setInterval(applyTargetScriptIfNeeded, 300);
+    window.addEventListener("popstate", applyCorrectTargetScript);
   };
 
-  beginExecution();
+  patchHistoryApi();
+  setInterval(applyCorrectTargetScript, 300);
+  applyCorrectTargetScript();
 })();
 
