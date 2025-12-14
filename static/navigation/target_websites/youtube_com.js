@@ -71,6 +71,13 @@
       }
     };
 
+    const invokeYouTubeMuteButton = function () {
+      const muteButtonElement = document.querySelector('button.ytp-volume-icon');
+      if (muteButtonElement) {
+        muteButtonElement.click();
+      }
+    };
+
     const rebuildPanelContents = function () {
       if (!controlPanelElement) return;
 
@@ -108,6 +115,12 @@
             if (subtitlesButtonElement) {
               subtitlesButtonElement.click();
             }
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Mute / Unmute', 'audio-32x32.png', function () {
+            invokeYouTubeMuteButton();
           })
         );
       }
