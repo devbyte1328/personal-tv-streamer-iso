@@ -28,6 +28,7 @@
     let controlPanelElement = null;
     let panelVisible = false;
     let previousActiveElement = null;
+    let lastKnownPathname = location.pathname + location.search;
 
     const isWatchPage = function () {
       return location.pathname === '/watch' && location.search.includes('v=');
@@ -70,11 +71,10 @@
       }
     };
 
-    const createPanel = function () {
-      ensureStylesheetLoaded();
+    const rebuildPanelContents = function () {
+      if (!controlPanelElement) return;
 
-      controlPanelElement = document.createElement('div');
-      controlPanelElement.className = 'stnav-control-panel';
+      controlPanelElement.innerHTML = '';
 
       const makeButton = function (labelText, iconName, clickHandler) {
         const buttonElement = document.createElement('button');
@@ -104,7 +104,10 @@
 
         controlPanelElement.appendChild(
           makeButton('Subtitles', 'subtitles-32x32.png', function () {
-            console.log("Hello World! 'Subtitles' was pressed!");
+            const subtitlesButtonElement = document.querySelector('button.ytp-subtitles-button');
+            if (subtitlesButtonElement) {
+              subtitlesButtonElement.click();
+            }
           })
         );
       }
@@ -127,6 +130,15 @@
           hidePanel();
         })
       );
+    };
+
+    const createPanel = function () {
+      ensureStylesheetLoaded();
+
+      controlPanelElement = document.createElement('div');
+      controlPanelElement.className = 'stnav-control-panel';
+
+      rebuildPanelContents();
 
       document.body.appendChild(controlPanelElement);
     };
@@ -149,12 +161,25 @@
     };
 
     const hidePanel = function () {
+      if (!controlPanelElement) return;
       controlPanelElement.classList.remove('stnav-visible');
       panelVisible = false;
       if (window.STNAV_CORE && previousActiveElement) {
         window.STNAV_CORE.highlight(previousActiveElement);
       }
     };
+
+    const detectSpaNavigation = function () {
+      const currentLocation = location.pathname + location.search;
+      if (currentLocation !== lastKnownPathname) {
+        lastKnownPathname = currentLocation;
+        if (controlPanelElement) {
+          rebuildPanelContents();
+        }
+      }
+    };
+
+    setInterval(detectSpaNavigation, 300);
 
     window.addEventListener(
       'keydown',
