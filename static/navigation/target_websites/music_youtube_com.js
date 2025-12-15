@@ -119,6 +119,11 @@
       if (fullscreenButton) fullscreenButton.click();
     };
 
+    const toggleMute = function () {
+      const muteButton = document.querySelector('button[aria-label="Mute"], button[aria-label="Unmute"]');
+      if (muteButton) muteButton.click();
+    };
+
     const rebuildPanelButtons = function () {
       controlPanelElement.innerHTML = '';
 
@@ -145,6 +150,12 @@
           makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
             pressFullscreenButton();
             hidePanel();
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Mute / Unmute', 'audio-32x32.png', function () {
+            toggleMute();
           })
         );
       }
