@@ -79,6 +79,7 @@
     let controlPanelElement = null;
     let panelVisible = false;
     let previousActiveElement = null;
+    let panelMode = 'main';
 
     const ensureStylesheetLoaded = function () {
       if (document.getElementById('stnav-virtual-panel-css')) return;
@@ -124,6 +125,14 @@
       if (muteButton) muteButton.click();
     };
 
+    const setVolumeLevel = function (percentage) {
+      const mediaElement = document.querySelector('video, audio');
+      if (!mediaElement) return;
+      mediaElement.volume = Math.max(0, Math.min(1, percentage / 100));
+      if (percentage === 0) mediaElement.muted = true;
+      if (percentage > 0) mediaElement.muted = false;
+    };
+
     const rebuildPanelButtons = function () {
       controlPanelElement.innerHTML = '';
 
@@ -145,39 +154,67 @@
         return buttonElement;
       };
 
-      if (isWatchUrl()) {
+      if (panelMode === 'main') {
+        if (isWatchUrl()) {
+          controlPanelElement.appendChild(
+            makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
+              pressFullscreenButton();
+              hidePanel();
+            })
+          );
+
+          controlPanelElement.appendChild(
+            makeButton('Mute / Unmute', 'audio-32x32.png', function () {
+              toggleMute();
+            })
+          );
+
+          controlPanelElement.appendChild(
+            makeButton('Volume', 'audio-32x32.png', function () {
+              panelMode = 'volume';
+              rebuildPanelButtons();
+              setTimeout(focusFirstPanelButton, 0);
+            })
+          );
+        }
+
         controlPanelElement.appendChild(
-          makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
-            pressFullscreenButton();
-            hidePanel();
+          makeButton('Refresh Page', 'refresh-32x32.png', function () {
+            dispatchKey('F5', 'F5');
+            location.reload();
           })
         );
 
         controlPanelElement.appendChild(
-          makeButton('Mute / Unmute', 'audio-32x32.png', function () {
-            toggleMute();
+          makeButton('Escape', 'escape-32x32.png', function () {
+            dispatchKey('Escape', 'Escape');
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Close', 'close-32x32.png', function () {
+            hidePanel();
           })
         );
       }
 
-      controlPanelElement.appendChild(
-        makeButton('Refresh Page', 'refresh-32x32.png', function () {
-          dispatchKey('F5', 'F5');
-          location.reload();
-        })
-      );
+      if (panelMode === 'volume') {
+        [100, 75, 50, 25, 0].forEach(function (value) {
+          controlPanelElement.appendChild(
+            makeButton(value + '%', 'audio-32x32.png', function () {
+              setVolumeLevel(value);
+            })
+          );
+        });
 
-      controlPanelElement.appendChild(
-        makeButton('Escape', 'escape-32x32.png', function () {
-          dispatchKey('Escape', 'Escape');
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('Close', 'close-32x32.png', function () {
-          hidePanel();
-        })
-      );
+        controlPanelElement.appendChild(
+          makeButton('Back', 'escape-32x32.png', function () {
+            panelMode = 'main';
+            rebuildPanelButtons();
+            setTimeout(focusFirstPanelButton, 0);
+          })
+        );
+      }
     };
 
     const createPanel = function () {
@@ -208,6 +245,7 @@
         document.exitFullscreen();
       }
       if (!controlPanelElement) createPanel();
+      panelMode = 'main';
       rebuildPanelButtons();
       previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
       controlPanelElement.classList.add('stnav-visible');
@@ -216,8 +254,10 @@
     };
 
     const hidePanel = function () {
+      if (!controlPanelElement) return;
       controlPanelElement.classList.remove('stnav-visible');
       panelVisible = false;
+      panelMode = 'main';
       if (window.STNAV_CORE && previousActiveElement) {
         window.STNAV_CORE.highlight(previousActiveElement);
         forceHighlighterOnTop();
