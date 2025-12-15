@@ -95,7 +95,7 @@
       const overlay = window.STNAV_CORE.overlay || window.STNAV_CORE.highlightOverlay;
       if (overlay && overlay.style) {
         overlay.style.position = 'fixed';
-        overlay.style.zIndex = '2147483646';
+        overlay.style.zIndex = '2147483647';
         overlay.style.pointerEvents = 'none';
       }
     };
@@ -175,7 +175,8 @@
       controlPanelElement = document.createElement('div');
       controlPanelElement.className = 'stnav-control-panel';
       controlPanelElement.style.position = 'fixed';
-      controlPanelElement.style.zIndex = '2147483647';
+      controlPanelElement.style.zIndex = '2147483645';
+      controlPanelElement.style.pointerEvents = 'auto';
 
       rebuildPanelButtons();
 
