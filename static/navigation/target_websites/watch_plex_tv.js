@@ -69,30 +69,38 @@
 
   window.addEventListener('keydown', remap, true);
 
-  window.addEventListener('keydown', function (eventObject) {
-    if (!document.fullscreenElement) return;
-    if (eventObject.altKey || eventObject.ctrlKey || eventObject.metaKey) return;
+  window.addEventListener(
+    'keydown',
+    function (eventObject) {
+      if (!document.fullscreenElement) return;
+      if (eventObject.altKey || eventObject.ctrlKey || eventObject.metaKey) return;
 
-    const video = document.querySelector('video');
-    if (!video) return;
+      const video = document.querySelector('video');
+      if (!video) return;
 
-    if (eventObject.key === 'ArrowLeft') {
-      eventObject.preventDefault();
-      video.currentTime = Math.max(0, video.currentTime - 600);
-    }
+      if (eventObject.key === 'ArrowLeft') {
+        eventObject.preventDefault();
+        video.currentTime = Math.max(0, video.currentTime - 600);
+      }
 
-    if (eventObject.key === 'ArrowRight') {
-      eventObject.preventDefault();
-      video.currentTime = Math.min(video.duration, video.currentTime + 600);
-    }
-  }, true);
-  
+      if (eventObject.key === 'ArrowRight') {
+        eventObject.preventDefault();
+        video.currentTime = Math.min(video.duration, video.currentTime + 600);
+      }
+    },
+    true
+  );
+
   if (!window.__STNAV_RIGHT_CTRL_BOUND__) {
     window.__STNAV_RIGHT_CTRL_BOUND__ = true;
 
     let controlPanelElement = null;
     let panelVisible = false;
     let previousActiveElement = null;
+
+    const isWatchPage = function () {
+      return location.pathname.startsWith('/watch/');
+    };
 
     const ensureStylesheetLoaded = function () {
       if (document.getElementById('stnav-virtual-panel-css')) return;
@@ -123,6 +131,15 @@
       document.dispatchEvent(keyboardEvent);
     };
 
+    const clickPlayerButtonByAria = function (ariaLabelText) {
+      const buttonElement = Array.from(document.querySelectorAll('button[role="button"]')).find(
+        function (candidateElement) {
+          return candidateElement.getAttribute('aria-label') === ariaLabelText;
+        }
+      );
+      if (buttonElement) buttonElement.click();
+    };
+
     const createPanel = function () {
       ensureStylesheetLoaded();
 
@@ -148,6 +165,27 @@
 
         return buttonElement;
       };
+
+      if (isWatchPage()) {
+        controlPanelElement.appendChild(
+          makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
+            clickPlayerButtonByAria('Enter Fullscreen');
+            hidePanel();
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Mute / Unmute', 'audio-32x32.png', function () {
+            clickPlayerButtonByAria('Mute');
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Subtitles', 'subtitles-32x32.png', function () {
+            clickPlayerButtonByAria('Subtitles');
+          })
+        );
+      }
 
       controlPanelElement.appendChild(
         makeButton('Refresh Page', 'refresh-32x32.png', function () {
@@ -181,6 +219,7 @@
     };
 
     const showPanel = function () {
+      if (document.fullscreenElement) document.exitFullscreen();
       if (!controlPanelElement) createPanel();
       previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
       controlPanelElement.classList.add('stnav-visible');
@@ -189,6 +228,7 @@
     };
 
     const hidePanel = function () {
+      if (!controlPanelElement) return;
       controlPanelElement.classList.remove('stnav-visible');
       panelVisible = false;
       if (window.STNAV_CORE && previousActiveElement) {
@@ -209,7 +249,5 @@
       true
     );
   }
-  
-  
 })();
 
