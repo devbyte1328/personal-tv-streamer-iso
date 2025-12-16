@@ -44,7 +44,7 @@
       const overlayElement = window.STNAV_CORE.overlay || window.STNAV_CORE.highlightOverlay;
       if (!overlayElement || !overlayElement.style) return;
       overlayElement.style.position = 'fixed';
-      overlayElement.style.zIndex = '2147483648';
+      overlayElement.style.zIndex = '2147483640';
       overlayElement.style.pointerEvents = 'none';
     };
 
@@ -64,7 +64,7 @@
       controlPanelElement = document.createElement('div');
       controlPanelElement.className = 'stnav-control-panel';
       controlPanelElement.style.position = 'fixed';
-      controlPanelElement.style.zIndex = '2147483647';
+      controlPanelElement.style.zIndex = '2147483639';
 
       const makeButton = function (labelText, iconName, clickHandler) {
         const buttonElement = document.createElement('button');
