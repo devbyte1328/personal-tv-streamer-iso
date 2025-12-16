@@ -21,7 +21,7 @@
     '[role="link"]',
     'div.rgpl-btn-play'
   ];
-  
+
   if (!window.__STNAV_RIGHT_CTRL_BOUND__) {
     window.__STNAV_RIGHT_CTRL_BOUND__ = true;
 
@@ -39,6 +39,15 @@
       document.head.appendChild(linkElement);
     };
 
+    const forceHighlighterAbovePanel = function () {
+      if (!window.STNAV_CORE) return;
+      const overlayElement = window.STNAV_CORE.overlay || window.STNAV_CORE.highlightOverlay;
+      if (!overlayElement || !overlayElement.style) return;
+      overlayElement.style.position = 'fixed';
+      overlayElement.style.zIndex = '2147483648';
+      overlayElement.style.pointerEvents = 'none';
+    };
+
     const dispatchKey = function (keyValue, codeValue) {
       const keyboardEvent = new KeyboardEvent('keydown', {
         key: keyValue,
@@ -54,6 +63,8 @@
 
       controlPanelElement = document.createElement('div');
       controlPanelElement.className = 'stnav-control-panel';
+      controlPanelElement.style.position = 'fixed';
+      controlPanelElement.style.zIndex = '2147483647';
 
       const makeButton = function (labelText, iconName, clickHandler) {
         const buttonElement = document.createElement('button');
@@ -97,6 +108,7 @@
 
     const focusFirstPanelButton = function () {
       if (!window.STNAV_CORE) return;
+      forceHighlighterAbovePanel();
       const buttons = controlPanelElement.querySelectorAll('button');
       if (buttons.length > 0) {
         window.STNAV_CORE.highlight(buttons[0]);
@@ -116,6 +128,7 @@
       panelVisible = false;
       if (window.STNAV_CORE && previousActiveElement) {
         window.STNAV_CORE.highlight(previousActiveElement);
+        forceHighlighterAbovePanel();
       }
     };
 
@@ -131,5 +144,5 @@
       true
     );
   }
-  
 })();
+
