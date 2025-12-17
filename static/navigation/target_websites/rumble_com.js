@@ -122,6 +122,13 @@
       document.dispatchEvent(keyboardEvent);
     };
 
+    const toggleMuteState = function () {
+      const videoElement = document.querySelector('video');
+      if (videoElement) {
+        videoElement.muted = !videoElement.muted;
+      }
+    };
+
     const createPanel = function () {
       ensureStylesheetLoaded();
 
@@ -151,6 +158,12 @@
       controlPanelElement.appendChild(
         makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
           fullscreenActive ? exitFullscreenReliably() : enterFullscreenReliably();
+        })
+      );
+
+      controlPanelElement.appendChild(
+        makeButton('Mute / Unmute', 'audio-32x32.png', function () {
+          toggleMuteState();
         })
       );
 
