@@ -111,6 +111,7 @@
     let controlPanelElement = null;
     let panelVisible = false;
     let previousActiveElement = null;
+    let panelPageIdentifier = 'main';
 
     const ensureStylesheetLoaded = function () {
       if (document.getElementById('stnav-virtual-panel-css')) return;
@@ -141,19 +142,150 @@
       document.dispatchEvent(keyboardEvent);
     };
 
-    const clickPlayerButtonByAria = function (ariaLabelTextList) {
-      const labels = Array.isArray(ariaLabelTextList)
-        ? ariaLabelTextList
-        : [ariaLabelTextList];
+    const pressSubtitlesButtonWithPointerSimulation = function () {
+      const subtitlesButtonElement = document.querySelector('button[aria-label="Subtitles"]');
+      if (!subtitlesButtonElement) return;
 
-      const buttonElement = Array.from(
-        document.querySelectorAll('button[role="button"]')
-      ).find(function (candidateElement) {
-        const label = candidateElement.getAttribute('aria-label');
-        return labels.includes(label);
-      });
+      const boundingRectangle = subtitlesButtonElement.getBoundingClientRect();
+      const pointerClientX = boundingRectangle.left + boundingRectangle.width / 2;
+      const pointerClientY = boundingRectangle.top + boundingRectangle.height / 2;
 
-      if (buttonElement) buttonElement.click();
+      const firePointerEvent = function (eventType) {
+        subtitlesButtonElement.dispatchEvent(
+          new PointerEvent(eventType, {
+            bubbles: true,
+            cancelable: true,
+            pointerType: 'mouse',
+            isPrimary: true,
+            button: 0,
+            buttons: 1,
+            clientX: pointerClientX,
+            clientY: pointerClientY
+          })
+        );
+      };
+
+      firePointerEvent('pointerover');
+      firePointerEvent('pointerenter');
+      firePointerEvent('pointerdown');
+      firePointerEvent('pointerup');
+      firePointerEvent('click');
+    };
+
+    const collectSubtitleMenuItemElements = function () {
+      const menuRootElement = document.querySelector('[role="menu"][data-radix-menu-content]');
+      if (!menuRootElement) return [];
+      return Array.from(menuRootElement.querySelectorAll('[role="menuitemcheckbox"]'));
+    };
+
+    const rebuildPanelContents = function () {
+      controlPanelElement.innerHTML = '';
+
+      const createPanelButtonElement = function (buttonLabelText, iconFileName, clickHandlerFunction) {
+        const buttonElement = document.createElement('button');
+        buttonElement.className = 'stnav-control-button';
+
+        if (iconFileName) {
+          const iconElement = document.createElement('img');
+          iconElement.className = 'stnav-control-icon';
+          iconElement.src = 'http://localhost:8080/static/assets/virtual_panel_icons/' + iconFileName;
+          buttonElement.appendChild(iconElement);
+        }
+
+        const labelElement = document.createElement('span');
+        labelElement.textContent = buttonLabelText;
+
+        buttonElement.appendChild(labelElement);
+        buttonElement.onclick = clickHandlerFunction;
+
+        return buttonElement;
+      };
+
+      if (panelPageIdentifier === 'main') {
+        if (isWatchPage()) {
+          controlPanelElement.appendChild(
+            createPanelButtonElement('Fullscreen', 'fullscreen-32x32.png', function () {
+              const fullscreenButton = document.querySelector('button[aria-label="Enter Fullscreen"]');
+              if (fullscreenButton) fullscreenButton.click();
+              hidePanel();
+            })
+          );
+
+          controlPanelElement.appendChild(
+            createPanelButtonElement('Mute / Unmute', 'audio-32x32.png', function () {
+              const muteToggleButton = document.querySelector('button[aria-label="Mute"], button[aria-label="Unmute"]');
+              if (muteToggleButton) muteToggleButton.click();
+            })
+          );
+
+          controlPanelElement.appendChild(
+            createPanelButtonElement('Subtitles', 'subtitles-32x32.png', function () {
+              panelPageIdentifier = 'subtitles';
+              rebuildPanelContents();
+              forceHighlighterAbovePanel();
+              setTimeout(focusFirstPanelButton, 0);
+            })
+          );
+        }
+
+        controlPanelElement.appendChild(
+          createPanelButtonElement('Refresh Page', 'refresh-32x32.png', function () {
+            dispatchKey('F5', 'F5');
+            location.reload();
+          })
+        );
+
+        controlPanelElement.appendChild(
+          createPanelButtonElement('Escape', 'escape-32x32.png', function () {
+            dispatchKey('Escape', 'Escape');
+          })
+        );
+
+        controlPanelElement.appendChild(
+          createPanelButtonElement('Close', 'close-32x32.png', function () {
+            hidePanel();
+          })
+        );
+      }
+
+      if (panelPageIdentifier === 'subtitles') {
+        pressSubtitlesButtonWithPointerSimulation();
+
+        setTimeout(function () {
+          const subtitleMenuItemElements = collectSubtitleMenuItemElements();
+
+          if (subtitleMenuItemElements.length === 0) {
+            controlPanelElement.appendChild(
+              createPanelButtonElement('No Subtitles', null, function () {})
+            );
+          } else {
+            subtitleMenuItemElements.forEach(function (menuItemElement) {
+              const subtitleLabelText = menuItemElement.innerText.trim();
+              controlPanelElement.appendChild(
+                createPanelButtonElement(subtitleLabelText, null, function () {
+                  menuItemElement.click();
+                  panelPageIdentifier = 'main';
+                  rebuildPanelContents();
+                  forceHighlighterAbovePanel();
+                  setTimeout(focusFirstPanelButton, 0);
+                })
+              );
+            });
+          }
+
+          controlPanelElement.appendChild(
+            createPanelButtonElement('Back', null, function () {
+              panelPageIdentifier = 'main';
+              rebuildPanelContents();
+              forceHighlighterAbovePanel();
+              setTimeout(focusFirstPanelButton, 0);
+            })
+          );
+
+          forceHighlighterAbovePanel();
+          setTimeout(focusFirstPanelButton, 0);
+        }, 80);
+      }
     };
 
     const createPanel = function () {
@@ -164,70 +296,12 @@
       controlPanelElement.style.position = 'fixed';
       controlPanelElement.style.zIndex = '2147483639';
 
-      const makeButton = function (labelText, iconName, clickHandler) {
-        const buttonElement = document.createElement('button');
-        buttonElement.className = 'stnav-control-button';
-
-        const iconElement = document.createElement('img');
-        iconElement.className = 'stnav-control-icon';
-        iconElement.src = 'http://localhost:8080/static/assets/virtual_panel_icons/' + iconName;
-
-        const labelElement = document.createElement('span');
-        labelElement.textContent = labelText;
-
-        buttonElement.appendChild(iconElement);
-        buttonElement.appendChild(labelElement);
-        buttonElement.onclick = clickHandler;
-
-        return buttonElement;
-      };
-
-      if (isWatchPage()) {
-        controlPanelElement.appendChild(
-          makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
-            clickPlayerButtonByAria('Enter Fullscreen');
-            hidePanel();
-          })
-        );
-
-        controlPanelElement.appendChild(
-          makeButton('Mute / Unmute', 'audio-32x32.png', function () {
-            clickPlayerButtonByAria(['Mute', 'Unmute']);
-          })
-        );
-
-        controlPanelElement.appendChild(
-          makeButton('Subtitles', 'subtitles-32x32.png', function () {
-            clickPlayerButtonByAria('Subtitles');
-          })
-        );
-      }
-
-      controlPanelElement.appendChild(
-        makeButton('Refresh Page', 'refresh-32x32.png', function () {
-          dispatchKey('F5', 'F5');
-          location.reload();
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('Escape', 'escape-32x32.png', function () {
-          dispatchKey('Escape', 'Escape');
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('Close', 'close-32x32.png', function () {
-          hidePanel();
-        })
-      );
-
+      rebuildPanelContents();
       document.body.appendChild(controlPanelElement);
     };
 
     const focusFirstPanelButton = function () {
       if (!window.STNAV_CORE) return;
-      forceHighlighterAbovePanel();
       const buttons = controlPanelElement.querySelectorAll('button');
       if (buttons.length > 0) {
         window.STNAV_CORE.highlight(buttons[0]);
@@ -240,6 +314,7 @@
       previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
       controlPanelElement.classList.add('stnav-visible');
       panelVisible = true;
+      forceHighlighterAbovePanel();
       setTimeout(focusFirstPanelButton, 0);
     };
 
@@ -247,6 +322,7 @@
       if (!controlPanelElement) return;
       controlPanelElement.classList.remove('stnav-visible');
       panelVisible = false;
+      panelPageIdentifier = 'main';
       if (window.STNAV_CORE && previousActiveElement) {
         window.STNAV_CORE.highlight(previousActiveElement);
         forceHighlighterAbovePanel();
