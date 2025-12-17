@@ -15,45 +15,75 @@
 
   let fullscreenActive = false;
 
+  const isVideoPage = function () {
+    const pathnameValue = window.location.pathname || '';
+    return pathnameValue.split('/').filter(Boolean).length >= 2;
+  };
+
+  const findFullscreenButton = function () {
+    return document.querySelector('button.vjs-fullscreen-control');
+  };
+
+  const enterFullscreenReliably = function () {
+    const fullscreenButtonElement = findFullscreenButton();
+    if (fullscreenButtonElement) {
+      fullscreenButtonElement.click();
+    }
+  };
+
+  const exitFullscreenReliably = function () {
+    if (window?.STNAV_CORE?.state?.websocketLink) {
+      window.STNAV_CORE.state.websocketLink.send('ExitFullscreen');
+      return;
+    }
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    }
+  };
+
   function setNavigationSystemState(disabledState) {
     if (window?.STNAV_CORE?.state) {
       window.STNAV_CORE.state.navigationDisabled = disabledState;
     }
   }
 
-  window.addEventListener('keydown', function (eventObject) {
-    const isArrowKey =
-      eventObject.key === 'ArrowLeft' ||
-      eventObject.key === 'ArrowRight' ||
-      eventObject.key === 'ArrowUp' ||
-      eventObject.key === 'ArrowDown';
+  window.addEventListener(
+    'keydown',
+    function (eventObject) {
+      const isArrowKey =
+        eventObject.key === 'ArrowLeft' ||
+        eventObject.key === 'ArrowRight' ||
+        eventObject.key === 'ArrowUp' ||
+        eventObject.key === 'ArrowDown';
 
-    if (!fullscreenActive) {
+      if (!fullscreenActive) {
+        if (isArrowKey) {
+          eventObject.preventDefault();
+          eventObject.stopPropagation();
+        }
+        return;
+      }
+
       if (isArrowKey) {
+        return;
+      }
+
+      if (eventObject.key === 'Enter') {
         eventObject.preventDefault();
         eventObject.stopPropagation();
+        if (window?.STNAV_CORE?.state?.websocketLink) {
+          window.STNAV_CORE.state.websocketLink.send('VideoPlayPause');
+        }
       }
-      return;
-    }
-
-    if (isArrowKey) {
-      return;
-    }
-
-    if (eventObject.key === 'Enter') {
-      eventObject.preventDefault();
-      eventObject.stopPropagation();
-      if (window?.STNAV_CORE?.state?.websocketLink) {
-        window.STNAV_CORE.state.websocketLink.send('VideoPlayPause');
-      }
-    }
-  }, true);
+    },
+    true
+  );
 
   document.addEventListener('fullscreenchange', function () {
     fullscreenActive = !!document.fullscreenElement;
     setNavigationSystemState(fullscreenActive);
   });
-  
+
   if (!window.__STNAV_RIGHT_CTRL_BOUND__) {
     window.__STNAV_RIGHT_CTRL_BOUND__ = true;
 
@@ -93,7 +123,8 @@
 
         const iconElement = document.createElement('img');
         iconElement.className = 'stnav-control-icon';
-        iconElement.src = 'http://localhost:8080/static/assets/virtual_panel_icons/' + iconName;
+        iconElement.src =
+          'http://localhost:8080/static/assets/virtual_panel_icons/' + iconName;
 
         const labelElement = document.createElement('span');
         labelElement.textContent = labelText;
@@ -104,6 +135,16 @@
 
         return buttonElement;
       };
+
+      if (isVideoPage()) {
+        controlPanelElement.appendChild(
+          makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
+            fullscreenActive
+              ? exitFullscreenReliably()
+              : enterFullscreenReliably();
+          })
+        );
+      }
 
       controlPanelElement.appendChild(
         makeButton('Refresh Page', 'refresh-32x32.png', function () {
@@ -137,7 +178,8 @@
 
     const showPanel = function () {
       if (!controlPanelElement) createPanel();
-      previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
+      previousActiveElement =
+        window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
       controlPanelElement.classList.add('stnav-visible');
       panelVisible = true;
       setTimeout(focusFirstPanelButton, 0);
@@ -157,12 +199,17 @@
         if (keyboardEvent.code === 'ControlRight') {
           keyboardEvent.preventDefault();
           keyboardEvent.stopPropagation();
+
+          if (fullscreenActive) {
+            exitFullscreenReliably();
+            return;
+          }
+
           panelVisible ? hidePanel() : showPanel();
         }
       },
       true
     );
   }
-  
 })();
 
