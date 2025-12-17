@@ -22,45 +22,19 @@
     'div.rgpl-btn-play'
   ];
 
-  const refreshedWatchUrlsKey = '__STNAV_REFRESHED_WATCH_URLS__';
+  let lastObservedUrl = location.href;
 
-  const getRefreshedWatchUrls = function () {
-    try {
-      return JSON.parse(sessionStorage.getItem(refreshedWatchUrlsKey) || '{}');
-    } catch {
-      return {};
-    }
-  };
-
-  const markWatchUrlRefreshed = function (url) {
-    const map = getRefreshedWatchUrls();
-    map[url] = true;
-    sessionStorage.setItem(refreshedWatchUrlsKey, JSON.stringify(map));
-  };
-
-  const hasWatchUrlBeenRefreshed = function (url) {
-    return !!getRefreshedWatchUrls()[url];
-  };
-
-  const isWatchUrl = function () {
-    return location.pathname.startsWith('/watch/');
-  };
-
-  let lastSeenHref = '';
-
-  const watchUrlRefreshWatcher = function () {
-    if (location.href === lastSeenHref) return;
-    lastSeenHref = location.href;
-
-    if (!isWatchUrl()) return;
-    if (hasWatchUrlBeenRefreshed(location.href)) return;
-
-    markWatchUrlRefreshed(location.href);
+  const refreshOnAnyUrlChange = function () {
+    if (location.href === lastObservedUrl) return;
+    lastObservedUrl = location.href;
     location.reload();
   };
 
-  setInterval(watchUrlRefreshWatcher, 200);
-  watchUrlRefreshWatcher();
+  setInterval(refreshOnAnyUrlChange, 200);
+
+  const isWatchPage = function () {
+    return location.pathname.startsWith('/watch/');
+  };
 
   let remapActive = false;
 
@@ -202,7 +176,7 @@
         return buttonElement;
       };
 
-      if (isWatchUrl()) {
+      if (isWatchPage()) {
         controlPanelElement.appendChild(
           makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
             clickPlayerButtonByAria('Enter Fullscreen');
