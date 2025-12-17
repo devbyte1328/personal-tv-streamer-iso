@@ -24,10 +24,21 @@
     return document.querySelector('button.vjs-fullscreen-control');
   };
 
+  const findMuteButton = function () {
+    return document.querySelector('button.vjs-mute-control');
+  };
+
   const enterFullscreenReliably = function () {
     const fullscreenButtonElement = findFullscreenButton();
     if (fullscreenButtonElement) {
       fullscreenButtonElement.click();
+    }
+  };
+
+  const toggleMuteReliably = function () {
+    const muteButtonElement = findMuteButton();
+    if (muteButtonElement) {
+      muteButtonElement.click();
     }
   };
 
@@ -167,6 +178,12 @@
             fullscreenActive
               ? exitFullscreenReliably()
               : enterFullscreenReliably();
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Mute / Unmute', 'audio-32x32.png', function () {
+            toggleMuteReliably();
           })
         );
       }
