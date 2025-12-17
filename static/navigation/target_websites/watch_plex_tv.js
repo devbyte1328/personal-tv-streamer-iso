@@ -141,12 +141,18 @@
       document.dispatchEvent(keyboardEvent);
     };
 
-    const clickPlayerButtonByAria = function (ariaLabelText) {
-      const buttonElement = Array.from(document.querySelectorAll('button[role="button"]')).find(
-        function (candidateElement) {
-          return candidateElement.getAttribute('aria-label') === ariaLabelText;
-        }
-      );
+    const clickPlayerButtonByAria = function (ariaLabelTextList) {
+      const labels = Array.isArray(ariaLabelTextList)
+        ? ariaLabelTextList
+        : [ariaLabelTextList];
+
+      const buttonElement = Array.from(
+        document.querySelectorAll('button[role="button"]')
+      ).find(function (candidateElement) {
+        const label = candidateElement.getAttribute('aria-label');
+        return labels.includes(label);
+      });
+
       if (buttonElement) buttonElement.click();
     };
 
@@ -186,7 +192,7 @@
 
         controlPanelElement.appendChild(
           makeButton('Mute / Unmute', 'audio-32x32.png', function () {
-            clickPlayerButtonByAria('Mute');
+            clickPlayerButtonByAria(['Mute', 'Unmute']);
           })
         );
 
