@@ -30,7 +30,10 @@ async def ws_handler(ws):
     print("WS client connected")
     try:
         async for msg in ws:
-            if msg == "FocusLocalhostBackground":
+            if msg == "ExitFullscreen":
+                print("hello ExitFullscreen")
+                pyautogui.press('esc')
+            elif msg == "FocusLocalhostBackground":
                 ### Hardcoded to work with two screens for now
                 time.sleep(0.1)
                 pyautogui.click(x=314, y=1012) # This needs to be resolved at some point
