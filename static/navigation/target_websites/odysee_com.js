@@ -47,6 +47,31 @@
     }
   }
 
+  let lastKnownUrl = window.location.href;
+
+  const forceRefreshOnUrlChange = function () {
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastKnownUrl) {
+      lastKnownUrl = currentUrl;
+      location.reload();
+    }
+  };
+
+  const wrapHistoryMethod = function (methodName) {
+    const originalMethod = history[methodName];
+    history[methodName] = function () {
+      const returnValue = originalMethod.apply(this, arguments);
+      forceRefreshOnUrlChange();
+      return returnValue;
+    };
+  };
+
+  wrapHistoryMethod('pushState');
+  wrapHistoryMethod('replaceState');
+
+  window.addEventListener('popstate', forceRefreshOnUrlChange);
+  window.addEventListener('hashchange', forceRefreshOnUrlChange);
+
   window.addEventListener(
     'keydown',
     function (eventObject) {
