@@ -22,6 +22,46 @@
     'div.rgpl-btn-play'
   ];
 
+  const refreshedWatchUrlsKey = '__STNAV_REFRESHED_WATCH_URLS__';
+
+  const getRefreshedWatchUrls = function () {
+    try {
+      return JSON.parse(sessionStorage.getItem(refreshedWatchUrlsKey) || '{}');
+    } catch {
+      return {};
+    }
+  };
+
+  const markWatchUrlRefreshed = function (url) {
+    const map = getRefreshedWatchUrls();
+    map[url] = true;
+    sessionStorage.setItem(refreshedWatchUrlsKey, JSON.stringify(map));
+  };
+
+  const hasWatchUrlBeenRefreshed = function (url) {
+    return !!getRefreshedWatchUrls()[url];
+  };
+
+  const isWatchUrl = function () {
+    return location.pathname.startsWith('/watch/');
+  };
+
+  let lastSeenHref = '';
+
+  const watchUrlRefreshWatcher = function () {
+    if (location.href === lastSeenHref) return;
+    lastSeenHref = location.href;
+
+    if (!isWatchUrl()) return;
+    if (hasWatchUrlBeenRefreshed(location.href)) return;
+
+    markWatchUrlRefreshed(location.href);
+    location.reload();
+  };
+
+  setInterval(watchUrlRefreshWatcher, 200);
+  watchUrlRefreshWatcher();
+
   let remapActive = false;
 
   function remap(event) {
@@ -98,10 +138,6 @@
     let panelVisible = false;
     let previousActiveElement = null;
 
-    const isWatchPage = function () {
-      return location.pathname.startsWith('/watch/');
-    };
-
     const ensureStylesheetLoaded = function () {
       if (document.getElementById('stnav-virtual-panel-css')) return;
 
@@ -166,7 +202,7 @@
         return buttonElement;
       };
 
-      if (isWatchPage()) {
+      if (isWatchUrl()) {
         controlPanelElement.appendChild(
           makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
             clickPlayerButtonByAria('Enter Fullscreen');
