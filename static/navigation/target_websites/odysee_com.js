@@ -28,6 +28,10 @@
     return document.querySelector('button.vjs-mute-control');
   };
 
+  const findVideoElement = function () {
+    return document.querySelector('video');
+  };
+
   const enterFullscreenReliably = function () {
     const fullscreenButtonElement = findFullscreenButton();
     if (fullscreenButtonElement) {
@@ -39,6 +43,14 @@
     const muteButtonElement = findMuteButton();
     if (muteButtonElement) {
       muteButtonElement.click();
+    }
+  };
+
+  const setVolumeReliably = function (volumeValue) {
+    const videoElement = findVideoElement();
+    if (videoElement) {
+      videoElement.volume = volumeValue;
+      videoElement.muted = volumeValue === 0;
     }
   };
 
@@ -126,6 +138,7 @@
     let controlPanelElement = null;
     let panelVisible = false;
     let previousActiveElement = null;
+    let currentPanelPage = 'main';
 
     const ensureStylesheetLoaded = function () {
       if (document.getElementById('stnav-virtual-panel-css')) return;
@@ -147,30 +160,34 @@
       document.dispatchEvent(keyboardEvent);
     };
 
-    const createPanel = function () {
-      ensureStylesheetLoaded();
+    const clearPanel = function () {
+      while (controlPanelElement.firstChild) {
+        controlPanelElement.removeChild(controlPanelElement.firstChild);
+      }
+    };
 
-      controlPanelElement = document.createElement('div');
-      controlPanelElement.className = 'stnav-control-panel';
+    const makeButton = function (labelText, iconName, clickHandler) {
+      const buttonElement = document.createElement('button');
+      buttonElement.className = 'stnav-control-button';
 
-      const makeButton = function (labelText, iconName, clickHandler) {
-        const buttonElement = document.createElement('button');
-        buttonElement.className = 'stnav-control-button';
+      const iconElement = document.createElement('img');
+      iconElement.className = 'stnav-control-icon';
+      iconElement.src =
+        'http://localhost:8080/static/assets/virtual_panel_icons/' + iconName;
 
-        const iconElement = document.createElement('img');
-        iconElement.className = 'stnav-control-icon';
-        iconElement.src =
-          'http://localhost:8080/static/assets/virtual_panel_icons/' + iconName;
+      const labelElement = document.createElement('span');
+      labelElement.textContent = labelText;
 
-        const labelElement = document.createElement('span');
-        labelElement.textContent = labelText;
+      buttonElement.appendChild(iconElement);
+      buttonElement.appendChild(labelElement);
+      buttonElement.onclick = clickHandler;
 
-        buttonElement.appendChild(iconElement);
-        buttonElement.appendChild(labelElement);
-        buttonElement.onclick = clickHandler;
+      return buttonElement;
+    };
 
-        return buttonElement;
-      };
+    const renderMainPage = function () {
+      clearPanel();
+      currentPanelPage = 'main';
 
       if (isVideoPage()) {
         controlPanelElement.appendChild(
@@ -184,6 +201,13 @@
         controlPanelElement.appendChild(
           makeButton('Mute / Unmute', 'audio-32x32.png', function () {
             toggleMuteReliably();
+          })
+        );
+
+        controlPanelElement.appendChild(
+          makeButton('Volume', 'audio-32x32.png', function () {
+            renderVolumePage();
+            focusFirstPanelButton();
           })
         );
       }
@@ -206,7 +230,55 @@
           hidePanel();
         })
       );
+    };
 
+    const renderVolumePage = function () {
+      clearPanel();
+      currentPanelPage = 'volume';
+
+      controlPanelElement.appendChild(
+        makeButton('100%', 'audio-32x32.png', function () {
+          setVolumeReliably(1.0);
+        })
+      );
+
+      controlPanelElement.appendChild(
+        makeButton('75%', 'audio-32x32.png', function () {
+          setVolumeReliably(0.75);
+        })
+      );
+
+      controlPanelElement.appendChild(
+        makeButton('50%', 'audio-32x32.png', function () {
+          setVolumeReliably(0.5);
+        })
+      );
+
+      controlPanelElement.appendChild(
+        makeButton('25%', 'audio-32x32.png', function () {
+          setVolumeReliably(0.25);
+        })
+      );
+
+      controlPanelElement.appendChild(
+        makeButton('0%', 'audio-32x32.png', function () {
+          setVolumeReliably(0.0);
+        })
+      );
+
+      controlPanelElement.appendChild(
+        makeButton('Back', 'escape-32x32.png', function () {
+          renderMainPage();
+          focusFirstPanelButton();
+        })
+      );
+    };
+
+    const createPanel = function () {
+      ensureStylesheetLoaded();
+      controlPanelElement = document.createElement('div');
+      controlPanelElement.className = 'stnav-control-panel';
+      renderMainPage();
       document.body.appendChild(controlPanelElement);
     };
 
@@ -244,6 +316,12 @@
 
           if (fullscreenActive) {
             exitFullscreenReliably();
+            return;
+          }
+
+          if (panelVisible && currentPanelPage === 'volume') {
+            renderMainPage();
+            focusFirstPanelButton();
             return;
           }
 
