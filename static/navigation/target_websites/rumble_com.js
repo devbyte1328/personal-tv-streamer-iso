@@ -15,46 +15,78 @@
 
   let fullscreenActive = false;
 
+  const resolveBestFullscreenElement = function () {
+    const candidates = [
+      document.querySelector('video'),
+      document.querySelector('[role="video"]'),
+      document.querySelector('.video-player'),
+      document.querySelector('#player'),
+      document.documentElement
+    ];
+    for (const element of candidates) {
+      if (element && element.requestFullscreen) return element;
+    }
+    return document.documentElement;
+  };
+
+  const enterFullscreenReliably = function () {
+    const targetElement = resolveBestFullscreenElement();
+    if (!document.fullscreenElement && targetElement?.requestFullscreen) {
+      targetElement.requestFullscreen().catch(function () {});
+    }
+  };
+
+  const exitFullscreenReliably = function () {
+    if (window?.STNAV_CORE?.state?.websocketLink) {
+      window.STNAV_CORE.state.websocketLink.send('ExitFullscreen');
+    }
+  };
+
   document.addEventListener('fullscreenchange', function () {
     fullscreenActive = !!document.fullscreenElement;
   });
 
-  window.addEventListener('keydown', function (eventObject) {
-    if (!fullscreenActive) {
+  window.addEventListener(
+    'keydown',
+    function (eventObject) {
+      if (!fullscreenActive) {
+        if (
+          eventObject.key === 'ArrowLeft' ||
+          eventObject.key === 'ArrowRight' ||
+          eventObject.key === 'ArrowUp' ||
+          eventObject.key === 'ArrowDown'
+        ) {
+          eventObject.preventDefault();
+          eventObject.stopPropagation();
+        }
+        return;
+      }
+
       if (
         eventObject.key === 'ArrowLeft' ||
         eventObject.key === 'ArrowRight' ||
         eventObject.key === 'ArrowUp' ||
         eventObject.key === 'ArrowDown'
       ) {
+        return;
+      }
+
+      if (eventObject.key === 'Enter') {
         eventObject.preventDefault();
         eventObject.stopPropagation();
+        const videoElement = document.querySelector('video');
+        if (videoElement) {
+          videoElement.paused ? videoElement.play() : videoElement.pause();
+        }
+        return;
       }
-      return;
-    }
 
-    if (
-      eventObject.key === 'ArrowLeft' ||
-      eventObject.key === 'ArrowRight' ||
-      eventObject.key === 'ArrowUp' ||
-      eventObject.key === 'ArrowDown'
-    ) {
-      return;
-    }
-
-    if (eventObject.key === 'Enter') {
       eventObject.preventDefault();
       eventObject.stopPropagation();
-      if (window?.STNAV_CORE?.state?.websocketLink) {
-        window.STNAV_CORE.state.websocketLink.send('VideoPlayPause');
-      }
-      return;
-    }
+    },
+    true
+  );
 
-    eventObject.preventDefault();
-    eventObject.stopPropagation();
-  }, true);
-  
   if (!window.__STNAV_RIGHT_CTRL_BOUND__) {
     window.__STNAV_RIGHT_CTRL_BOUND__ = true;
 
@@ -64,7 +96,6 @@
 
     const ensureStylesheetLoaded = function () {
       if (document.getElementById('stnav-virtual-panel-css')) return;
-
       const linkElement = document.createElement('link');
       linkElement.id = 'stnav-virtual-panel-css';
       linkElement.rel = 'stylesheet';
@@ -118,6 +149,12 @@
       };
 
       controlPanelElement.appendChild(
+        makeButton('Fullscreen', 'fullscreen-32x32.png', function () {
+          fullscreenActive ? exitFullscreenReliably() : enterFullscreenReliably();
+        })
+      );
+
+      controlPanelElement.appendChild(
         makeButton('Refresh Page', 'refresh-32x32.png', function () {
           dispatchKey('F5', 'F5');
           location.reload();
@@ -151,6 +188,7 @@
     const showPanel = function () {
       if (!controlPanelElement) createPanel();
       previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
+      if (fullscreenActive) exitFullscreenReliably();
       controlPanelElement.classList.add('stnav-visible');
       panelVisible = true;
       setTimeout(focusFirstPanelButton, 0);
@@ -177,6 +215,5 @@
       true
     );
   }
-  
 })();
 
