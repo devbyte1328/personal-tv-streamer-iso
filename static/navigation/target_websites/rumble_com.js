@@ -188,7 +188,6 @@
     const showPanel = function () {
       if (!controlPanelElement) createPanel();
       previousActiveElement = window.STNAV_CORE && window.STNAV_CORE.state.activeElement;
-      if (fullscreenActive) exitFullscreenReliably();
       controlPanelElement.classList.add('stnav-visible');
       panelVisible = true;
       setTimeout(focusFirstPanelButton, 0);
@@ -209,6 +208,7 @@
         if (keyboardEvent.code === 'ControlRight') {
           keyboardEvent.preventDefault();
           keyboardEvent.stopPropagation();
+          if (fullscreenActive) exitFullscreenReliably();
           panelVisible ? hidePanel() : showPanel();
         }
       },
