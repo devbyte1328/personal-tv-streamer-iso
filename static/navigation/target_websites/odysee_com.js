@@ -340,6 +340,18 @@
       const qualityMenuItems = findQualityMenuItems();
 
       qualityMenuItems.forEach(function (menuItemElement) {
+        const menuRoot = menuItemElement.closest('.vjs-menu-content');
+        const menuTitleElement = menuRoot
+          ? menuRoot.querySelector('.vjs-menu-title')
+          : null;
+
+        if (
+          menuTitleElement &&
+          menuTitleElement.textContent.trim().toLowerCase() === 'chapters'
+        ) {
+          return;
+        }
+
         const labelElement = menuItemElement.querySelector(
           '.vjs-menu-item-text'
         );
