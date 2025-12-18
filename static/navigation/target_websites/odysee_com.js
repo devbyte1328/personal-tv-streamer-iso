@@ -52,6 +52,23 @@
     );
   };
 
+  const findSpeedRootMenuItem = function () {
+    return Array.from(
+      document.querySelectorAll('.vjs-menu-content .vjs-menu-item')
+    ).find(function (menuItemElement) {
+      const labelElement = menuItemElement.querySelector('.vjs-setting-menu-label');
+      return labelElement && labelElement.textContent.trim().toLowerCase() === 'speed';
+    });
+  };
+
+  const findSpeedSubMenuItems = function () {
+    return Array.from(
+      document.querySelectorAll(
+        '.vjs-menu-content .vjs-settings-sub-menu-option'
+      )
+    );
+  };
+
   const enterFullscreenReliably = function () {
     const fullscreenButtonElement = findFullscreenButton();
     if (fullscreenButtonElement) {
@@ -289,35 +306,17 @@
       clearPanel();
       currentPanelPage = 'volume';
 
-      controlPanelElement.appendChild(
-        makeButton('100%', 'audio-32x32.png', function () {
-          setVolumeReliably(1.0);
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('75%', 'audio-32x32.png', function () {
-          setVolumeReliably(0.75);
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('50%', 'audio-32x32.png', function () {
-          setVolumeReliably(0.5);
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('25%', 'audio-32x32.png', function () {
-          setVolumeReliably(0.25);
-        })
-      );
-
-      controlPanelElement.appendChild(
-        makeButton('0%', 'audio-32x32.png', function () {
-          setVolumeReliably(0.0);
-        })
-      );
+      [1.0, 0.75, 0.5, 0.25, 0.0].forEach(function (volumeValue) {
+        controlPanelElement.appendChild(
+          makeButton(
+            Math.round(volumeValue * 100) + '%',
+            'audio-32x32.png',
+            function () {
+              setVolumeReliably(volumeValue);
+            }
+          )
+        );
+      });
 
       controlPanelElement.appendChild(
         makeButton('Back', 'escape-32x32.png', function () {
@@ -383,6 +382,13 @@
 
       openVideoSettingsReliably();
 
+      controlPanelElement.appendChild(
+        makeButton('Speed', 'video_settings-32x32.png', function () {
+          renderSpeedPage();
+          focusFirstPanelButton();
+        })
+      );
+
       const settingsMenuItems = findVideoSettingsMenuItems();
 
       settingsMenuItems.forEach(function (menuItemElement) {
@@ -408,6 +414,40 @@
       controlPanelElement.appendChild(
         makeButton('Back', 'escape-32x32.png', function () {
           renderMainPage();
+          focusFirstPanelButton();
+        })
+      );
+    };
+
+    const renderSpeedPage = function () {
+      clearPanel();
+      currentPanelPage = 'speed';
+
+      openVideoSettingsReliably();
+
+      const speedRootItem = findSpeedRootMenuItem();
+      if (speedRootItem) {
+        speedRootItem.click();
+      }
+
+      const speedMenuItems = findSpeedSubMenuItems();
+
+      speedMenuItems.forEach(function (menuItemElement) {
+        const labelElement = menuItemElement.querySelector('.vjs-menu-item-text');
+        if (!labelElement) return;
+
+        const labelText = labelElement.textContent.trim();
+
+        controlPanelElement.appendChild(
+          makeButton(labelText, 'video_settings-32x32.png', function () {
+            activateMenuItemReliably(menuItemElement);
+          })
+        );
+      });
+
+      controlPanelElement.appendChild(
+        makeButton('Back', 'escape-32x32.png', function () {
+          renderVideoSettingsPage();
           focusFirstPanelButton();
         })
       );
@@ -462,7 +502,8 @@
             panelVisible &&
             (currentPanelPage === 'volume' ||
               currentPanelPage === 'quality' ||
-              currentPanelPage === 'video_settings')
+              currentPanelPage === 'video_settings' ||
+              currentPanelPage === 'speed')
           ) {
             renderMainPage();
             focusFirstPanelButton();
