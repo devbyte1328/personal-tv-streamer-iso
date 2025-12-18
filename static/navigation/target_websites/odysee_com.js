@@ -40,6 +40,18 @@
     );
   };
 
+  const findVideoSettingsButton = function () {
+    return document.querySelector('button.vjs-setting-button');
+  };
+
+  const findVideoSettingsMenuItems = function () {
+    return Array.from(
+      document.querySelectorAll(
+        '.vjs-menu-content .vjs-menu-item'
+      )
+    );
+  };
+
   const enterFullscreenReliably = function () {
     const fullscreenButtonElement = findFullscreenButton();
     if (fullscreenButtonElement) {
@@ -63,6 +75,19 @@
   };
 
   const selectQualityReliably = function (menuItemElement) {
+    if (menuItemElement) {
+      menuItemElement.click();
+    }
+  };
+
+  const openVideoSettingsReliably = function () {
+    const settingsButtonElement = findVideoSettingsButton();
+    if (settingsButtonElement) {
+      settingsButtonElement.click();
+    }
+  };
+
+  const activateMenuItemReliably = function (menuItemElement) {
     if (menuItemElement) {
       menuItemElement.click();
     }
@@ -231,6 +256,13 @@
             focusFirstPanelButton();
           })
         );
+
+        controlPanelElement.appendChild(
+          makeButton('Video Settings', 'video_settings-32x32.png', function () {
+            renderVideoSettingsPage();
+            focusFirstPanelButton();
+          })
+        );
       }
 
       controlPanelElement.appendChild(
@@ -333,6 +365,42 @@
       );
     };
 
+    const renderVideoSettingsPage = function () {
+      clearPanel();
+      currentPanelPage = 'video_settings';
+
+      openVideoSettingsReliably();
+
+      const settingsMenuItems = findVideoSettingsMenuItems();
+
+      settingsMenuItems.forEach(function (menuItemElement) {
+        const labelText = menuItemElement.textContent.trim().toLowerCase();
+
+        if (labelText.includes('autoplay next')) {
+          controlPanelElement.appendChild(
+            makeButton('Autoplay next', 'video_settings-32x32.png', function () {
+              activateMenuItemReliably(menuItemElement);
+            })
+          );
+        }
+
+        if (labelText === 'loop') {
+          controlPanelElement.appendChild(
+            makeButton('Loop', 'video_settings-32x32.png', function () {
+              activateMenuItemReliably(menuItemElement);
+            })
+          );
+        }
+      });
+
+      controlPanelElement.appendChild(
+        makeButton('Back', 'escape-32x32.png', function () {
+          renderMainPage();
+          focusFirstPanelButton();
+        })
+      );
+    };
+
     const createPanel = function () {
       ensureStylesheetLoaded();
       controlPanelElement = document.createElement('div');
@@ -381,7 +449,8 @@
           if (
             panelVisible &&
             (currentPanelPage === 'volume' ||
-              currentPanelPage === 'quality')
+              currentPanelPage === 'quality' ||
+              currentPanelPage === 'video_settings')
           ) {
             renderMainPage();
             focusFirstPanelButton();
