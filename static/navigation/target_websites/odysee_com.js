@@ -32,6 +32,14 @@
     return document.querySelector('video');
   };
 
+  const findQualityMenuItems = function () {
+    return Array.from(
+      document.querySelectorAll(
+        '.vjs-menu-content .vjs-menu-item[role="menuitemradio"]'
+      )
+    );
+  };
+
   const enterFullscreenReliably = function () {
     const fullscreenButtonElement = findFullscreenButton();
     if (fullscreenButtonElement) {
@@ -51,6 +59,12 @@
     if (videoElement) {
       videoElement.volume = volumeValue;
       videoElement.muted = volumeValue === 0;
+    }
+  };
+
+  const selectQualityReliably = function (menuItemElement) {
+    if (menuItemElement) {
+      menuItemElement.click();
     }
   };
 
@@ -210,6 +224,13 @@
             focusFirstPanelButton();
           })
         );
+
+        controlPanelElement.appendChild(
+          makeButton('Quality', 'video_settings-32x32.png', function () {
+            renderQualityPage();
+            focusFirstPanelButton();
+          })
+        );
       }
 
       controlPanelElement.appendChild(
@@ -274,6 +295,44 @@
       );
     };
 
+    const renderQualityPage = function () {
+      clearPanel();
+      currentPanelPage = 'quality';
+
+      const forbiddenLabels = [
+        'descriptions off',
+        'captions off',
+        'default'
+      ];
+
+      const qualityMenuItems = findQualityMenuItems();
+
+      qualityMenuItems.forEach(function (menuItemElement) {
+        const labelElement = menuItemElement.querySelector(
+          '.vjs-menu-item-text'
+        );
+        if (!labelElement) return;
+
+        const labelText = labelElement.textContent.trim();
+        const normalizedLabel = labelText.toLowerCase();
+
+        if (forbiddenLabels.includes(normalizedLabel)) return;
+
+        controlPanelElement.appendChild(
+          makeButton(labelText, 'video_settings-32x32.png', function () {
+            selectQualityReliably(menuItemElement);
+          })
+        );
+      });
+
+      controlPanelElement.appendChild(
+        makeButton('Back', 'escape-32x32.png', function () {
+          renderMainPage();
+          focusFirstPanelButton();
+        })
+      );
+    };
+
     const createPanel = function () {
       ensureStylesheetLoaded();
       controlPanelElement = document.createElement('div');
@@ -319,7 +378,11 @@
             return;
           }
 
-          if (panelVisible && currentPanelPage === 'volume') {
+          if (
+            panelVisible &&
+            (currentPanelPage === 'volume' ||
+              currentPanelPage === 'quality')
+          ) {
             renderMainPage();
             focusFirstPanelButton();
             return;
