@@ -88,6 +88,16 @@
     drawOverlay(elementGiven);
   }
 
+  function restoreNavigationState() {
+    engineState.typingMode = false;
+    engineState.keyboardEntryMode = false;
+    engineState.navigationEnabled = true;
+    engineState.navEnabled = true;
+    const list = collectFocusableElements();
+    if (list.length > 0) highlightItem(list[0]);
+    else hideOverlay();
+  }
+
   function searchDirectional(elementCurrent, elementList, directionName) {
     if (!elementCurrent) return elementList[0] || null;
 
@@ -167,11 +177,20 @@
     clearTimeout(scrollDelay);
     scrollDelay = setTimeout(() => {
       engineState.isScrolling = false;
+      if (engineState.navigationEnabled && engineState.activeElement) {
+        drawOverlay(engineState.activeElement);
+      }
     }, 180);
   }, { passive: true });
 
   document.addEventListener('keydown', (e) => {
-    if (!engineState.navigationEnabled) return;
+    if (!engineState.navigationEnabled) {
+      if (e.key === 'Escape') {
+        restoreNavigationState();
+      }
+      return;
+    }
+
     if (e.key !== 'Enter') return;
     if (!engineState.activeElement) return;
 
@@ -192,6 +211,23 @@
     engineState.navEnabled = false;
     hideOverlay();
     el.focus();
+  }, true);
+
+  document.addEventListener('focusout', () => {
+    if (engineState.keyboardEntryMode) {
+      setTimeout(() => {
+        if (!document.activeElement ||
+            document.activeElement === document.body) {
+          restoreNavigationState();
+        }
+      }, 0);
+    }
+  }, true);
+
+  document.addEventListener('submit', () => {
+    if (engineState.keyboardEntryMode) {
+      setTimeout(restoreNavigationState, 0);
+    }
   }, true);
 
   window.STNAV_CORE = {
