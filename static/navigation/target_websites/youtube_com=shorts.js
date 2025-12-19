@@ -22,10 +22,19 @@
     'div.rgpl-btn-play'
   ];
 
+  function elementIsTextEntry(elementGiven) {
+    if (!elementGiven) return false;
+    if (elementGiven.isContentEditable) return true;
+    if (elementGiven.tagName === 'INPUT') return true;
+    if (elementGiven.tagName === 'TEXTAREA') return true;
+    return false;
+  }
+
   function cancelYouTubeShortsHandler(e) {
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      e.stopPropagation();
-    }
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    const activeElement = document.activeElement;
+    if (elementIsTextEntry(activeElement)) return;
+    e.stopPropagation();
   }
 
   if (location.pathname.startsWith('/shorts')) {
