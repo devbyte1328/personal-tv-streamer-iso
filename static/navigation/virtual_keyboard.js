@@ -40,79 +40,10 @@
 
   const wide = { SPACE: 8, BACKSPACE: 2, CAPS: 2, SHIFT: 2.5, ENTER: 2.5, '🌐': 2 };
 
-  const css = document.createElement('style');
-  css.textContent = `
-    #stnav_virtual_keyboard {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #141414;
-      color: #fff;
-      display: none;
-      z-index: 999999;
-      border-top: 3px solid cyan;
-      font-size: 24px;
-      user-select: none;
-      flex-direction: column;
-      padding: 8px;
-      gap: 8px;
-      box-sizing: border-box;
-      min-height: 350px;
-    }
-    #stnav_vk_display {
-      width: 100%;
-      background: #fff;
-      color: #000;
-      font-size: 32px;
-      padding: 12px;
-      border-radius: 6px;
-      box-sizing: border-box;
-      min-height: 55px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      white-space: pre;
-    }
-    .stnav_vk_row {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-      flex: 1;
-    }
-    .stnav_vk_key {
-      height: 55px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #333;
-      border: 1px solid #555;
-      border-radius: 8px;
-      transition: background 0.1s, box-shadow 0.1s, color 0.1s;
-    }
-    .stnav_vk_selected {
-      outline: 4px solid cyan;
-      box-shadow: 0 0 12px rgba(0,255,255,0.9);
-      background: #444;
-    }
-    #stnav_virtual_keyboard.stnav_vk_caps_on .stnav_vk_key[data-key="CAPS"],
-    #stnav_virtual_keyboard.stnav_vk_shift_on .stnav_vk_key[data-key="SHIFT"] {
-      background: #006666;
-      border-color: cyan;
-      color: #fff;
-      box-shadow: 0 0 12px rgba(0,255,255,0.7);
-    }
-    .stnav_vk_caret {
-      display: inline-block;
-      width: 3px;
-      height: 1.3em;
-      margin-left: 1px;
-      background: #0f8ab1;
-    }
-  `;
-  document.head.appendChild(css);
+  const cssLink = document.createElement('link');
+  cssLink.rel = 'stylesheet';
+  cssLink.href = 'http://localhost:8080/static/navigation/virtual_keyboard.css';
+  document.head.appendChild(cssLink);
 
   const vk = document.createElement('div');
   vk.id = 'stnav_virtual_keyboard';
@@ -236,6 +167,7 @@
     vk.style.bottom = '0px';
     vk.style.height = `${height}px`;
   };
+
   window.addEventListener('resize', adjustVKPosition);
   window.addEventListener('fullscreenchange', adjustVKPosition);
   adjustVKPosition();
