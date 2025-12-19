@@ -15,6 +15,16 @@
 
   let fullscreenActive = false;
 
+  const isTextEntryElement = function () {
+    const activeElement = document.activeElement;
+    if (!activeElement) return false;
+    return (
+      activeElement.isContentEditable ||
+      activeElement.tagName === 'INPUT' ||
+      activeElement.tagName === 'TEXTAREA'
+    );
+  };
+
   const resolveBestFullscreenElement = function () {
     const candidates = [
       document.querySelector('video'),
@@ -49,6 +59,10 @@
   window.addEventListener(
     'keydown',
     function (eventObject) {
+      if (isTextEntryElement()) {
+        return;
+      }
+
       if (!fullscreenActive) {
         if (
           eventObject.key === 'ArrowLeft' ||
