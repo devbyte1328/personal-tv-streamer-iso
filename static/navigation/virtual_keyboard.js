@@ -1,9 +1,9 @@
 (function () {
   'use strict';
 
-  const { state } = window.STNAV_CORE;
+  const { state: navigationGlobalState } = window.STNAV_CORE;
 
-  const numberSym = {
+  const numberCharacterToSymbolMapping = {
     '`': ['`', '~'],
     '1': ['1', '!'],
     '2': ['2', '@'],
@@ -19,7 +19,7 @@
     '=': ['=', '+'],
   };
 
-  const punctSym = {
+  const punctuationCharacterToSymbolMapping = {
     '[': ['[', '{'],
     ']': [']', '}'],
     '\\': ['\\', '|'],
@@ -30,7 +30,7 @@
     '/': ['/', '?'],
   };
 
-  const layout = [
+  const keyboardPhysicalLayoutDefinition = [
     ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'BACKSPACE'],
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']', '\\'],
     ['CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'", 'ENTER'],
@@ -38,416 +38,688 @@
     ['🌐', 'SPACE', '⬅', '➡'],
   ];
 
-  const wide = { SPACE: 8, BACKSPACE: 2, CAPS: 2, SHIFT: 2.5, ENTER: 2.5, '🌐': 2 };
+  const keysThatOccupyMultipleHorizontalSlots = {
+    SPACE: 8,
+    BACKSPACE: 2,
+    CAPS: 2,
+    SHIFT: 2.5,
+    ENTER: 2.5,
+    '🌐': 2,
+  };
 
-  const cssLink = document.createElement('link');
-  cssLink.rel = 'stylesheet';
-  cssLink.href = 'http://localhost:8080/static/navigation/virtual_keyboard.css';
-  document.head.appendChild(cssLink);
+  const keyboardStylesheetLinkElement = document.createElement('link');
+  keyboardStylesheetLinkElement.rel = 'stylesheet';
+  keyboardStylesheetLinkElement.href = 'http://localhost:8080/static/navigation/virtual_keyboard.css';
+  document.head.appendChild(keyboardStylesheetLinkElement);
 
-  const vk = document.createElement('div');
-  vk.id = 'stnav_virtual_keyboard';
+  const virtualKeyboardContainerElement = document.createElement('div');
+  virtualKeyboardContainerElement.id = 'stnav_virtual_keyboard';
 
-  const display = document.createElement('div');
-  display.id = 'stnav_vk_display';
-  vk.appendChild(display);
+  const virtualKeyboardDisplayElement = document.createElement('div');
+  virtualKeyboardDisplayElement.id = 'stnav_vk_display';
+  virtualKeyboardContainerElement.appendChild(virtualKeyboardDisplayElement);
 
-  const keyRows = [];
-  const keys = [];
+  const allKeyboardRowsAsElementGroups = [];
+  const allKeyboardKeyElements = [];
 
-  layout.forEach((row, ri) => {
-    const r = document.createElement('div');
-    r.className = 'stnav_vk_row';
-    const rk = [];
-    row.forEach((label, ci) => {
-      const k = document.createElement('div');
-      k.className = 'stnav_vk_key';
-      k.textContent = label;
-      k.dataset.key = label;
-      k.dataset.row = ri;
-      k.dataset.col = ci;
-      k.style.flex = wide[label] ? String(wide[label]) : '1';
-      r.appendChild(k);
-      rk.push(k);
-      keys.push(k);
+  keyboardPhysicalLayoutDefinition.forEach((rowDefinition, rowIndex) => {
+    const rowContainerElement = document.createElement('div');
+    rowContainerElement.className = 'stnav_vk_row';
+
+    const rowKeyElements = [];
+
+    rowDefinition.forEach((keyLabelText, columnIndex) => {
+      const keyElement = document.createElement('div');
+      keyElement.className = 'stnav_vk_key';
+      keyElement.textContent = keyLabelText;
+      keyElement.dataset.key = keyLabelText;
+      keyElement.dataset.row = rowIndex;
+      keyElement.dataset.col = columnIndex;
+      keyElement.style.flex = keysThatOccupyMultipleHorizontalSlots[keyLabelText]
+        ? String(keysThatOccupyMultipleHorizontalSlots[keyLabelText])
+        : '1';
+
+      rowContainerElement.appendChild(keyElement);
+      rowKeyElements.push(keyElement);
+      allKeyboardKeyElements.push(keyElement);
     });
-    keyRows.push(rk);
-    vk.appendChild(r);
+
+    allKeyboardRowsAsElementGroups.push(rowKeyElements);
+    virtualKeyboardContainerElement.appendChild(rowContainerElement);
   });
 
-  document.body.appendChild(vk);
+  document.body.appendChild(virtualKeyboardContainerElement);
 
-  let current = null;
-  let vkInputTarget = null;
-  let caps = false;
-  let shift = false;
-  let autoFirstCap = true;
+  let currentlySelectedKeyElement = null;
+  let activeTextInputTargetElement = null;
+  let capsLockIsEnabled = false;
+  let shiftModifierIsEnabled = false;
+  let automaticFirstCharacterCapitalizationIsEnabled = true;
 
-  let TIP = null;
+  let textInputProcessorInstance = null;
+
   if (window.TextInputProcessor) {
     try {
-      TIP = new TextInputProcessor();
-      TIP.beginInputTransaction(document);
-    } catch (e) {
-      TIP = null;
+      textInputProcessorInstance = new TextInputProcessor();
+      textInputProcessorInstance.beginInputTransaction(document);
+    } catch (error) {
+      textInputProcessorInstance = null;
     }
   }
 
-  const isText = (el) =>
-    el && (el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+  const elementIsTextInputCapable = (element) =>
+    element &&
+    (element.isContentEditable ||
+      element.tagName === 'INPUT' ||
+      element.tagName === 'TEXTAREA');
 
-  const findInput = () =>
-    document.activeElement && isText(document.activeElement)
+  const findBestAvailableTextInputTarget = () =>
+    document.activeElement && elementIsTextInputCapable(document.activeElement)
       ? document.activeElement
-      : document.querySelector('input[type="search"],input[role="searchbox"],input[type="text"],textarea');
+      : document.querySelector(
+          'input[type="search"],input[role="searchbox"],input[type="text"],textarea',
+        );
 
-  const firstCharMode = () => {
-    if (!vkInputTarget) return false;
-    if (!autoFirstCap) return false;
-    return (vkInputTarget.value || '').length === 0;
+  const shouldAutomaticallyCapitalizeFirstCharacter = () => {
+    if (!activeTextInputTargetElement) return false;
+    if (!automaticFirstCharacterCapitalizationIsEnabled) return false;
+    return (activeTextInputTargetElement.value || '').length === 0;
   };
 
-  const updateDisplay = () => {
-    if (!vkInputTarget) {
-      display.textContent = '';
+  const updateVirtualKeyboardDisplayText = () => {
+    if (!activeTextInputTargetElement) {
+      virtualKeyboardDisplayElement.textContent = '';
       return;
     }
-    const val = vkInputTarget.value || '';
-    const s = vkInputTarget.selectionStart || 0;
-    display.innerHTML = '';
-    const before = document.createTextNode(val.slice(0, s));
-    const caret = document.createElement('span');
-    caret.className = 'stnav_vk_caret';
-    const after = document.createTextNode(val.slice(s));
-    display.appendChild(before);
-    display.appendChild(caret);
-    display.appendChild(after);
+
+    const fullTextValue = activeTextInputTargetElement.value || '';
+    const caretPosition = activeTextInputTargetElement.selectionStart || 0;
+
+    virtualKeyboardDisplayElement.innerHTML = '';
+
+    const textBeforeCaretNode = document.createTextNode(
+      fullTextValue.slice(0, caretPosition),
+    );
+
+    const caretVisualElement = document.createElement('span');
+    caretVisualElement.className = 'stnav_vk_caret';
+
+    const textAfterCaretNode = document.createTextNode(
+      fullTextValue.slice(caretPosition),
+    );
+
+    virtualKeyboardDisplayElement.appendChild(textBeforeCaretNode);
+    virtualKeyboardDisplayElement.appendChild(caretVisualElement);
+    virtualKeyboardDisplayElement.appendChild(textAfterCaretNode);
   };
 
-  const updateLabels = () => {
-    const first = firstCharMode();
-    keys.forEach((k) => {
-      const base = k.dataset.key;
-      if (base.length === 1) {
-        if (/^[A-Za-z]$/.test(base)) {
-          if (first) k.textContent = base.toUpperCase();
-          else k.textContent = caps ^ shift ? base.toUpperCase() : base.toLowerCase();
-        } else if (numberSym[base]) {
-          const pair = numberSym[base];
-          k.textContent = caps || shift ? pair[1] : pair[0];
-        } else if (punctSym[base]) {
-          const pair = punctSym[base];
-          k.textContent = shift ? pair[1] : pair[0];
+  const updateAllKeyLabelsBasedOnCurrentModifiers = () => {
+    const isFirstCharacterScenario = shouldAutomaticallyCapitalizeFirstCharacter();
+
+    allKeyboardKeyElements.forEach((keyElement) => {
+      const baseKeyIdentifier = keyElement.dataset.key;
+
+      if (baseKeyIdentifier.length !== 1) return;
+
+      if (/^[A-Za-z]$/.test(baseKeyIdentifier)) {
+        if (isFirstCharacterScenario) {
+          keyElement.textContent = baseKeyIdentifier.toUpperCase();
         } else {
-          k.textContent = base;
+          keyElement.textContent =
+            capsLockIsEnabled ^ shiftModifierIsEnabled
+              ? baseKeyIdentifier.toUpperCase()
+              : baseKeyIdentifier.toLowerCase();
         }
+        return;
       }
+
+      if (numberCharacterToSymbolMapping[baseKeyIdentifier]) {
+        const symbolPair = numberCharacterToSymbolMapping[baseKeyIdentifier];
+        keyElement.textContent =
+          capsLockIsEnabled || shiftModifierIsEnabled
+            ? symbolPair[1]
+            : symbolPair[0];
+        return;
+      }
+
+      if (punctuationCharacterToSymbolMapping[baseKeyIdentifier]) {
+        const symbolPair = punctuationCharacterToSymbolMapping[baseKeyIdentifier];
+        keyElement.textContent = shiftModifierIsEnabled
+          ? symbolPair[1]
+          : symbolPair[0];
+        return;
+      }
+
+      keyElement.textContent = baseKeyIdentifier;
     });
-    updateDisplay();
+
+    updateVirtualKeyboardDisplayText();
   };
 
-  const selectKey = (el) => {
-    if (current) current.classList.remove('stnav_vk_selected');
-    current = el;
-    el.classList.add('stnav_vk_selected');
-    const r = el.getBoundingClientRect();
-    const m = 20;
-    if (r.top < m || r.bottom > innerHeight - m) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  const visuallySelectKeyElement = (keyElement) => {
+    if (currentlySelectedKeyElement) {
+      currentlySelectedKeyElement.classList.remove('stnav_vk_selected');
+    }
+
+    currentlySelectedKeyElement = keyElement;
+    keyElement.classList.add('stnav_vk_selected');
+
+    const keyBoundingRectangle = keyElement.getBoundingClientRect();
+    const viewportMarginThreshold = 20;
+
+    if (
+      keyBoundingRectangle.top < viewportMarginThreshold ||
+      keyBoundingRectangle.bottom > innerHeight - viewportMarginThreshold
+    ) {
+      keyElement.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
+      });
+    }
   };
 
-  const computeBaseHeight = () => {
-    const base = Math.min(400, window.innerHeight * 0.55);
-    return Math.max(350, base);
+  const calculateVirtualKeyboardBaseHeight = () => {
+    const preferredHeight = Math.min(400, window.innerHeight * 0.55);
+    return Math.max(350, preferredHeight);
   };
 
-  const adjustVKPosition = () => {
-    const extra = window.outerHeight - window.innerHeight;
-    const offset = extra > 0 ? Math.round(extra / 2) : 0;
-    const height = computeBaseHeight() + offset;
-    vk.style.bottom = '0px';
-    vk.style.height = `${height}px`;
+  const adjustVirtualKeyboardVerticalPosition = () => {
+    const browserChromeHeightDifference =
+      window.outerHeight - window.innerHeight;
+
+    const verticalOffset =
+      browserChromeHeightDifference > 0
+        ? Math.round(browserChromeHeightDifference / 2)
+        : 0;
+
+    const finalHeight =
+      calculateVirtualKeyboardBaseHeight() + verticalOffset;
+
+    virtualKeyboardContainerElement.style.bottom = '0px';
+    virtualKeyboardContainerElement.style.height = `${finalHeight}px`;
   };
 
-  window.addEventListener('resize', adjustVKPosition);
-  window.addEventListener('fullscreenchange', adjustVKPosition);
-  adjustVKPosition();
+  window.addEventListener('resize', adjustVirtualKeyboardVerticalPosition);
+  window.addEventListener(
+    'fullscreenchange',
+    adjustVirtualKeyboardVerticalPosition,
+  );
 
-  const showVK = () => {
-    vkInputTarget = findInput();
-    autoFirstCap = true;
-    updateLabels();
-    updateDisplay();
-    adjustVKPosition();
-    vk.style.display = 'flex';
-    selectKey(keyRows[0][0]);
+  adjustVirtualKeyboardVerticalPosition();
+
+  const showVirtualKeyboard = () => {
+    activeTextInputTargetElement = findBestAvailableTextInputTarget();
+    automaticFirstCharacterCapitalizationIsEnabled = true;
+    updateAllKeyLabelsBasedOnCurrentModifiers();
+    updateVirtualKeyboardDisplayText();
+    adjustVirtualKeyboardVerticalPosition();
+    virtualKeyboardContainerElement.style.display = 'flex';
+    visuallySelectKeyElement(allKeyboardRowsAsElementGroups[0][0]);
   };
 
-  const hideVK = () => {
-    vk.style.display = 'none';
-    if (current) current.classList.remove('stnav_vk_selected');
-    current = null;
+  const hideVirtualKeyboard = () => {
+    virtualKeyboardContainerElement.style.display = 'none';
+    if (currentlySelectedKeyElement) {
+      currentlySelectedKeyElement.classList.remove('stnav_vk_selected');
+    }
+    currentlySelectedKeyElement = null;
   };
 
-  const clearAll = () => {
-    if (!vkInputTarget) return;
-    vkInputTarget.value = '';
-    vkInputTarget.dispatchEvent(new Event('input', { bubbles: true }));
-    autoFirstCap = true;
-    updateDisplay();
+  const clearEntireInputValue = () => {
+    if (!activeTextInputTargetElement) return;
+    activeTextInputTargetElement.value = '';
+    activeTextInputTargetElement.dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+    automaticFirstCharacterCapitalizationIsEnabled = true;
+    updateVirtualKeyboardDisplayText();
   };
 
-  const outputChar = (ch) => {
-    if (!vkInputTarget) return;
-    vkInputTarget.focus();
-    if (TIP) {
-      TIP.flushPendingComposition();
-      TIP.commitComposition(ch);
-      updateDisplay();
+  const insertCharacterIntoInput = (character) => {
+    if (!activeTextInputTargetElement) return;
+    activeTextInputTargetElement.focus();
+
+    if (textInputProcessorInstance) {
+      textInputProcessorInstance.flushPendingComposition();
+      textInputProcessorInstance.commitComposition(character);
+      updateVirtualKeyboardDisplayText();
       return;
     }
-    const val = vkInputTarget.value;
-    const s = vkInputTarget.selectionStart;
-    const e = vkInputTarget.selectionEnd;
-    const nv = val.slice(0, s) + ch + val.slice(e);
-    vkInputTarget.value = nv;
-    vkInputTarget.setSelectionRange(s + ch.length, s + ch.length);
-    vkInputTarget.dispatchEvent(new Event('input', { bubbles: true }));
-    autoFirstCap = false;
-    updateDisplay();
+
+    const currentValue = activeTextInputTargetElement.value;
+    const selectionStartIndex =
+      activeTextInputTargetElement.selectionStart;
+    const selectionEndIndex =
+      activeTextInputTargetElement.selectionEnd;
+
+    const newValue =
+      currentValue.slice(0, selectionStartIndex) +
+      character +
+      currentValue.slice(selectionEndIndex);
+
+    activeTextInputTargetElement.value = newValue;
+    activeTextInputTargetElement.setSelectionRange(
+      selectionStartIndex + character.length,
+      selectionStartIndex + character.length,
+    );
+
+    activeTextInputTargetElement.dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+
+    automaticFirstCharacterCapitalizationIsEnabled = false;
+    updateVirtualKeyboardDisplayText();
   };
 
-  const delChar = () => {
-    if (!vkInputTarget) return;
-    vkInputTarget.focus();
-    if (TIP) {
-      TIP.flushPendingComposition();
-      TIP.commitComposition('\b');
-      updateDisplay();
+  const deleteCharacterBeforeCaret = () => {
+    if (!activeTextInputTargetElement) return;
+    activeTextInputTargetElement.focus();
+
+    if (textInputProcessorInstance) {
+      textInputProcessorInstance.flushPendingComposition();
+      textInputProcessorInstance.commitComposition('\b');
+      updateVirtualKeyboardDisplayText();
       return;
     }
-    const val = vkInputTarget.value;
-    const s = vkInputTarget.selectionStart;
-    const e = vkInputTarget.selectionEnd;
-    if (s === 0 && e === 0) return;
-    const from = s === e ? s - 1 : s;
-    const nv = val.slice(0, from) + val.slice(e);
-    vkInputTarget.value = nv;
-    vkInputTarget.setSelectionRange(from, from);
-    vkInputTarget.dispatchEvent(new Event('input', { bubbles: true }));
-    if (vkInputTarget.value.length === 0) autoFirstCap = true;
-    updateDisplay();
+
+    const currentValue = activeTextInputTargetElement.value;
+    const selectionStartIndex =
+      activeTextInputTargetElement.selectionStart;
+    const selectionEndIndex =
+      activeTextInputTargetElement.selectionEnd;
+
+    if (selectionStartIndex === 0 && selectionEndIndex === 0) return;
+
+    const deletionStartIndex =
+      selectionStartIndex === selectionEndIndex
+        ? selectionStartIndex - 1
+        : selectionStartIndex;
+
+    const newValue =
+      currentValue.slice(0, deletionStartIndex) +
+      currentValue.slice(selectionEndIndex);
+
+    activeTextInputTargetElement.value = newValue;
+    activeTextInputTargetElement.setSelectionRange(
+      deletionStartIndex,
+      deletionStartIndex,
+    );
+
+    activeTextInputTargetElement.dispatchEvent(
+      new Event('input', { bubbles: true }),
+    );
+
+    if (activeTextInputTargetElement.value.length === 0) {
+      automaticFirstCharacterCapitalizationIsEnabled = true;
+    }
+
+    updateVirtualKeyboardDisplayText();
   };
 
-  const center = (el) => {
-    const r = el.getBoundingClientRect();
-    return [r.left + r.width / 2, r.top + r.height / 2];
+  const getVisualCenterPointOfElement = (element) => {
+    const rectangle = element.getBoundingClientRect();
+    return [
+      rectangle.left + rectangle.width / 2,
+      rectangle.top + rectangle.height / 2,
+    ];
   };
 
-  const moveVK = (dir) => {
-    if (!current) return;
-    const k = current.dataset.key;
-    if (dir === 'down' && (k === '[' || k === ']' || k === '\\')) {
-      const t = keys.find((x) => x.dataset.key === 'ENTER');
-      if (t) return selectKey(t);
+  const moveKeyboardSelectionInDirection = (direction) => {
+    if (!currentlySelectedKeyElement) return;
+
+    const currentKeyIdentifier = currentlySelectedKeyElement.dataset.key;
+
+    if (
+      direction === 'down' &&
+      (currentKeyIdentifier === '[' ||
+        currentKeyIdentifier === ']' ||
+        currentKeyIdentifier === '\\')
+    ) {
+      const enterKeyElement = allKeyboardKeyElements.find(
+        (key) => key.dataset.key === 'ENTER',
+      );
+      if (enterKeyElement) {
+        visuallySelectKeyElement(enterKeyElement);
+        return;
+      }
     }
-    if (dir === 'up' && (k === '.' || k === '/')) {
-      const t = keys.find((x) => x.dataset.key === 'ENTER');
-      if (t) return selectKey(t);
+
+    if (
+      direction === 'up' &&
+      (currentKeyIdentifier === '.' ||
+        currentKeyIdentifier === '/')
+    ) {
+      const enterKeyElement = allKeyboardKeyElements.find(
+        (key) => key.dataset.key === 'ENTER',
+      );
+      if (enterKeyElement) {
+        visuallySelectKeyElement(enterKeyElement);
+        return;
+      }
     }
-    if (dir === 'up' && k === 'ENTER') {
-      const t = keys.find((x) => x.dataset.key === ']');
-      if (t) return selectKey(t);
+
+    if (direction === 'up' && currentKeyIdentifier === 'ENTER') {
+      const closingBracketKeyElement = allKeyboardKeyElements.find(
+        (key) => key.dataset.key === ']',
+      );
+      if (closingBracketKeyElement) {
+        visuallySelectKeyElement(closingBracketKeyElement);
+        return;
+      }
     }
-    const [cx, cy] = center(current);
-    let best = null;
+
+    const [currentCenterX, currentCenterY] =
+      getVisualCenterPointOfElement(currentlySelectedKeyElement);
+
+    let bestCandidateElement = null;
     let bestScore = Infinity;
-    let bestP = Infinity;
-    keys.forEach((keyEl) => {
-      if (keyEl === current) return;
-      const [x, y] = center(keyEl);
-      let dx = x - cx;
-      let dy = y - cy;
-      let p, s;
-      if (dir === 'up') {
-        p = cy - y;
-        if (p <= 1) return;
-        s = Math.abs(dx);
-      } else if (dir === 'down') {
-        p = y - cy;
-        if (p <= 1) return;
-        s = Math.abs(dx);
-      } else if (dir === 'left') {
-        p = cx - x;
-        if (p <= 1) return;
-        s = Math.abs(dy);
-      } else if (dir === 'right') {
-        p = x - cx;
-        if (p <= 1) return;
-        s = Math.abs(dy);
-      } else return;
-      const w = dir === 'left' || dir === 'right' ? 30 : 2;
-      const sc = p + s * w;
-      if (sc < bestScore || (sc === bestScore && p < bestP)) {
-        best = keyEl;
-        bestScore = sc;
-        bestP = p;
+    let bestPrimaryDistance = Infinity;
+
+    allKeyboardKeyElements.forEach((candidateElement) => {
+      if (candidateElement === currentlySelectedKeyElement) return;
+
+      const [candidateCenterX, candidateCenterY] =
+        getVisualCenterPointOfElement(candidateElement);
+
+      const deltaX = candidateCenterX - currentCenterX;
+      const deltaY = candidateCenterY - currentCenterY;
+
+      let primaryDistance;
+      let secondaryDistance;
+
+      if (direction === 'up') {
+        primaryDistance = currentCenterY - candidateCenterY;
+        if (primaryDistance <= 1) return;
+        secondaryDistance = Math.abs(deltaX);
+      } else if (direction === 'down') {
+        primaryDistance = candidateCenterY - currentCenterY;
+        if (primaryDistance <= 1) return;
+        secondaryDistance = Math.abs(deltaX);
+      } else if (direction === 'left') {
+        primaryDistance = currentCenterX - candidateCenterX;
+        if (primaryDistance <= 1) return;
+        secondaryDistance = Math.abs(deltaY);
+      } else if (direction === 'right') {
+        primaryDistance = candidateCenterX - currentCenterX;
+        if (primaryDistance <= 1) return;
+        secondaryDistance = Math.abs(deltaY);
+      } else {
+        return;
+      }
+
+      const directionalWeight =
+        direction === 'left' || direction === 'right' ? 30 : 2;
+
+      const candidateScore =
+        primaryDistance + secondaryDistance * directionalWeight;
+
+      if (
+        candidateScore < bestScore ||
+        (candidateScore === bestScore &&
+          primaryDistance < bestPrimaryDistance)
+      ) {
+        bestCandidateElement = candidateElement;
+        bestScore = candidateScore;
+        bestPrimaryDistance = primaryDistance;
       }
     });
-    if (best) selectKey(best);
+
+    if (bestCandidateElement) {
+      visuallySelectKeyElement(bestCandidateElement);
+    }
   };
 
-  const keyOutput = (key) => {
-    if (/^[a-z]$/i.test(key)) {
-      if (firstCharMode()) return key.toUpperCase();
-      return caps ^ shift ? key.toUpperCase() : key.toLowerCase();
-    }
-    if (numberSym[key]) {
-      const pair = numberSym[key];
-      return caps || shift ? pair[1] : pair[0];
-    }
-    if (punctSym[key]) {
-      const pair = punctSym[key];
-      return shift ? pair[1] : pair[0];
-    }
-    return key;
-  };
-
-  const moveCursor = (dir) => {
-    if (!vkInputTarget) return;
-    vkInputTarget.focus();
-    const val = vkInputTarget.value || '';
-    const s = vkInputTarget.selectionStart;
-    const e = vkInputTarget.selectionEnd;
-    const pos = dir === 'left' ? Math.max(0, s - 1) : Math.min(val.length, e + 1);
-    vkInputTarget.setSelectionRange(pos, pos);
-    if (vkInputTarget.value.length === 0) autoFirstCap = true;
-    updateLabels();
-  };
-
-  const press = (el) => {
-    const key = el.dataset.key;
-    if (key === 'SHIFT') {
-      if (firstCharMode()) {
-        autoFirstCap = false;
-      } else {
-        shift = !shift;
-        vk.classList.toggle('stnav_vk_shift_on', shift);
+  const resolveOutputCharacterForKey = (keyIdentifier) => {
+    if (/^[a-z]$/i.test(keyIdentifier)) {
+      if (shouldAutomaticallyCapitalizeFirstCharacter()) {
+        return keyIdentifier.toUpperCase();
       }
-      updateLabels();
+      return capsLockIsEnabled ^ shiftModifierIsEnabled
+        ? keyIdentifier.toUpperCase()
+        : keyIdentifier.toLowerCase();
+    }
+
+    if (numberCharacterToSymbolMapping[keyIdentifier]) {
+      const symbolPair = numberCharacterToSymbolMapping[keyIdentifier];
+      return capsLockIsEnabled || shiftModifierIsEnabled
+        ? symbolPair[1]
+        : symbolPair[0];
+    }
+
+    if (punctuationCharacterToSymbolMapping[keyIdentifier]) {
+      const symbolPair =
+        punctuationCharacterToSymbolMapping[keyIdentifier];
+      return shiftModifierIsEnabled
+        ? symbolPair[1]
+        : symbolPair[0];
+    }
+
+    return keyIdentifier;
+  };
+
+  const moveTextCursorHorizontally = (direction) => {
+    if (!activeTextInputTargetElement) return;
+    activeTextInputTargetElement.focus();
+
+    const fullValue = activeTextInputTargetElement.value || '';
+    const selectionStartIndex =
+      activeTextInputTargetElement.selectionStart;
+    const selectionEndIndex =
+      activeTextInputTargetElement.selectionEnd;
+
+    const newCaretPosition =
+      direction === 'left'
+        ? Math.max(0, selectionStartIndex - 1)
+        : Math.min(fullValue.length, selectionEndIndex + 1);
+
+    activeTextInputTargetElement.setSelectionRange(
+      newCaretPosition,
+      newCaretPosition,
+    );
+
+    if (activeTextInputTargetElement.value.length === 0) {
+      automaticFirstCharacterCapitalizationIsEnabled = true;
+    }
+
+    updateAllKeyLabelsBasedOnCurrentModifiers();
+  };
+
+  const handleVirtualKeyPress = (keyElement) => {
+    const keyIdentifier = keyElement.dataset.key;
+
+    if (keyIdentifier === 'SHIFT') {
+      if (shouldAutomaticallyCapitalizeFirstCharacter()) {
+        automaticFirstCharacterCapitalizationIsEnabled = false;
+      } else {
+        shiftModifierIsEnabled = !shiftModifierIsEnabled;
+        virtualKeyboardContainerElement.classList.toggle(
+          'stnav_vk_shift_on',
+          shiftModifierIsEnabled,
+        );
+      }
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    if (key === 'CAPS') {
-      caps = !caps;
-      vk.classList.toggle('stnav_vk_caps_on', caps);
-      updateLabels();
+
+    if (keyIdentifier === 'CAPS') {
+      capsLockIsEnabled = !capsLockIsEnabled;
+      virtualKeyboardContainerElement.classList.toggle(
+        'stnav_vk_caps_on',
+        capsLockIsEnabled,
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    if (key === 'BACKSPACE') {
-      delChar();
-      shift = false;
-      vk.classList.remove('stnav_vk_shift_on');
-      updateLabels();
+
+    if (keyIdentifier === 'BACKSPACE') {
+      deleteCharacterBeforeCaret();
+      shiftModifierIsEnabled = false;
+      virtualKeyboardContainerElement.classList.remove(
+        'stnav_vk_shift_on',
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    if (key === 'ENTER') {
-      hideVK();
-      state.typingMode = false;
-      state.navEnabled = false;
+
+    if (keyIdentifier === 'ENTER') {
+      hideVirtualKeyboard();
+      navigationGlobalState.typingMode = false;
+      navigationGlobalState.navEnabled = false;
+
       Promise.resolve().then(() => {
-        if (vkInputTarget) {
-          vkInputTarget.focus();
-          const v = vkInputTarget.value || '';
-          vkInputTarget.setSelectionRange(v.length, v.length);
+        if (activeTextInputTargetElement) {
+          activeTextInputTargetElement.focus();
+          const valueLength =
+            activeTextInputTargetElement.value.length;
+          activeTextInputTargetElement.setSelectionRange(
+            valueLength,
+            valueLength,
+          );
         }
-        state.ws.send('SearchEnter');
+        navigationGlobalState.ws.send('SearchEnter');
       });
       return;
     }
-    if (key === 'SPACE') {
-      outputChar(' ');
-      shift = false;
-      vk.classList.remove('stnav_vk_shift_on');
-      updateLabels();
+
+    if (keyIdentifier === 'SPACE') {
+      insertCharacterIntoInput(' ');
+      shiftModifierIsEnabled = false;
+      virtualKeyboardContainerElement.classList.remove(
+        'stnav_vk_shift_on',
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    if (key === '🌐') {
-      shift = false;
-      vk.classList.remove('stnav_vk_shift_on');
-      updateLabels();
+
+    if (keyIdentifier === '🌐') {
+      shiftModifierIsEnabled = false;
+      virtualKeyboardContainerElement.classList.remove(
+        'stnav_vk_shift_on',
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    if (key === '⬅') {
-      moveCursor('left');
-      shift = false;
-      vk.classList.remove('stnav_vk_shift_on');
-      updateLabels();
+
+    if (keyIdentifier === '⬅') {
+      moveTextCursorHorizontally('left');
+      shiftModifierIsEnabled = false;
+      virtualKeyboardContainerElement.classList.remove(
+        'stnav_vk_shift_on',
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    if (key === '➡') {
-      moveCursor('right');
-      shift = false;
-      vk.classList.remove('stnav_vk_shift_on');
-      updateLabels();
+
+    if (keyIdentifier === '➡') {
+      moveTextCursorHorizontally('right');
+      shiftModifierIsEnabled = false;
+      virtualKeyboardContainerElement.classList.remove(
+        'stnav_vk_shift_on',
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
       return;
     }
-    const ch = keyOutput(key);
-    if (ch) {
-      outputChar(ch);
-      shift = false;
-      vk.classList.remove('stnav_vk_shift_on');
-      updateLabels();
+
+    const resolvedCharacter =
+      resolveOutputCharacterForKey(keyIdentifier);
+
+    if (resolvedCharacter) {
+      insertCharacterIntoInput(resolvedCharacter);
+      shiftModifierIsEnabled = false;
+      virtualKeyboardContainerElement.classList.remove(
+        'stnav_vk_shift_on',
+      );
+      updateAllKeyLabelsBasedOnCurrentModifiers();
     }
   };
 
   document.addEventListener(
     'keydown',
-    (e) => {
-      if (!state.typingMode) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const k = e.key;
-      if (k === 'Escape') {
-        clearAll();
-        state.typingMode = false;
-        hideVK();
+    (keyboardEvent) => {
+      if (!navigationGlobalState.typingMode) return;
+
+      keyboardEvent.preventDefault();
+      keyboardEvent.stopPropagation();
+
+      const pressedKey = keyboardEvent.key;
+
+      if (pressedKey === 'Escape') {
+        clearEntireInputValue();
+        navigationGlobalState.typingMode = false;
+        hideVirtualKeyboard();
         return;
       }
-      if (k === 'ArrowLeft') return moveVK('left');
-      if (k === 'ArrowRight') return moveVK('right');
-      if (k === 'ArrowUp') return moveVK('up');
-      if (k === 'ArrowDown') return moveVK('down');
-      if (k === 'Enter') return press(current);
+
+      if (pressedKey === 'ArrowLeft')
+        return moveKeyboardSelectionInDirection('left');
+      if (pressedKey === 'ArrowRight')
+        return moveKeyboardSelectionInDirection('right');
+      if (pressedKey === 'ArrowUp')
+        return moveKeyboardSelectionInDirection('up');
+      if (pressedKey === 'ArrowDown')
+        return moveKeyboardSelectionInDirection('down');
+      if (pressedKey === 'Enter')
+        return handleVirtualKeyPress(currentlySelectedKeyElement);
     },
     true,
   );
 
-  vk.addEventListener('click', (e) => {
-    if (!state.typingMode) return;
-    const el = e.target.closest('.stnav_vk_key');
-    if (!el) return;
-    selectKey(el);
-    press(el);
+  virtualKeyboardContainerElement.addEventListener('click', (mouseEvent) => {
+    if (!navigationGlobalState.typingMode) return;
+
+    const clickedKeyElement =
+      mouseEvent.target.closest('.stnav_vk_key');
+
+    if (!clickedKeyElement) return;
+
+    visuallySelectKeyElement(clickedKeyElement);
+    handleVirtualKeyPress(clickedKeyElement);
   });
 
   setInterval(() => {
-    if (state.typingMode && vk.style.display === 'none') showVK();
-    if (!state.typingMode && vk.style.display !== 'none') hideVK();
-    updateDisplay();
-    adjustVKPosition();
+    if (
+      navigationGlobalState.typingMode &&
+      virtualKeyboardContainerElement.style.display === 'none'
+    ) {
+      showVirtualKeyboard();
+    }
+
+    if (
+      !navigationGlobalState.typingMode &&
+      virtualKeyboardContainerElement.style.display !== 'none'
+    ) {
+      hideVirtualKeyboard();
+    }
+
+    updateVirtualKeyboardDisplayText();
+    adjustVirtualKeyboardVerticalPosition();
   }, 120);
 
-  let lastURL = location.href;
-  const restoreNav = () => {
-    if (location.href !== lastURL) {
-      lastURL = location.href;
-      state.navEnabled = true;
+  let lastKnownPageLocation = location.href;
+
+  const restoreNavigationStateOnPageChange = () => {
+    if (location.href !== lastKnownPageLocation) {
+      lastKnownPageLocation = location.href;
+      navigationGlobalState.navEnabled = true;
     }
   };
 
-  window.addEventListener('popstate', restoreNav);
-  window.addEventListener('hashchange', restoreNav);
-  const obs = new MutationObserver(restoreNav);
-  obs.observe(document, { subtree: true, childList: true });
+  window.addEventListener(
+    'popstate',
+    restoreNavigationStateOnPageChange,
+  );
+  window.addEventListener(
+    'hashchange',
+    restoreNavigationStateOnPageChange,
+  );
 
+  const pageMutationObserver = new MutationObserver(
+    restoreNavigationStateOnPageChange,
+  );
+
+  pageMutationObserver.observe(document, {
+    subtree: true,
+    childList: true,
+  });
 })();
 
