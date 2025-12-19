@@ -15,6 +15,16 @@
 
   let fullscreenActive = false;
 
+  const isTextEntryElement = function () {
+    const activeElement = document.activeElement;
+    if (!activeElement) return false;
+    return (
+      activeElement.isContentEditable ||
+      activeElement.tagName === 'INPUT' ||
+      activeElement.tagName === 'TEXTAREA'
+    );
+  };
+
   const isVideoPage = function () {
     const pathnameValue = window.location.pathname || '';
     return pathnameValue.split('/').filter(Boolean).length >= 2;
@@ -154,6 +164,10 @@
   window.addEventListener(
     'keydown',
     function (eventObject) {
+      if (isTextEntryElement()) {
+        return;
+      }
+
       const isArrowKey =
         eventObject.key === 'ArrowLeft' ||
         eventObject.key === 'ArrowRight' ||
@@ -489,6 +503,10 @@
     window.addEventListener(
       'keydown',
       function (keyboardEvent) {
+        if (isTextEntryElement()) {
+          return;
+        }
+
         if (keyboardEvent.code === 'ControlRight') {
           keyboardEvent.preventDefault();
           keyboardEvent.stopPropagation();
