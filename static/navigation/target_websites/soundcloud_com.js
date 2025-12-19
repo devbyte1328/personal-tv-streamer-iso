@@ -11,27 +11,40 @@
     'select:not([disabled])',
     'textarea:not([disabled])',
     '[tabindex]:not([tabindex="-1"])',
-    '[contenteditable="true"]',
-    'ytd-thumbnail',
-    'ytd-playlist-panel-video-renderer',
-    '.yt-lockup-view-model',
-    'ytmusic-responsive-list-item-renderer .title',
-    'a.videostream__link.link',
-    'li',
-    '[role="button"]',
-    '[role="link"]',
-    'div.rgpl-btn-play'
+    '[contenteditable="true"]'
   ];
 
   window.addEventListener(
     'keydown',
     function handleKeydownToDisableSoundCloudDefaults(event) {
-      const pressedKey = event.key;
-      const isEnterPressed = pressedKey === 'Enter';
-      const isLeftArrowPressed = pressedKey === 'ArrowLeft';
-      const isRightArrowPressed = pressedKey === 'ArrowRight';
+      const navigationCore = window.STNAV_CORE;
+      const activeNavigationElement =
+        navigationCore && navigationCore.state && navigationCore.state.activeElement;
 
-      if (isEnterPressed || isLeftArrowPressed || isRightArrowPressed) {
+      const isNavigatedEditable =
+        activeNavigationElement &&
+        (activeNavigationElement.isContentEditable ||
+         activeNavigationElement.tagName === 'INPUT' ||
+         activeNavigationElement.tagName === 'TEXTAREA');
+
+      if (isNavigatedEditable) return;
+
+      const targetElement = event.target;
+      const isDirectEditable =
+        targetElement &&
+        (targetElement.isContentEditable ||
+         targetElement.tagName === 'INPUT' ||
+         targetElement.tagName === 'TEXTAREA');
+
+      if (isDirectEditable) return;
+
+      const pressedKey = event.key;
+
+      if (
+        pressedKey === 'Enter' ||
+        pressedKey === 'ArrowLeft' ||
+        pressedKey === 'ArrowRight'
+      ) {
         event.preventDefault();
         event.stopPropagation();
       }
@@ -48,10 +61,6 @@
   };
 
   setInterval(refreshOnAnyUrlChange, 200);
-
-  const isWatchPage = function () {
-    return location.pathname.startsWith('/watch/');
-  };
 
   let remapActive = false;
 
