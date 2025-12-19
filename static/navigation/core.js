@@ -5,12 +5,17 @@
 
   const engineState = {
     websocketLink: new WebSocket("ws://127.0.0.1:8765"),
+    ws: null,
     navigationEnabled: true,
+    navEnabled: true,
     keyboardEntryMode: false,
+    typingMode: false,
     activeElement: null,
     scrollDistance,
     isScrolling: false
   };
+
+  engineState.ws = engineState.websocketLink;
 
   const selectorList =
     (window.STNAV_TARGETS &&
@@ -79,7 +84,6 @@
   function highlightItem(elementGiven) {
     hideOverlay();
     if (!elementGiven) return;
-
     engineState.activeElement = elementGiven;
     drawOverlay(elementGiven);
   }
@@ -166,6 +170,30 @@
     }, 180);
   }, { passive: true });
 
+  document.addEventListener('keydown', (e) => {
+    if (!engineState.navigationEnabled) return;
+    if (e.key !== 'Enter') return;
+    if (!engineState.activeElement) return;
+
+    const el = engineState.activeElement;
+    const isText =
+      el.isContentEditable ||
+      el.tagName === 'INPUT' ||
+      el.tagName === 'TEXTAREA';
+
+    if (!isText) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    engineState.typingMode = true;
+    engineState.keyboardEntryMode = true;
+    engineState.navigationEnabled = false;
+    engineState.navEnabled = false;
+    hideOverlay();
+    el.focus();
+  }, true);
+
   window.STNAV_CORE = {
     state: engineState,
     highlight: highlightItem,
@@ -188,9 +216,11 @@
   document.addEventListener('fullscreenchange', () => {
     if (document.fullscreenElement) {
       engineState.navigationEnabled = false;
+      engineState.navEnabled = false;
       hideOverlay();
     } else {
       engineState.navigationEnabled = true;
+      engineState.navEnabled = true;
       const all = collectFocusableElements();
       if (all.length > 0) highlightItem(all[0]);
     }
