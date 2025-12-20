@@ -73,15 +73,27 @@
 
   const loadCoreScriptsOnce = (function () {
     let alreadyLoaded = false;
-    return function () {
+    return async function () {
       if (alreadyLoaded) return;
       alreadyLoaded = true;
 
+      const baseNavigationUrl = "http://localhost:8080/static/navigation/";
+      const languageDirectoryUrl = baseNavigationUrl + "virtual_keyboard_languages/";
+
+      const languageFileList = await fetchJsonFromUrl(languageDirectoryUrl);
+
+      injectScriptFromText(
+        "window.VKAVAILABLELANGUAGES = " + JSON.stringify(languageFileList) + ";"
+      );
+
       const scriptQueue = [
-        "http://localhost:8080/static/navigation/core.js",
-        "http://localhost:8080/static/navigation/focus.js",
-        "http://localhost:8080/static/navigation/input.js",
-        "http://localhost:8080/static/navigation/virtual_keyboard.js"
+        baseNavigationUrl + "core.js",
+        baseNavigationUrl + "focus.js",
+        baseNavigationUrl + "input.js",
+        ...languageFileList.map(function (languageFilename) {
+          return languageDirectoryUrl + languageFilename;
+        }),
+        baseNavigationUrl + "virtual_keyboard.js"
       ];
 
       const loadNextScript = function (index) {
