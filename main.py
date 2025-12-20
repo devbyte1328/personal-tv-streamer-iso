@@ -154,6 +154,24 @@ def serve_location_file():
 def serve_weather_data():
     return jsonify(weather_data)
 
+@app.route("/static/navigation/virtual_keyboard_languages/")
+def list_virtual_keyboard_languages():
+    base_directory = os.path.dirname(os.path.abspath(__file__))
+    language_directory = os.path.join(
+        base_directory,
+        "static",
+        "navigation",
+        "virtual_keyboard_languages",
+    )
+    if not os.path.isdir(language_directory):
+        abort(404)
+    language_files = [
+        filename
+        for filename in os.listdir(language_directory)
+        if filename.endswith(".js")
+    ]
+    return jsonify(language_files)
+
 if __name__ == "__main__":
     pulled_folder_path = os.path.join(app.root_path, "database", "pulled")
     os.makedirs(pulled_folder_path, exist_ok=True)
