@@ -372,13 +372,40 @@
     true,
   );
 
-  const getKeyCenter = (keyElement) => {
-    const bounds = keyElement.getBoundingClientRect();
-    return [bounds.left + bounds.width / 2, bounds.top + bounds.height / 2];
-  };
+  const findKeyByLabel = (label) =>
+    allKeyElements.find(
+      (element) => element.dataset.key === label,
+    );
 
   const navigateBetweenKeys = (direction) => {
     if (!currentlySelectedKey) return;
+
+    const currentKeyLabel = currentlySelectedKey.dataset.key;
+
+    if (direction === 'down' && (currentKeyLabel === ']' || currentKeyLabel === '\\')) {
+      const enterKey = findKeyByLabel('ENTER');
+      if (enterKey) return visuallySelectKey(enterKey);
+    }
+
+    if (direction === 'up' && (currentKeyLabel === '.' || currentKeyLabel === '/')) {
+      const enterKey = findKeyByLabel('ENTER');
+      if (enterKey) return visuallySelectKey(enterKey);
+    }
+
+    if (currentKeyLabel === 'ENTER' && direction === 'up') {
+      const targetKey = findKeyByLabel(']');
+      if (targetKey) return visuallySelectKey(targetKey);
+    }
+
+    if (currentKeyLabel === 'ENTER' && direction === 'down') {
+      const targetKey = findKeyByLabel('.');
+      if (targetKey) return visuallySelectKey(targetKey);
+    }
+
+    const getKeyCenter = (keyElement) => {
+      const bounds = keyElement.getBoundingClientRect();
+      return [bounds.left + bounds.width / 2, bounds.top + bounds.height / 2];
+    };
 
     const [currentX, currentY] = getKeyCenter(currentlySelectedKey);
     let closestKey = null;
