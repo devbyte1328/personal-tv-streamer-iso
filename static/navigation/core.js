@@ -12,7 +12,8 @@
     typingMode: false,
     activeElement: null,
     scrollDistance,
-    isScrolling: false
+    isScrolling: false,
+    mouseDisabledNavigation: false
   };
 
   engineState.ws = engineState.websocketLink;
@@ -82,6 +83,7 @@
   }
 
   function highlightItem(elementGiven) {
+    if (!engineState.navigationEnabled) return;
     hideOverlay();
     if (!elementGiven) return;
     engineState.activeElement = elementGiven;
@@ -93,6 +95,7 @@
     engineState.keyboardEntryMode = false;
     engineState.navigationEnabled = true;
     engineState.navEnabled = true;
+    engineState.mouseDisabledNavigation = false;
     const list = collectFocusableElements();
     if (list.length > 0) highlightItem(list[0]);
     else hideOverlay();
@@ -183,7 +186,25 @@
     }, 180);
   }, { passive: true });
 
+  document.addEventListener('mousemove', () => {
+    if (engineState.mouseDisabledNavigation) return;
+    engineState.mouseDisabledNavigation = true;
+    engineState.navigationEnabled = false;
+    engineState.navEnabled = false;
+    engineState.activeElement = null;
+    hideOverlay();
+  }, { passive: true });
+
   document.addEventListener('keydown', (e) => {
+    const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+
+    if (arrowKeys.includes(e.key) && engineState.mouseDisabledNavigation) {
+      restoreNavigationState();
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
     if (!engineState.navigationEnabled) {
       if (e.key === 'Escape') {
         restoreNavigationState();
@@ -255,10 +276,7 @@
       engineState.navEnabled = false;
       hideOverlay();
     } else {
-      engineState.navigationEnabled = true;
-      engineState.navEnabled = true;
-      const all = collectFocusableElements();
-      if (all.length > 0) highlightItem(all[0]);
+      restoreNavigationState();
     }
   });
 
