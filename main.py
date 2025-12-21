@@ -51,7 +51,6 @@ async def ws_handler(ws):
             elif msg == "ManualVideoPlayerFocusAndFullscreen":
                 ### Hardcoded to work with two screens for now, later will make this auto resolve resolution...
                 #pyautogui.click(center_x, center_y)
-                print("Hello from ManualVideoPlayerFocusAndFullscreen")
                 time.sleep(2)
                 pyautogui.moveTo(x=950, y=535) # This needs to be resolved at some point
                 pyautogui.press('F')
