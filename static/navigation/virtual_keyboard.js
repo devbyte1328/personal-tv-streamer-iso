@@ -188,6 +188,17 @@
 
   const activateKey = (keyElement) => {
     const keyName = keyElement.dataset.key;
+    
+    if (keyName === 'ENTER') {
+      if (
+        window.STNAV_CORE &&
+        window.STNAV_CORE.state &&
+        window.STNAV_CORE.state.websocketLink
+      ) {
+        window.STNAV_CORE.state.websocketLink.send('SearchEnter');
+      }
+      return hideKeyboard();
+    }
 
     if (keyName === '🌐') return switchLanguage();
 
