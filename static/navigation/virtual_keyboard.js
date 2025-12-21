@@ -190,6 +190,8 @@
     const keyName = keyElement.dataset.key;
     
     if (keyName === 'ENTER') {
+      navigationBrain.typingMode = false;
+      hideKeyboard();
       if (
         window.STNAV_CORE &&
         window.STNAV_CORE.state &&
@@ -197,7 +199,7 @@
       ) {
         window.STNAV_CORE.state.websocketLink.send('SearchEnter');
       }
-      return hideKeyboard();
+      return;
     }
 
     if (keyName === '🌐') return switchLanguage();
@@ -365,20 +367,32 @@
     'keydown',
     (keyboardEvent) => {
       if (!navigationBrain.typingMode) return;
-      keyboardEvent.preventDefault();
-      keyboardEvent.stopPropagation();
 
-      if (keyboardEvent.key === 'Escape') hideKeyboard();
+      const navigationKeys = [
+        'ArrowLeft',
+        'ArrowRight',
+        'ArrowUp',
+        'ArrowDown',
+        'Enter',
+        'Escape',
+      ];
+
+      if (navigationKeys.includes(keyboardEvent.key)) {
+        keyboardEvent.preventDefault();
+        keyboardEvent.stopPropagation();
+      }
+
+      if (keyboardEvent.key === 'Escape') return hideKeyboard();
       if (keyboardEvent.key === 'ArrowLeft')
-        navigateBetweenKeys('left');
+        return navigateBetweenKeys('left');
       if (keyboardEvent.key === 'ArrowRight')
-        navigateBetweenKeys('right');
+        return navigateBetweenKeys('right');
       if (keyboardEvent.key === 'ArrowUp')
-        navigateBetweenKeys('up');
+        return navigateBetweenKeys('up');
       if (keyboardEvent.key === 'ArrowDown')
-        navigateBetweenKeys('down');
+        return navigateBetweenKeys('down');
       if (keyboardEvent.key === 'Enter')
-        activateKey(currentlySelectedKey);
+        return activateKey(currentlySelectedKey);
     },
     true,
   );
