@@ -11,14 +11,11 @@ import time
 from cryptography.fernet import Fernet
 
 app = Flask(__name__)
-
 pyautogui.FAILSAFE = False
 width, height = pyautogui.size()
 center_x = width // 2
 center_y = height // 2
-
 weather_data = {"locations": []}
-
 SHARED_KEY = b''
 fernet = Fernet(SHARED_KEY)
 
@@ -54,7 +51,7 @@ async def CheckUpdate():
             await ws.send(encrypted_payload)
             response = await ws.recv()
             decrypted = fernet.decrypt(response)
-            print(decrypted.decode())
+            return decrypted.decode() == "True"
 
 @app.route('/static/navigation/target_websites/')
 def serve_target_website_directory():
@@ -210,7 +207,12 @@ def list_virtual_keyboard_languages():
     return jsonify(language_files)
 
 if __name__ == "__main__":
-    asyncio.run(CheckUpdate())
+    if os.path.exists("database/update"):
+        os.remove("database/update")
+    update_available = asyncio.run(CheckUpdate())
+    if update_available:
+        os.makedirs("database", exist_ok=True)
+        open("database/update", "w").close()
     pulled_folder_path = os.path.join(app.root_path, "database", "pulled")
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
