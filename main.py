@@ -209,6 +209,10 @@ def list_virtual_keyboard_languages():
     ]
     return jsonify(language_files)
 
+@app.route("/update")
+def update_exists():
+    return jsonify(os.path.isfile(os.path.join(app.root_path, "database", "update")))
+
 if __name__ == "__main__":
     if os.path.exists("database/update"):
         os.remove("database/update")
