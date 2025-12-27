@@ -8,6 +8,7 @@ import os
 import subprocess
 import requests
 import time
+from cryptography.fernet import Fernet
 
 app = Flask(__name__)
 
@@ -17,6 +18,43 @@ center_x = width // 2
 center_y = height // 2
 
 weather_data = {"locations": []}
+
+SHARED_KEY = b''
+fernet = Fernet(SHARED_KEY)
+
+async def CheckUpdate():
+    path = "database/clientinfo"
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w") as f:
+            f.write("Client: None\n")
+            f.write("Build: 1\n")
+    client = "None"
+    build = "1"
+    with open(path, "r") as f:
+        for line in f:
+            key, _, value = line.partition(": ")
+            value = value.strip()
+            if key == "Client":
+                client = value
+            elif key == "Build":
+                build = value
+    async with websockets.connect("ws://localhost:8764") as ws:
+        await ws.send(fernet.encrypt(SHARED_KEY))
+        response = await ws.recv()
+        decrypted = fernet.decrypt(response)
+        if decrypted == SHARED_KEY:
+            payload = {
+                "UpdateCheck": [
+                    {"Client": client},
+                    {"Build": build}
+                ]
+            }
+            encrypted_payload = fernet.encrypt(json.dumps(payload).encode())
+            await ws.send(encrypted_payload)
+            response = await ws.recv()
+            decrypted = fernet.decrypt(response)
+            print(decrypted.decode())
 
 @app.route('/static/navigation/target_websites/')
 def serve_target_website_directory():
@@ -172,6 +210,7 @@ def list_virtual_keyboard_languages():
     return jsonify(language_files)
 
 if __name__ == "__main__":
+    asyncio.run(CheckUpdate())
     pulled_folder_path = os.path.join(app.root_path, "database", "pulled")
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
