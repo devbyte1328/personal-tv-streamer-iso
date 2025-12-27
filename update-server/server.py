@@ -4,8 +4,7 @@ import json
 import os
 from cryptography.fernet import Fernet
 
-# Test key
-SHARED_KEY = b'ycrhQ4UyYbMqeqUP1qXHsvVFVLFeyzzEDk2P5mGA5no='
+SHARED_KEY = b''
 fernet = Fernet(SHARED_KEY)
 
 async def handler(websocket):
@@ -38,8 +37,8 @@ async def handler(websocket):
             pass
 
 async def main():
-    async with websockets.serve(handler, "localhost", 8765):
-        print("WebSocket server running on ws://localhost:8765")
+    async with websockets.serve(handler, "localhost", 8764):
+        print("WebSocket server running on ws://localhost:8764")
         await asyncio.Future()
 
 asyncio.run(main())
