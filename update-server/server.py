@@ -4,7 +4,7 @@ import json
 import os
 from cryptography.fernet import Fernet
 
-SHARED_KEY = b''
+SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key
 fernet = Fernet(SHARED_KEY)
 
 async def handler(websocket):

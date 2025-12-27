@@ -16,7 +16,7 @@ width, height = pyautogui.size()
 center_x = width // 2
 center_y = height // 2
 weather_data = {"locations": []}
-SHARED_KEY = b''
+SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key to avoid raising error
 fernet = Fernet(SHARED_KEY)
 
 async def CheckUpdate():
