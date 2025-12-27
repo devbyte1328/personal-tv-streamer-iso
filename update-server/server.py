@@ -21,7 +21,6 @@ async def handler(websocket):
 
             if "UpdateCheck" in data:
                 client_name = data["UpdateCheck"][0]["Client"]
-                build_value = data["UpdateCheck"][1]["Build"]
 
                 payload_directory = "payload"
                 payload_entries = os.listdir(payload_directory) if os.path.isdir(payload_directory) else []
@@ -32,11 +31,8 @@ async def handler(websocket):
                     for entry in payload_entries
                 )
 
-                client_status = f"Client: {str(client_exists)}"
-                build_status = f"Build: {str(build_exists)}"
-
-                response_message = f"{client_status}, {build_status}"
-                await websocket.send(fernet.encrypt(response_message.encode()))
+                result = "True" if client_exists or build_exists else "False"
+                await websocket.send(fernet.encrypt(result.encode()))
 
         except Exception:
             pass
