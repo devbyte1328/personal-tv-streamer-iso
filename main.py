@@ -68,7 +68,9 @@ async def ws_handler(ws):
     print("WS client connected")
     try:
         async for msg in ws:
-            if msg == "ManualFullScreen":
+            if msg == "UpdateRequest":
+                print("Hello World! Received UpdateRequest!")
+            elif msg == "ManualFullScreen":
                 pyautogui.press('F')
             elif msg == "ExitFullscreen":
                 pyautogui.press('esc')
