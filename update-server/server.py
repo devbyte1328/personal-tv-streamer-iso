@@ -32,6 +32,9 @@ async def handler(websocket):
 
                 result = "True" if client_exists or build_exists else "False"
                 await websocket.send(fernet.encrypt(result.encode()))
+                
+            elif "UpdateRequest" in data:
+                pass
 
         except Exception:
             pass

@@ -17,7 +17,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 updateNavigationItem.addEventListener("click", event => {
                     event.preventDefault();
-                    console.log("Hello World! Update!");
+                    if (websocketLink && websocketLink.readyState === WebSocket.OPEN) {
+                        websocketLink.send("UpdateRequest");
+                    }
                 });
 
                 sidebarListElement.appendChild(updateNavigationItem);
