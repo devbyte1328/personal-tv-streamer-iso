@@ -13,6 +13,7 @@ window.addEventListener("DOMContentLoaded", () => {
             if (updateExists === true) {
                 const updateNavigationItem = document.createElement("li");
                 updateNavigationItem.textContent = "Update";
+                updateNavigationItem.classList.add("update-indicator");
 
                 updateNavigationItem.addEventListener("click", event => {
                     event.preventDefault();
