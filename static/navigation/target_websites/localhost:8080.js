@@ -5,6 +5,7 @@
 
   window.STNAV_TARGETS.selectors = [
     '#sidebar ul li[data-url]',
+    '#sidebar ul li.update-indicator',
     '.home-video-wrapper iframe#standalone-home-video-frame',
     '.home-video-wrapper #standalone-home-video-overlay',
     '#carousel-container iframe[data-position="center"]',
