@@ -48,6 +48,7 @@ html, body {
     padding: 18px 0;
     cursor: pointer;
     font-size: 18px;
+    position: relative;
 }
 
 #sidebar li:hover {
@@ -56,6 +57,21 @@ html, body {
 
 .active-tab {
     background: rgba(255,255,255,0.15);
+}
+
+.update-indicator::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 24px;
+    width: 10px;
+    height: 10px;
+    background: radial-gradient(circle, rgba(255,230,120,1) 0%, rgba(255,200,0,0.9) 40%, rgba(255,200,0,0.2) 70%, rgba(255,200,0,0) 100%);
+    border-radius: 50%;
+    box-shadow:
+        0 0 6px rgba(255,220,120,0.9),
+        0 0 14px rgba(255,200,0,0.8),
+        0 0 28px rgba(255,180,0,0.6);
 }
 
 #content {
@@ -69,3 +85,4 @@ html, body {
     overflow: visible;
     position: relative;
 }
+
