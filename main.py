@@ -75,7 +75,7 @@ async def ws_handler(ws):
             elif msg == "FocusLocalhostBackground":
                 ### Hardcoded to work with two screens for now
                 time.sleep(0.1)
-                pyautogui.click(x=314, y=1012) # This needs to be resolved at some point
+                pyautogui.click(x=284, y=723) # This needs to be resolved at some point
                 pyautogui.moveTo(0, height - 1)
             elif msg == "VideoPlayPause":
                 ### Hardcoded to work with two screens for now, later will make this auto resolve resolution...
