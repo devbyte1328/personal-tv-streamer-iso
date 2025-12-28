@@ -33,18 +33,19 @@ async def handler(websocket):
 
                 result = "True" if client_exists or build_exists else "False"
                 await websocket.send(fernet.encrypt(result.encode()))
-                
+
             elif "UpdateRequest" in data:
                 client_name = data["UpdateRequest"]["Client"]
                 client_payload_path = os.path.join("payload", client_name)
                 if os.path.isdir(client_payload_path):
-                    for file_name in os.listdir(client_payload_path):
-                        file_path = os.path.join(client_payload_path, file_name)
-                        if os.path.isfile(file_path):
+                    for root, directories, files in os.walk(client_payload_path):
+                        for file_name in files:
+                            file_path = os.path.join(root, file_name)
                             with open(file_path, "rb") as f:
                                 encoded_content = base64.b64encode(f.read()).decode("utf-8")
+                            relative_path = os.path.relpath(file_path, client_payload_path)
                             payload = {
-                                "FileName": file_name,
+                                "Path": relative_path,
                                 "FileContent": encoded_content
                             }
                             await websocket.send(fernet.encrypt(json.dumps(payload).encode()))

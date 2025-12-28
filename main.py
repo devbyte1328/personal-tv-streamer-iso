@@ -81,10 +81,12 @@ async def RequestUpdate():
                 data = json.loads(decrypted.decode())
                 if data.get("Done") is True:
                     break
-                file_name = data["FileName"]
+                relative_path = data["Path"]
                 encoded_content = data["FileContent"]
                 file_bytes = base64.b64decode(encoded_content)
-                with open(os.path.join(updates_directory, file_name), "wb") as f:
+                destination_path = os.path.join(updates_directory, relative_path)
+                os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+                with open(destination_path, "wb") as f:
                     f.write(file_bytes)
     except Exception:
         pass
@@ -102,7 +104,6 @@ async def ws_handler(ws):
     try:
         async for msg in ws:
             if msg == "UpdateRequest":
-                print("Hello World! Received UpdateRequest!")
                 await RequestUpdate()
             elif msg == "ManualFullScreen":
                 pyautogui.press('F')
