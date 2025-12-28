@@ -9,6 +9,7 @@ import subprocess
 import requests
 import time
 from cryptography.fernet import Fernet
+import base64
 
 app = Flask(__name__)
 pyautogui.FAILSAFE = False
@@ -56,6 +57,38 @@ async def CheckUpdate():
     except Exception:
         return False
 
+async def RequestUpdate():
+    try:
+        path = "database/clientinfo"
+        client = "None"
+        if os.path.isfile(path):
+            with open(path, "r") as f:
+                for line in f:
+                    key, _, value = line.partition(": ")
+                    if key == "Client":
+                        client = value.strip()
+        updates_directory = os.path.join("database", "updates")
+        os.makedirs(updates_directory, exist_ok=True)
+        async with websockets.connect("ws://localhost:8764", max_size=None) as ws:
+            await ws.send(fernet.encrypt(SHARED_KEY))
+            response = await ws.recv()
+            if fernet.decrypt(response) != SHARED_KEY:
+                return
+            await ws.send(fernet.encrypt(json.dumps({"UpdateRequest": {"Client": client}}).encode()))
+            while True:
+                response = await ws.recv()
+                decrypted = fernet.decrypt(response)
+                data = json.loads(decrypted.decode())
+                if data.get("Done") is True:
+                    break
+                file_name = data["FileName"]
+                encoded_content = data["FileContent"]
+                file_bytes = base64.b64decode(encoded_content)
+                with open(os.path.join(updates_directory, file_name), "wb") as f:
+                    f.write(file_bytes)
+    except Exception:
+        pass
+
 @app.route('/static/navigation/target_websites/')
 def serve_target_website_directory():
     directory_path = os.path.join(app.root_path, "static/navigation/target_websites")
@@ -70,6 +103,7 @@ async def ws_handler(ws):
         async for msg in ws:
             if msg == "UpdateRequest":
                 print("Hello World! Received UpdateRequest!")
+                await RequestUpdate()
             elif msg == "ManualFullScreen":
                 pyautogui.press('F')
             elif msg == "ExitFullscreen":
