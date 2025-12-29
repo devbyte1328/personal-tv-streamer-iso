@@ -20,74 +20,117 @@ weather_data = {"locations": []}
 SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key to avoid raising error
 fernet = Fernet(SHARED_KEY)
 
+def load_server_info():
+    server_info_path = os.path.join("database", "serverinfo")
+    server_ip = "0.0.0.0"
+    server_port = "8764"
+
+    # Create serverinfo with defaults if missing
+    if not os.path.isfile(server_info_path):
+        os.makedirs(os.path.dirname(server_info_path), exist_ok=True)
+        with open(server_info_path, "w", encoding="utf-8") as file:
+            file.write(f"IP: {server_ip}\n")
+            file.write(f"PORT: {server_port}\n")
+        return server_ip, server_port
+
+    # Read existing serverinfo values
+    with open(server_info_path, "r", encoding="utf-8") as file:
+        for line in file:
+            key, _, value = line.partition(": ")
+            value = value.strip()
+            if key == "IP":
+                server_ip = value
+            elif key == "PORT":
+                server_port = value
+
+    return server_ip, server_port
+
 async def CheckUpdate():
     try:
-        path = "database/clientinfo"
-        if not os.path.exists(path):
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w") as f:
-                f.write("Client: None\n")
-                f.write("Build: 1\n")
+        client_info_path = "database/clientinfo"
+
+        # Ensure clientinfo exists
+        if not os.path.isfile(client_info_path):
+            os.makedirs(os.path.dirname(client_info_path), exist_ok=True)
+            with open(client_info_path, "w", encoding="utf-8") as file:
+                file.write("Client: None\n")
+                file.write("Build: 1\n")
+
         client = "None"
         build = "1"
-        with open(path, "r") as f:
-            for line in f:
+
+        # Read client and build values
+        with open(client_info_path, "r", encoding="utf-8") as file:
+            for line in file:
                 key, _, value = line.partition(": ")
                 value = value.strip()
                 if key == "Client":
                     client = value
                 elif key == "Build":
                     build = value
-        async with websockets.connect("ws://localhost:8764") as ws:
+
+        server_ip, server_port = load_server_info()
+        websocket_url = f"ws://{server_ip}:{server_port}"
+
+        async with websockets.connect(websocket_url) as ws:
             await ws.send(fernet.encrypt(SHARED_KEY))
             response = await ws.recv()
+
+            # Validate shared key handshake
+            if fernet.decrypt(response) != SHARED_KEY:
+                return False
+
+            payload = {
+                "UpdateCheck": [
+                    {"Client": client},
+                    {"Build": build}
+                ]
+            }
+
+            await ws.send(fernet.encrypt(json.dumps(payload).encode()))
+            response = await ws.recv()
             decrypted = fernet.decrypt(response)
-            if decrypted == SHARED_KEY:
-                payload = {
-                    "UpdateCheck": [
-                        {"Client": client},
-                        {"Build": build}
-                    ]
-                }
-                encrypted_payload = fernet.encrypt(json.dumps(payload).encode())
-                await ws.send(encrypted_payload)
-                response = await ws.recv()
-                decrypted = fernet.decrypt(response)
-                return decrypted.decode() == "True"
+
+            return decrypted.decode() == "True"
+
     except Exception:
         return False
 
 async def RequestUpdate():
     try:
-        # Read client identifier used by the update server
-        path = "database/clientinfo"
+        client_info_path = "database/clientinfo"
         client = "None"
-        if os.path.isfile(path):
-            with open(path, "r") as f:
-                for line in f:
+
+        # Read client identifier
+        if os.path.isfile(client_info_path):
+            with open(client_info_path, "r", encoding="utf-8") as file:
+                for line in file:
                     key, _, value = line.partition(": ")
                     if key == "Client":
                         client = value.strip()
 
-        # Temporary staging area for incoming update files
         updates_directory = os.path.join("database", "updates")
         os.makedirs(updates_directory, exist_ok=True)
 
-        # WebSocket handshake and update request
-        async with websockets.connect("ws://localhost:8764", max_size=None) as ws:
+        server_ip, server_port = load_server_info()
+        websocket_url = f"ws://{server_ip}:{server_port}"
+
+        async with websockets.connect(websocket_url, max_size=None) as ws:
             await ws.send(fernet.encrypt(SHARED_KEY))
             response = await ws.recv()
+
+            # Validate shared key handshake
             if fernet.decrypt(response) != SHARED_KEY:
                 return
 
-            # Ask server for update payload
+            # Request update payload
             await ws.send(
                 fernet.encrypt(
                     json.dumps({"UpdateRequest": {"Client": client}}).encode()
                 )
             )
 
-            # Stream files until server signals completion
+            # Receive files until completion signal
             while True:
                 response = await ws.recv()
                 decrypted = fernet.decrypt(response)
@@ -96,18 +139,18 @@ async def RequestUpdate():
                 if data.get("Done") is True:
                     break
 
-                # Decode and write each file to the updates directory
                 relative_path = data["Path"]
-                encoded_content = data["FileContent"]
-                file_bytes = base64.b64decode(encoded_content)
+                file_bytes = base64.b64decode(data["FileContent"])
 
                 destination_path = os.path.join(updates_directory, relative_path)
                 os.makedirs(os.path.dirname(destination_path), exist_ok=True)
-                with open(destination_path, "wb") as f:
-                    f.write(file_bytes)
 
-        # Promote staged update files into the application root
+                with open(destination_path, "wb") as file:
+                    file.write(file_bytes)
+
         root_directory = os.path.abspath(os.path.dirname(__file__))
+
+        # Move staged update files into application root
         for root_path, directory_names, file_names in os.walk(updates_directory, topdown=False):
             for file_name in file_names:
                 source_file_path = os.path.join(root_path, file_name)
@@ -117,24 +160,18 @@ async def RequestUpdate():
                 os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                 os.replace(source_file_path, target_file_path)
 
-            # Clean up empty directories as we walk back up
             for directory_name in directory_names:
                 directory_path = os.path.join(root_path, directory_name)
                 if not os.listdir(directory_path):
                     os.rmdir(directory_path)
 
-        # Remove the now-empty updates directory
         if os.path.isdir(updates_directory):
             os.rmdir(updates_directory)
 
-        # Final signal that update processing has completed
-        subprocess.run(
-            ["echo", "Update finished! maybe this should be a reboot command?"]
-        )
+        subprocess.run(["echo", "Update finished! maybe this should be a reboot command?"])
 
     except Exception:
         pass
-
 
 @app.route('/static/navigation/target_websites/')
 def serve_target_website_directory():

@@ -2,6 +2,7 @@ venv
 database/pulled/curated-youtube-general-videos
 database/pulled/curated-youtube-trailer-videos
 database/clientinfo
+database/serverinfo
 database/update
 database/updates
 update-server/payload
