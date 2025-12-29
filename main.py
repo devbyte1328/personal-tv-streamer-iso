@@ -306,6 +306,6 @@ if __name__ == "__main__":
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
     threading.Thread(target=weather_thread_function, daemon=True).start()
-    #threading.Thread(target=run_youtube_api, daemon=True).start()
+    threading.Thread(target=run_youtube_api, daemon=True).start()
     app.run(host='0.0.0.0', port=8080)
 
