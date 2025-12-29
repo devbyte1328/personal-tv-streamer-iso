@@ -59,6 +59,7 @@ async def CheckUpdate():
 
 async def RequestUpdate():
     try:
+        # Read client identifier used by the update server
         path = "database/clientinfo"
         client = "None"
         if os.path.isfile(path):
@@ -67,29 +68,73 @@ async def RequestUpdate():
                     key, _, value = line.partition(": ")
                     if key == "Client":
                         client = value.strip()
+
+        # Temporary staging area for incoming update files
         updates_directory = os.path.join("database", "updates")
         os.makedirs(updates_directory, exist_ok=True)
+
+        # WebSocket handshake and update request
         async with websockets.connect("ws://localhost:8764", max_size=None) as ws:
             await ws.send(fernet.encrypt(SHARED_KEY))
             response = await ws.recv()
             if fernet.decrypt(response) != SHARED_KEY:
                 return
-            await ws.send(fernet.encrypt(json.dumps({"UpdateRequest": {"Client": client}}).encode()))
+
+            # Ask server for update payload
+            await ws.send(
+                fernet.encrypt(
+                    json.dumps({"UpdateRequest": {"Client": client}}).encode()
+                )
+            )
+
+            # Stream files until server signals completion
             while True:
                 response = await ws.recv()
                 decrypted = fernet.decrypt(response)
                 data = json.loads(decrypted.decode())
+
                 if data.get("Done") is True:
                     break
+
+                # Decode and write each file to the updates directory
                 relative_path = data["Path"]
                 encoded_content = data["FileContent"]
                 file_bytes = base64.b64decode(encoded_content)
+
                 destination_path = os.path.join(updates_directory, relative_path)
                 os.makedirs(os.path.dirname(destination_path), exist_ok=True)
                 with open(destination_path, "wb") as f:
                     f.write(file_bytes)
+
+        # Promote staged update files into the application root
+        root_directory = os.path.abspath(os.path.dirname(__file__))
+        for root_path, directory_names, file_names in os.walk(updates_directory, topdown=False):
+            for file_name in file_names:
+                source_file_path = os.path.join(root_path, file_name)
+                relative_sub_path = os.path.relpath(source_file_path, updates_directory)
+                target_file_path = os.path.join(root_directory, relative_sub_path)
+
+                os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+                os.replace(source_file_path, target_file_path)
+
+            # Clean up empty directories as we walk back up
+            for directory_name in directory_names:
+                directory_path = os.path.join(root_path, directory_name)
+                if not os.listdir(directory_path):
+                    os.rmdir(directory_path)
+
+        # Remove the now-empty updates directory
+        if os.path.isdir(updates_directory):
+            os.rmdir(updates_directory)
+
+        # Final signal that update processing has completed
+        subprocess.run(
+            ["echo", "Update finished! maybe this should be a reboot command?"]
+        )
+
     except Exception:
         pass
+
 
 @app.route('/static/navigation/target_websites/')
 def serve_target_website_directory():
@@ -261,6 +306,6 @@ if __name__ == "__main__":
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
     threading.Thread(target=weather_thread_function, daemon=True).start()
-    threading.Thread(target=run_youtube_api, daemon=True).start()
+    #threading.Thread(target=run_youtube_api, daemon=True).start()
     app.run(host='0.0.0.0', port=8080)
 
