@@ -195,6 +195,18 @@ Vendor links (read the above warning first):
     sudo reboot
     ``` 
     
+## 🖥️📡 How to Setup Update Service/Server
+![Update_Button_Demo](images/Update_Button_Demo.png)
+You can configure an update server by adding server information to 'database/serverinfo'.
+Once configured, the TV Streamer will check for updates every time it boots up by pinging the server. The update system supports both client-specific updates (targeted to a single TV Streamer) and general updates (applied to all TV Streamers). The TV Streamer sends its "Client Name" and "Build Number". The server evaluates this information and determines whether an update is available. If an update exists, the server notifies the client which makes a "Update" button appear on the left side, highlighted with a glowing yellow indicator to signal its importance. When the user presses the "Update" button, the TV Streamer requests the new files and commands from the server. The server responds by sending does new files and commands. Once received, the TV Streamer applies the new files, runs any commands that were given, and finally reboots to finalize the update.
+
+The TV Streamer doesn't start with a Update Service/Server by default, here is how you set one up:
+1. **"..."** (Steps to be added...)
+    
+    ```
+    ...
+    ```
+     
 ## Credits
 
 ### Application Services
