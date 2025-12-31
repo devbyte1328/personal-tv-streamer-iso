@@ -51,8 +51,9 @@ async def handler(websocket):
                             await websocket.send(fernet.encrypt(json.dumps(payload).encode()))
                 await websocket.send(fernet.encrypt(json.dumps({"Done": True}).encode()))
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Error: {e}")
+            await websocket.close()
 
 async def main():
     async with websockets.serve(handler, "localhost", 8764):
