@@ -2,22 +2,42 @@ import asyncio
 import websockets
 import json
 import os
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 import base64
+from datetime import datetime
+from json import JSONDecodeError
 
 SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key
 fernet = Fernet(SHARED_KEY)
 
+def log_event(ip_address, event_type, summary):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    log_line = f"[{timestamp}] [{ip_address}] [{event_type}] {summary}"
+    print(log_line)
+    with open("logs.txt", "a", encoding="utf-8") as log_file:
+        log_file.write(log_line + "\n")
+
 async def handler(websocket):
-    async for encrypted_message in websocket:
-        try:
+    ip_address = "unknown"
+    if websocket.remote_address:
+        ip_address = f"{websocket.remote_address[0]}:{websocket.remote_address[1]}"
+
+    log_event(ip_address, "CONNECT", "opened")
+
+    try:
+        async for encrypted_message in websocket:
             decrypted = fernet.decrypt(encrypted_message)
 
             if decrypted == SHARED_KEY:
-                await websocket.send(fernet.encrypt(SHARED_KEY))
+                response = fernet.encrypt(SHARED_KEY)
+                await websocket.send(response)
+                log_event(ip_address, "HANDSHAKE", "shared key validated")
                 continue
 
-            data = json.loads(decrypted.decode())
+            decrypted_text = decrypted.decode(errors="replace")
+            data = json.loads(decrypted_text)
+
+            log_event(ip_address, "RECEIVED", decrypted_text)
 
             if "UpdateCheck" in data:
                 client_name = data["UpdateCheck"][0]["Client"]
@@ -32,28 +52,45 @@ async def handler(websocket):
                 )
 
                 result = "True" if client_exists or build_exists else "False"
-                await websocket.send(fernet.encrypt(result.encode()))
+                response = fernet.encrypt(result.encode())
+                await websocket.send(response)
+                log_event(ip_address, "RESPONDED", f"UpdateCheck={result}")
 
             elif "UpdateRequest" in data:
                 client_name = data["UpdateRequest"]["Client"]
                 client_payload_path = os.path.join("payload", client_name)
+
+                file_count = 0
+
                 if os.path.isdir(client_payload_path):
                     for root, directories, files in os.walk(client_payload_path):
                         for file_name in files:
                             file_path = os.path.join(root, file_name)
-                            with open(file_path, "rb") as f:
-                                encoded_content = base64.b64encode(f.read()).decode("utf-8")
+                            with open(file_path, "rb") as file_handle:
+                                encoded_content = base64.b64encode(file_handle.read()).decode("utf-8")
+
                             relative_path = os.path.relpath(file_path, client_payload_path)
                             payload = {
                                 "Path": relative_path,
                                 "FileContent": encoded_content
                             }
-                            await websocket.send(fernet.encrypt(json.dumps(payload).encode()))
-                await websocket.send(fernet.encrypt(json.dumps({"Done": True}).encode()))
 
-        except Exception as e:
-            print(f"Error: {e}")
-            await websocket.close()
+                            response = fernet.encrypt(json.dumps(payload).encode())
+                            await websocket.send(response)
+                            file_count += 1
+
+                done_response = fernet.encrypt(json.dumps({"Done": True}).encode())
+                await websocket.send(done_response)
+                log_event(ip_address, "RESPONDED", f"UpdateRequest files={file_count}")
+
+    except (InvalidToken, JSONDecodeError):
+        log_event(ip_address, "ENCRYPTION_FAILED", "decryption or integrity validation failed")
+        await websocket.close()
+    except Exception as exception:
+        log_event(ip_address, "ERROR", repr(exception))
+        await websocket.close()
+    finally:
+        log_event(ip_address, "DISCONNECT", "closed")
 
 async def main():
     async with websockets.serve(handler, "localhost", 8764):
