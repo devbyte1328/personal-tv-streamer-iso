@@ -101,7 +101,6 @@ async def RequestUpdate():
         client_info_path = "database/clientinfo"
         client = "None"
 
-        # Read client identifier
         if os.path.isfile(client_info_path):
             with open(client_info_path, "r", encoding="utf-8") as file:
                 for line in file:
@@ -119,18 +118,15 @@ async def RequestUpdate():
             await ws.send(fernet.encrypt(SHARED_KEY))
             response = await ws.recv()
 
-            # Validate shared key handshake
             if fernet.decrypt(response) != SHARED_KEY:
                 return
 
-            # Request update payload
             await ws.send(
                 fernet.encrypt(
                     json.dumps({"UpdateRequest": {"Client": client}}).encode()
                 )
             )
 
-            # Receive files until completion signal
             while True:
                 response = await ws.recv()
                 decrypted = fernet.decrypt(response)
@@ -149,8 +145,8 @@ async def RequestUpdate():
                     file.write(file_bytes)
 
         root_directory = os.path.abspath(os.path.dirname(__file__))
+        update_command_script_path = None
 
-        # Move staged update files into application root
         for root_path, directory_names, file_names in os.walk(updates_directory, topdown=False):
             for file_name in file_names:
                 source_file_path = os.path.join(root_path, file_name)
@@ -160,6 +156,9 @@ async def RequestUpdate():
                 os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                 os.replace(source_file_path, target_file_path)
 
+                if file_name == "update-com.sh":
+                    update_command_script_path = target_file_path
+
             for directory_name in directory_names:
                 directory_path = os.path.join(root_path, directory_name)
                 if not os.listdir(directory_path):
@@ -168,7 +167,10 @@ async def RequestUpdate():
         if os.path.isdir(updates_directory):
             os.rmdir(updates_directory)
 
-        subprocess.run(["echo", "Update finished! maybe this should be a reboot command?"])
+        if update_command_script_path and os.path.isfile(update_command_script_path):
+            os.chmod(update_command_script_path, 0o755)
+            subprocess.run(["bash", update_command_script_path])
+            os.remove(update_command_script_path)
 
     except Exception:
         pass
