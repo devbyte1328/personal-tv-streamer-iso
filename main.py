@@ -96,8 +96,10 @@ async def CheckUpdate():
     except Exception:
         return False
 
-async def RequestUpdate():
+async def RequestUpdate(ws):
     try:
+        await ws.send("UpdateStarted")
+
         # Read client identifier
         client_info_path = "database/clientinfo"
         client = "None"
@@ -117,16 +119,17 @@ async def RequestUpdate():
         server_ip, server_port = load_server_info()
         websocket_url = f"ws://{server_ip}:{server_port}"
 
-        async with websockets.connect(websocket_url, max_size=None) as ws:
+        async with websockets.connect(websocket_url, max_size=None) as update_ws:
             # Shared key handshake
-            await ws.send(fernet.encrypt(SHARED_KEY))
-            response = await ws.recv()
+            await update_ws.send(fernet.encrypt(SHARED_KEY))
+            response = await update_ws.recv()
 
             if fernet.decrypt(response) != SHARED_KEY:
+                await ws.send("UpdateFailed")
                 return
 
             # Request update payload
-            await ws.send(
+            await update_ws.send(
                 fernet.encrypt(
                     json.dumps({"UpdateRequest": {"Client": client}}).encode()
                 )
@@ -134,7 +137,7 @@ async def RequestUpdate():
 
             # Receive update files
             while True:
-                response = await ws.recv()
+                response = await update_ws.recv()
                 decrypted = fernet.decrypt(response)
                 data = json.loads(decrypted.decode())
 
@@ -149,6 +152,8 @@ async def RequestUpdate():
 
                 with open(destination_path, "wb") as file:
                     file.write(file_bytes)
+
+                await ws.send("UpdateProgress")
 
         root_directory = os.path.abspath(os.path.dirname(__file__))
         update_command_script_path = None
@@ -183,9 +188,10 @@ async def RequestUpdate():
             os.remove(update_command_script_path)
 
         subprocess.run(["echo", "Update finished! maybe this should be a reboot command?"])
+        await ws.send("UpdateFinished")
 
     except Exception:
-        pass
+        await ws.send("UpdateFailed")
 
 @app.route('/static/navigation/target_websites/')
 def serve_target_website_directory():
@@ -200,7 +206,7 @@ async def ws_handler(ws):
     try:
         async for msg in ws:
             if msg == "UpdateRequest":
-                await RequestUpdate()
+                await RequestUpdate(ws)
             elif msg == "ManualFullScreen":
                 pyautogui.press('F')
             elif msg == "ExitFullscreen":
