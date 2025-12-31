@@ -98,6 +98,7 @@ async def CheckUpdate():
 
 async def RequestUpdate():
     try:
+        # Read client identifier
         client_info_path = "database/clientinfo"
         client = "None"
 
@@ -108,25 +109,30 @@ async def RequestUpdate():
                     if key == "Client":
                         client = value.strip()
 
+        # Prepare update staging directory
         updates_directory = os.path.join("database", "updates")
         os.makedirs(updates_directory, exist_ok=True)
 
+        # Connect to update server
         server_ip, server_port = load_server_info()
         websocket_url = f"ws://{server_ip}:{server_port}"
 
         async with websockets.connect(websocket_url, max_size=None) as ws:
+            # Shared key handshake
             await ws.send(fernet.encrypt(SHARED_KEY))
             response = await ws.recv()
 
             if fernet.decrypt(response) != SHARED_KEY:
                 return
 
+            # Request update payload
             await ws.send(
                 fernet.encrypt(
                     json.dumps({"UpdateRequest": {"Client": client}}).encode()
                 )
             )
 
+            # Receive update files
             while True:
                 response = await ws.recv()
                 decrypted = fernet.decrypt(response)
@@ -147,6 +153,7 @@ async def RequestUpdate():
         root_directory = os.path.abspath(os.path.dirname(__file__))
         update_command_script_path = None
 
+        # Move staged files into application root
         for root_path, directory_names, file_names in os.walk(updates_directory, topdown=False):
             for file_name in file_names:
                 source_file_path = os.path.join(root_path, file_name)
@@ -156,9 +163,11 @@ async def RequestUpdate():
                 os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                 os.replace(source_file_path, target_file_path)
 
+                # Detect post-update command script
                 if file_name == "update-com.sh":
                     update_command_script_path = target_file_path
 
+            # Cleanup empty directories
             for directory_name in directory_names:
                 directory_path = os.path.join(root_path, directory_name)
                 if not os.listdir(directory_path):
@@ -167,10 +176,13 @@ async def RequestUpdate():
         if os.path.isdir(updates_directory):
             os.rmdir(updates_directory)
 
+        # Execute post-update command script if present
         if update_command_script_path and os.path.isfile(update_command_script_path):
             os.chmod(update_command_script_path, 0o755)
             subprocess.run(["bash", update_command_script_path])
             os.remove(update_command_script_path)
+
+        subprocess.run(["echo", "Update finished! maybe this should be a reboot command?"])
 
     except Exception:
         pass
