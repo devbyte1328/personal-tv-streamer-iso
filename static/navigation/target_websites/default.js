@@ -135,7 +135,7 @@
     window.addEventListener(
       'keydown',
       function (keyboardEvent) {
-        if (keyboardEvent.code === 'ControlRight') {
+        if (keyboardEvent.code === 'F8') {
           keyboardEvent.preventDefault();
           keyboardEvent.stopPropagation();
           panelVisible ? hidePanel() : showPanel();
