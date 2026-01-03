@@ -352,6 +352,16 @@ def list_virtual_keyboard_languages():
 def update_exists():
     return jsonify(os.path.isfile(os.path.join(app.root_path, "database", "update")))
 
+@app.route('/url-control-start-spinner')
+def url_control_start_spinner():
+    print("start spinner")
+    return "", 204
+
+@app.route('/url-control-stop-spinner') 
+def url_control_stop_spinner():
+    print("stop spinner")
+    return "", 204
+
 if __name__ == "__main__":
     if os.path.exists("database/update"):
         os.remove("database/update")
