@@ -175,6 +175,10 @@ Vendor links (read the above warning first):
     media.autoplay.enabled
     ```
     Set **"media.autoplay.enabled"** → **true**
+    ```
+    toolkit.legacyUserProfileCustomizations.stylesheets
+    ```
+    Set **"toolkit.legacyUserProfileCustomizations.stylesheets"** → **true**
     
     Visit the Tampermonkey Firefox add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
     → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →

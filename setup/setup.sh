@@ -35,6 +35,10 @@ sudo pacman -R --noconfirm webapp-manager vivaldi timeshift thunderbird xed gnom
 echo "Configuring Librewolf policies"
 sudo cp policies.json /usr/lib/librewolf/distribution/policies.json
 
+echo "Configuring Librewolf loading status"
+mkdir -p ~/.librewolf/*.default-default/chrome
+cp userChrome.css ~/.librewolf/*.default-default/chrome/
+
 echo "Remapping keys for airmouse"
 sudo cp Xmodmap ~/.Xmodmap
 sudo xmodmap ~/.Xmodmap
