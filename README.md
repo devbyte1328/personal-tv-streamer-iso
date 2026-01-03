@@ -152,6 +152,8 @@ Vendor links (read the above warning first):
     **"Settings"** → **"Privacy & Security"** →
     scroll to **"Cookies and Site Data"** → disable
     **"Delete cookies and site data when Librewolf is closed"**.
+    Visit the URL **"about:debugging#/runtime/this-firefox"** → Scroll to **"Temporary Extensions"** → Press **"Load Temporary Add-on..."** →
+    Select **"/home/tv-streamer/Repositories/personal-tv-streamer-iso/setup/manifest.json"**.
     
     Visit the URL **"about:config"** →
     search for these values and set them accordingly:
