@@ -1,0 +1,10 @@
+#statuspanel {
+    display: none !important;
+    visibility: collapse !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+#statuspanel-label {
+    display: none !important;
+}
