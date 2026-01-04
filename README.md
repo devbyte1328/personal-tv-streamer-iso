@@ -152,6 +152,10 @@ Vendor links (read the above warning first):
     **"Settings"** → **"Privacy & Security"** →
     scroll to **"Cookies and Site Data"** → disable
     **"Delete cookies and site data when Librewolf is closed"**.
+
+    **"Settings"** → **"General"** →
+    scroll to **"Translations"** → disable
+    **"Enable fullpage translations"**.
     
     Visit the URL **"about:config"** →
     search for these values and set them accordingly:
