@@ -201,6 +201,9 @@ Vendor links (read the above warning first):
     ```
     ...
     ```
+    ```
+    librewolf --kiosk
+    ```
 
 9. **Reboot**
 
