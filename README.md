@@ -179,6 +179,10 @@ Vendor links (read the above warning first):
     toolkit.legacyUserProfileCustomizations.stylesheets
     ```
     Set **"toolkit.legacyUserProfileCustomizations.stylesheets"** → **true**
+    ```
+    browser.link.open_newwindow
+    ```
+    Set **"browser.link.open_newwindow"** → 1
     
     Visit the Tampermonkey Firefox add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
     → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
