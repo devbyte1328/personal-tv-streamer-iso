@@ -189,7 +189,7 @@ async def RequestUpdate(ws):
             subprocess.run(["bash", update_command_script_path])
             os.remove(update_command_script_path)
 
-        subprocess.run(["echo", "Update finished! maybe this should be a reboot command?"])
+        subprocess.run(["reboot"])
         await ws.send("UpdateFinished")
 
     except Exception:
