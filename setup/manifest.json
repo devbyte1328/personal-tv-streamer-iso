@@ -2,7 +2,13 @@
   "manifest_version": 2,
   "name": "Loading Spinner",
   "version": "1.0",
-  "permissions": ["webNavigation", "<all_urls>"],
-  "background": { "scripts": ["loading-spinner.js"] }
+  "permissions": ["webNavigation"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "scripts": ["loading-spinner.js"] },
+  "applications": {
+    "gecko": {
+      "id": "loading-spinner@local"
+    }
+  }
 }
 

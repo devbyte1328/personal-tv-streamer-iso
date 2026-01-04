@@ -152,8 +152,6 @@ Vendor links (read the above warning first):
     **"Settings"** → **"Privacy & Security"** →
     scroll to **"Cookies and Site Data"** → disable
     **"Delete cookies and site data when Librewolf is closed"**.
-    Visit the URL **"about:debugging#/runtime/this-firefox"** → Scroll to **"Temporary Extensions"** → Press **"Load Temporary Add-on..."** →
-    Select **"/home/tv-streamer/Repositories/personal-tv-streamer-iso/setup/manifest.json"**.
     
     Visit the URL **"about:config"** →
     search for these values and set them accordingly:
@@ -187,6 +185,8 @@ Vendor links (read the above warning first):
     check **"Pin extention to toolbar"** → click **"OK"** → click on the Tampermonkey icon at the top right cornor of the browser
     → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from the repository
     setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
+    
+    Visit the URL **"about:addons"** → Enable **"Loading Spinner"**.
     
 8. **"..."** (Steps to be added...)
     

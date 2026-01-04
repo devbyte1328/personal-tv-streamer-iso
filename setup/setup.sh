@@ -36,8 +36,13 @@ echo "Configuring Librewolf policies"
 sudo cp policies.json /usr/lib/librewolf/distribution/policies.json
 
 echo "Configuring Librewolf loading status"
+# Remove default grey colored new URL display at bottom left
 mkdir -p ~/.librewolf/*.default-default/chrome
 cp userChrome.css ~/.librewolf/*.default-default/chrome/
+# Add loading screen connector to Python 
+zip -r loading-spinner@local.xpi manifest.json loading-spinner.js
+sudo mkdir -p /usr/lib/librewolf/browser/extensions
+sudo cp loading-spinner@local.xpi /usr/lib/librewolf/browser/extensions/loading-spinner@local.xpi
 
 echo "Remapping keys for airmouse"
 sudo cp Xmodmap ~/.Xmodmap
