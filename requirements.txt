@@ -6,3 +6,4 @@ aiohttp
 requests
 websockets
 cryptography
+pyqt6

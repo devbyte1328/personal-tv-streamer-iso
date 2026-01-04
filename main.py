@@ -19,6 +19,8 @@ center_y = height // 2
 weather_data = {"locations": []}
 SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key to avoid raising error
 fernet = Fernet(SHARED_KEY)
+_spinner_process = None
+_spinner_lock = threading.Lock()
 
 def load_server_info():
     server_info_path = os.path.join("database", "serverinfo")
@@ -354,12 +356,26 @@ def update_exists():
 
 @app.route('/url-control-start-spinner')
 def url_control_start_spinner():
-    print("start spinner")
+    global _spinner_process
+    with _spinner_lock:
+        if _spinner_process is None or _spinner_process.poll() is not None:
+            _spinner_process = subprocess.Popen(
+                ["python3", os.path.abspath("lib/spinner_overlay.py")],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True
+            )
+
     return "", 204
 
-@app.route('/url-control-stop-spinner') 
+@app.route('/url-control-stop-spinner')
 def url_control_stop_spinner():
-    print("stop spinner")
+    global _spinner_process
+    with _spinner_lock:
+        if _spinner_process is not None and _spinner_process.poll() is None:
+            _spinner_process.terminate()
+            _spinner_process = None
+
     return "", 204
 
 if __name__ == "__main__":
