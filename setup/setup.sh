@@ -6,9 +6,9 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 echo "Removing sudo password for 'tv-streamer'"
-echo "tv-streamer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/90-nopasswd-tv-streamer
-chmod 440 /etc/sudoers.d/90-nopasswd-tv-streamer
-visudo -c > /dev/null # ">/dev/null" to make it silent
+echo "tv-streamer ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/90-nopasswd-tv-streamer
+sudo chmod 440 /etc/sudoers.d/90-nopasswd-tv-streamer
+sudo visudo -c > /dev/null # ">/dev/null" to make it silent
 
 echo "Resolve errors caused by upstream (discovered on 1/1/2026)"
 yes | sudo pacman -Sy archlinux-keyring manjaro-keyring >/dev/null 2>&1 # ">/dev/null 2>&1" to make it silent
