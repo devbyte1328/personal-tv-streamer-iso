@@ -10,6 +10,8 @@ import requests
 import time
 from cryptography.fernet import Fernet
 import base64
+from pynput import keyboard
+from playsound3 import playsound
 
 app = Flask(__name__)
 pyautogui.FAILSAFE = False
@@ -21,6 +23,44 @@ SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key t
 fernet = Fernet(SHARED_KEY)
 _spinner_process = None
 _spinner_lock = threading.Lock()
+baseDir = os.path.dirname(os.path.abspath(__file__))
+moveAudioPath = os.path.join(baseDir, "static/assets/audio-feedback/move.mp3")
+enterAudioPath = os.path.join(baseDir, "static/assets/audio-feedback/enter.mp3")
+
+def playMove():
+    subprocess.Popen(
+        ["mpg123", "-q", moveAudioPath],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+def playEnter():
+    subprocess.Popen(
+        ["mpg123", "-q", enterAudioPath],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+
+def onKeyPress(key):
+    if key in (
+        keyboard.Key.up,
+        keyboard.Key.down,
+        keyboard.Key.left,
+        keyboard.Key.right,
+    ):
+        threading.Thread(target=playMove, daemon=True).start()
+
+    elif key in (
+        keyboard.Key.enter,
+        keyboard.Key.f8,
+    ):
+        threading.Thread(target=playEnter, daemon=True).start()
+
+def start_keyboard_listener():
+    listener = keyboard.Listener(on_press=onKeyPress)
+    listener.start()
+    listener.join()
 
 def load_server_info():
     server_info_path = os.path.join("database", "serverinfo")
@@ -390,5 +430,6 @@ if __name__ == "__main__":
     threading.Thread(target=start_ws, daemon=True).start()
     threading.Thread(target=weather_thread_function, daemon=True).start()
     threading.Thread(target=run_youtube_api, daemon=True).start()
+    threading.Thread(target=start_keyboard_listener, daemon=True).start()
     app.run(host='0.0.0.0', port=8080)
 
