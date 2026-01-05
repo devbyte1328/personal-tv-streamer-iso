@@ -7,3 +7,4 @@ requests
 websockets
 cryptography
 pyqt6
+pynput
