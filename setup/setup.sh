@@ -60,7 +60,7 @@ sudo -u tv-streamer bash -c 'cd .. && python -m venv venv >/dev/null 2>&1 && sou
 
 echo "Installing and enabling TV Streamer systemd user service from working directory..."
 mkdir -p /home/tv-streamer/.config/systemd/user
-cp /home/tv-streamer/personal-tv-streamer-iso/tv-streamer.service /home/tv-streamer/.config/systemd/user/tv-streamer.service
+cp /home/tv-streamer/personal-tv-streamer-iso/setup/tv-streamer.service /home/tv-streamer/.config/systemd/user/tv-streamer.service
 chown tv-streamer:tv-streamer /home/tv-streamer/.config/systemd/user/tv-streamer.service
 sudo -u tv-streamer systemctl --user daemon-reload
 sudo -u tv-streamer systemctl --user enable tv-streamer.service
