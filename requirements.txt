@@ -8,3 +8,4 @@ websockets
 cryptography
 pyqt6
 pynput
+playsound3
