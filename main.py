@@ -255,7 +255,7 @@ async def ws_handler(ws):
                 pyautogui.press('esc')
             elif msg == "FocusLocalhostBackground":
                 time.sleep(0.1)
-                pyautogui.click(center_x - center_x * 0.05, 0 + center_y * 0.05)
+                pyautogui.click(center_x, 0)
                 pyautogui.moveTo(0, height - 1)
             elif msg == "VideoPlayPause":
                 pyautogui.click(center_x, center_y)
