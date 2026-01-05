@@ -254,24 +254,19 @@ async def ws_handler(ws):
             elif msg == "ExitFullscreen":
                 pyautogui.press('esc')
             elif msg == "FocusLocalhostBackground":
-                ### Hardcoded to work with two screens for now
                 time.sleep(0.1)
-                pyautogui.click(x=284, y=723) # This needs to be resolved at some point
+                pyautogui.click(center_x - center_x * 0.05, 0 + center_y * 0.05)
                 pyautogui.moveTo(0, height - 1)
             elif msg == "VideoPlayPause":
-                ### Hardcoded to work with two screens for now, later will make this auto resolve resolution...
-                #pyautogui.click(center_x, center_y)
-                pyautogui.click(x=950, y=535) # This needs to be resolved at some point
+                pyautogui.click(center_x, center_y)
                 pyautogui.moveTo(0, height - 1)
             elif msg == "SearchEnter":
                 pyautogui.press('space')
                 pyautogui.press('backspace')
                 pyautogui.press('enter')
             elif msg == "ManualVideoPlayerFocusAndFullscreen":
-                ### Hardcoded to work with two screens for now, later will make this auto resolve resolution...
-                #pyautogui.click(center_x, center_y)
+                pyautogui.click(center_x, center_y)
                 time.sleep(2)
-                pyautogui.moveTo(x=950, y=535) # This needs to be resolved at some point
                 pyautogui.press('F')
                 pyautogui.moveTo(0, height - 1)
     except websockets.exceptions.ConnectionClosed:
