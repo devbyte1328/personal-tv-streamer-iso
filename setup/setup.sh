@@ -63,5 +63,7 @@ loginctl enable-linger tv-streamer
 mkdir -p /home/tv-streamer/.config/systemd/user
 cp /home/tv-streamer/personal-tv-streamer-iso/setup/tv-streamer.service /home/tv-streamer/.config/systemd/user/tv-streamer.service
 chown tv-streamer:tv-streamer /home/tv-streamer/.config/systemd/user/tv-streamer.service
-sudo -u tv-streamer systemctl --user daemon-reload
-sudo -u tv-streamer systemctl --user enable tv-streamer.service
+mkdir -p /home/tv-streamer/.config/systemd/user/default.target.wants
+ln -sf ../tv-streamer.service /home/tv-streamer/.config/systemd/user/default.target.wants/tv-streamer.service
+chown -R tv-streamer:tv-streamer /home/tv-streamer/.config/systemd
+sudo -u tv-streamer XDG_RUNTIME_DIR=/run/user/$(id -u tv-streamer) systemctl --user daemon-reload
