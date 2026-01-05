@@ -55,3 +55,5 @@ cp Xmodmap /home/tv-streamer/.Xmodmap
 chown tv-streamer:tv-streamer /home/tv-streamer/.Xmodmap
 sudo -u tv-streamer xmodmap /home/tv-streamer/.Xmodmap
 
+echo "Setting up Python virtual environment and installing requirements..."
+sudo -u tv-streamer bash -c 'cd .. && python -m venv venv >/dev/null 2>&1 # ">/dev/null 2>&1" to make it silent && source venv/bin/activate >/dev/null 2>&1 # ">/dev/null 2>&1" to make it silent && pip install -r requirements.txt >/dev/null 2>&1 # ">/dev/null 2>&1" to make it silent' # ">/dev/null 2>&1" to make it silent
