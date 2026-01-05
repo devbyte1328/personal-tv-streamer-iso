@@ -286,7 +286,7 @@ def start_ws():
     asyncio.run(ws_server())
 
 def run_youtube_api():
-    subprocess.Popen(["python3", "apis/youtube-api.py"])
+    subprocess.Popen(["python3", "/home/tv-streamer/personal-tv-streamer-iso/apis/youtube-api.py"])
 
 def fetch_weather_for_location(location_name):
     search_response = requests.get(

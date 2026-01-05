@@ -1,0 +1,15 @@
+[Unit]
+Description=Personal TV Streamer
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/tv-streamer/personal-tv-streamer-iso
+ExecStart=/home/tv-streamer/personal-tv-streamer-iso/venv/bin/python /home/tv-streamer/personal-tv-streamer-iso/main.py
+ExecStartPost=/usr/bin/librewolf --kiosk
+Restart=always
+RestartSec=2
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=default.target
