@@ -148,14 +148,19 @@ Vendor links (read the above warning first):
     open it → find **"Enable notifications"** → set to **"Disable"**.
 
     Configure Librewolf Settings:
-    Open **"Librewolf"** → click the **hamburger menu** (top-right corner) →
-    **"Settings"** → **"Privacy & Security"** →
-    scroll to **"Cookies and Site Data"** → disable
-    **"Delete cookies and site data when Librewolf is closed"**.
+    Open **"Librewolf"** → click the **hamburger menu** (top-right corner).
 
     **"Settings"** → **"General"** →
     scroll to **"Translations"** → disable
     **"Enable fullpage translations"**.
+
+    **"Settings"** → **"General"** →
+    scroll to **"Digital Rights Management (DRM) Content"** → enable
+    **"Play DRM-controlled content"**.
+
+    **"Settings"** → **"Privacy & Security"** →
+    scroll to **"Cookies and Site Data"** → disable
+    **"Delete cookies and site data when Librewolf is closed"**.
     
     Visit the URL **"about:config"** →
     search for these values and set them accordingly:
