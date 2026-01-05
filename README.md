@@ -89,7 +89,26 @@ Vendor links (read the above warning first):
     After closing **"Manjaro Hello"**, a **"Save history"** window will become visible.  
     Click **"No"** to close that window as well.
 
-6. **Run the Setup Script**
+6. **First Manual Step**
+   
+    Before continuing to the setup script, generate a **YouTube Data API key**.
+
+    Follow the official YouTube/Google documentation (or lookup a YouTube tutorial video):  
+    https://developers.google.com/youtube/registering_an_application
+
+    Once you have your API key, run the following to make it available to the system:
+   
+    ⚠️ Replace `<your-api-key-here>` with your YouTube Data API key (Don't share this with anyone).
+    
+    ```
+    echo 'export YT_DATA_API_KEY="<your-api-key-here>"' >> ~/.bashrc
+    ```
+    Reload your shell:
+    ```
+    source ~/.bashrc
+    ```
+
+7. **Run the Setup Script**
 
     Click the terminal icon in the bottom left corner of the panel.
     Git clone this repository:
@@ -110,24 +129,7 @@ Vendor links (read the above warning first):
     ```
     Allow the setup script to finish before moving onto the manual setup.
 
-7. **Manual Setup**
-   
-    Before closing the terminal, generate a **YouTube Data API key**.
-
-    Follow the official YouTube/Google documentation (or lookup a YouTube tutorial video):  
-    https://developers.google.com/youtube/registering_an_application
-
-    Once you have your API key, run the following to make it available to the system:
-   
-    ⚠️ Replace `<your-api-key-here>` with your YouTube Data API key (Don't share this with anyone).
-    
-    ```
-    echo 'export YT_DATA_API_KEY="<your-api-key-here>"' >> ~/.bashrc
-    ```
-    Reload your shell (optional because the reboot at the end will apply it):
-    ```
-    source ~/.bashrc
-    ```
+8. **Manual Setup**
     
     Configure Firewall Settings:
     Click **"Menu"** → search for **"Firewall"** → open it → enter **"password"** → click **"Enable"**.
@@ -148,7 +150,18 @@ Vendor links (read the above warning first):
     open it → find **"Enable notifications"** → set to **"Disable"**.
 
     Configure Librewolf Settings:
-    Open **"Librewolf"** → click the **hamburger menu** (top-right corner).
+    
+    Open **"Librewolf"**.
+    
+    Visit the URL **"about:addons"** → Enable **"Loading Spinner"**.
+    
+    Visit the Tampermonkey Add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
+    → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
+    check **"Pin extention to toolbar"** → click **"OK"** → click on the Tampermonkey icon at the top right cornor of the browser
+    → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from the repository
+    setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
+    
+    Go to the **Hamburger Menu** (top-right corner).
 
     **"Settings"** → **"General"** →
     scroll to **"Translations"** → disable
@@ -192,25 +205,8 @@ Vendor links (read the above warning first):
     browser.link.open_newwindow
     ```
     Set **"browser.link.open_newwindow"** → 1
-    
-    Visit the Tampermonkey Firefox add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
-    → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
-    check **"Pin extention to toolbar"** → click **"OK"** → click on the Tampermonkey icon at the top right cornor of the browser
-    → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from the repository
-    setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
-    
-    Visit the URL **"about:addons"** → Enable **"Loading Spinner"**.
-    
-8. **"..."** (Steps to be added...)
-    
-    ```
-    ...
-    ```
-    ```
-    librewolf --kiosk
-    ```
 
-9. **Reboot**
+10. **Reboot**
 
     Reboot to finalize changes:
     ```bash

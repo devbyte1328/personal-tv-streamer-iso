@@ -67,3 +67,6 @@ mkdir -p /home/tv-streamer/.config/systemd/user/default.target.wants
 ln -sf ../tv-streamer.service /home/tv-streamer/.config/systemd/user/default.target.wants/tv-streamer.service
 chown -R tv-streamer:tv-streamer /home/tv-streamer/.config/systemd
 sudo -u tv-streamer XDG_RUNTIME_DIR=/run/user/$(id -u tv-streamer) systemctl --user daemon-reload
+
+echo "Pulling curated content for first time boot"
+sudo -u tv-streamer bash -c 'cd .. && source venv/bin/activate >/dev/null 2>&1 && python apis/youtube-api.py >/dev/null 2>&1' # ">/dev/null 2>&1" to make it silent
