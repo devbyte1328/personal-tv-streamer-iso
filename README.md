@@ -187,6 +187,18 @@ Vendor links (read the above warning first):
     browser.link.open_newwindow
     ```
     Set **"browser.link.open_newwindow"** → 1
+    ```
+    browser.sessionstore.resume_from_crash
+    ```
+    Set **"browser.sessionstore.resume_from_crash"** → **false**
+    ```
+    browser.sessionstore.max_resumed_crashes
+    ```
+    Set **"browser.sessionstore.max_resumed_crashes"** → **0**
+    ```
+    browser.sessionstore.enabled
+    ```
+    Set **"browser.sessionstore.enabled"** → **false**
     
     Visit the Tampermonkey Firefox add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
     → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
