@@ -70,4 +70,5 @@ sudo -u tv-streamer XDG_RUNTIME_DIR=/run/user/$(id -u tv-streamer) systemctl --u
 
 echo "Pulling curated content for first time boot"
 mkdir -p /home/tv-streamer/personal-tv-streamer-iso/database/pulled
+sudo chown -R tv-streamer:tv-streamer /home/tv-streamer/personal-tv-streamer-iso/database/pulled && sudo chmod -R 755 /home/tv-streamer/personal-tv-streamer-iso/database/pulled
 sudo -E -u tv-streamer bash -c 'cd .. && source venv/bin/activate && python apis/youtube-api.py'
