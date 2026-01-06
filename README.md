@@ -123,9 +123,9 @@ Vendor links (read the above warning first):
     ```bash
     sudo chmod +x setup.sh
     ```
-    Run **"setup.sh"** with sudo:
+    Run **"setup.sh"** with sudo and your YouTube API key:
     ```bash
-    sudo ./setup.sh
+    sudo YT_DATA_API_KEY="$YT_DATA_API_KEY" ./setup.sh
     ```
     Allow the setup script to finish before moving onto the manual setup.
 
