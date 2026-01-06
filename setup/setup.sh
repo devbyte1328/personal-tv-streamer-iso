@@ -60,13 +60,16 @@ sudo -u tv-streamer xmodmap /home/tv-streamer/.Xmodmap
 echo "Setting up Python virtual environment and installing requirements..."
 sudo -u tv-streamer bash -c 'cd .. && python -m venv venv >/dev/null 2>&1 && source venv/bin/activate >/dev/null 2>&1 && pip install -r requirements.txt >/dev/null 2>&1' # ">/dev/null 2>&1" to make it silent
 
-echo "Installing and enabling TV Streamer systemd user service from working directory..."
+echo "Installing and enabling TV Streamer systemd user services..."
 loginctl enable-linger tv-streamer
 mkdir -p /home/tv-streamer/.config/systemd/user
-cp /home/tv-streamer/personal-tv-streamer-iso/setup/tv-streamer.service /home/tv-streamer/.config/systemd/user/tv-streamer.service
-chown tv-streamer:tv-streamer /home/tv-streamer/.config/systemd/user/tv-streamer.service
 mkdir -p /home/tv-streamer/.config/systemd/user/default.target.wants
+cp /home/tv-streamer/personal-tv-streamer-iso/setup/tv-streamer.service /home/tv-streamer/.config/systemd/user/tv-streamer.service
+cp /home/tv-streamer/personal-tv-streamer-iso/setup/librewolf-kiosk.service /home/tv-streamer/.config/systemd/user/librewolf-kiosk.service
+chown tv-streamer:tv-streamer /home/tv-streamer/.config/systemd/user/tv-streamer.service
+chown tv-streamer:tv-streamer /home/tv-streamer/.config/systemd/user/librewolf-kiosk.service
 ln -sf ../tv-streamer.service /home/tv-streamer/.config/systemd/user/default.target.wants/tv-streamer.service
+ln -sf ../librewolf-kiosk.service /home/tv-streamer/.config/systemd/user/default.target.wants/librewolf-kiosk.service
 chown -R tv-streamer:tv-streamer /home/tv-streamer/.config/systemd
 sudo -u tv-streamer XDG_RUNTIME_DIR=/run/user/$(id -u tv-streamer) systemctl --user daemon-reload
 

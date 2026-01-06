@@ -1,0 +1,16 @@
+[Unit]
+Description=LibreWolf Kiosk
+After=tv-streamer.service graphical-session.target
+Requires=tv-streamer.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/librewolf --kiosk
+Restart=always
+RestartSec=2
+Environment=DISPLAY=:0
+Environment=MOZ_ENABLE_WAYLAND=0
+
+[Install]
+WantedBy=default.target
+
