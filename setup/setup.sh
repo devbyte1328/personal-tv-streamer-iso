@@ -41,8 +41,10 @@ cp policies.json /usr/lib/librewolf/distribution/policies.json
 echo "Configuring Librewolf loading status"
 # Remove default grey colored new URL display at bottom left
 mkdir -p /home/tv-streamer/.librewolf
-mkdir -p /home/tv-streamer/.librewolf/*.default-default/chrome
-cp userChrome.css /home/tv-streamer/.librewolf/*.default-default/chrome/
+for ProfileDirectory in /home/tv-streamer/.librewolf/*.default-default; do
+  mkdir -p "$ProfileDirectory/chrome"
+  cp userChrome.css "$ProfileDirectory/chrome/"
+done
 chown -R tv-streamer:tv-streamer /home/tv-streamer/.librewolf
 # Add loading screen connector to Python 
 rm -f loading-spinner@local.xpi
