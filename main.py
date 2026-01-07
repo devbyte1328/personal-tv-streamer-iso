@@ -54,6 +54,7 @@ def onKeyPress(key):
     elif key in (
         keyboard.Key.enter,
         keyboard.Key.f8,
+        keyboard.Key.menu,
     ):
         threading.Thread(target=playEnter, daemon=True).start()
 
