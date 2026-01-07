@@ -30,7 +30,7 @@ sudo -u tv-streamer bash -c 'cd /tmp/yay && makepkg -si --noconfirm >/dev/null 2
 rm -rf /tmp/yay # ">/dev/null 2>&1" to make it silent
 
 echo "Installing packages, this takes a moment..."
-sudo -u tv-streamer bash -c "yay -S --noconfirm --needed curl ffmpeg mpg123 python python-pip tk gedit librewolf-bin >/dev/null 2>&1" # ">/dev/null 2>&1" to make it silent, "grep -v '^\s*#'" to ignore the comments
+sudo -u tv-streamer bash -c "yay -S --noconfirm --needed keyd curl ffmpeg mpg123 python python-pip tk gedit librewolf-bin >/dev/null 2>&1" # ">/dev/null 2>&1" to make it silent, "grep -v '^\s*#'" to ignore the comments
 
 echo "Removing Manjaro Cinnamon packages that are not needed, this takes a moment..."
 pacman -R --noconfirm webapp-manager vivaldi timeshift thunderbird xed gnome-screenshot system-config-printer pix onboard mpv micro manjaro-hello manjaro-application-utility galculator bulky gparted lollypop xviewer-plugins xviewer yelp dconf-editor celluloid gimp gcolor3 pamac-gtk pamac-cli libpamac libpamac-flatpak-plugin >/dev/null 2>&1 # ">/dev/null 2>&1" to make it silent
@@ -77,3 +77,6 @@ echo "Pulling curated content for first time boot"
 mkdir -p /home/tv-streamer/personal-tv-streamer-iso/database/pulled
 sudo chown -R tv-streamer:tv-streamer /home/tv-streamer/personal-tv-streamer-iso/database/pulled && sudo chmod -R 755 /home/tv-streamer/personal-tv-streamer-iso/database/pulled
 sudo YT_DATA_API_KEY="$YT_DATA_API_KEY" -u tv-streamer bash -c 'cd .. && source venv/bin/activate && python apis/youtube-api.py'
+
+echo "Enabling and starting keyd for virtual panel control"
+sudo systemctl enable --now keyd
