@@ -93,8 +93,8 @@ async def handler(websocket):
         log_event(ip_address, "DISCONNECT", "closed")
 
 async def main():
-    async with websockets.serve(handler, "localhost", 8764):
-        print("WebSocket server running on ws://localhost:8764")
+    async with websockets.serve(handler, "0.0.0.0", 8764):
+        print("WebSocket server running on ws://0.0.0.0:8764")
         await asyncio.Future()
 
 asyncio.run(main())
