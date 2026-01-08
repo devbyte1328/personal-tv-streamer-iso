@@ -1,0 +1,12 @@
+[Unit]
+Description=Load Xmodmap
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/xmodmap /home/tv-streamer/.Xmodmap
+Environment=DISPLAY=:0
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
