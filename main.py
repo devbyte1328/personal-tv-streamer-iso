@@ -26,6 +26,7 @@ _spinner_lock = threading.Lock()
 baseDir = os.path.dirname(os.path.abspath(__file__))
 moveAudioPath = os.path.join(baseDir, "static/assets/audio-feedback/move.mp3")
 enterAudioPath = os.path.join(baseDir, "static/assets/audio-feedback/enter.mp3")
+subprocess.run(["xmodmap", os.path.expanduser("~/.Xmodmap")], check=True)
 
 def playMove():
     subprocess.Popen(
