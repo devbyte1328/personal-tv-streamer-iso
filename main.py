@@ -255,10 +255,6 @@ async def ws_handler(ws):
                 pyautogui.press('F')
             elif msg == "ExitFullscreen":
                 pyautogui.press('esc')
-            elif msg == "FocusLocalhostBackground":
-                time.sleep(0.1)
-                pyautogui.click(width - 1, center_y)
-                pyautogui.moveTo(0, height - 1)
             elif msg == "VideoPlayPause":
                 pyautogui.click(center_x, center_y)
                 pyautogui.moveTo(0, height - 1)

@@ -70,10 +70,6 @@ window.addEventListener("DOMContentLoaded", () => {
             selectedNavigationItem.classList.add("active-tab");
         }
 
-        if (websocketLink && websocketLink.readyState === WebSocket.OPEN) {
-            websocketLink.send("FocusLocalhostBackground");
-        }
-
         if (requestedPageUrl.endsWith("/")) {
             window.dispatchEvent(new Event("home-page-loaded"));
         }
