@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ title }}</title>
+
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='curated.css') }}">
@@ -14,21 +15,31 @@
         <source src="{{ url_for('static', filename='assets/backgrounds/background.mp4') }}" type="video/mp4">
     </video>
 
-    <nav id="sidebar">
+    <div id="sidebar">
         <ul>
             <li data-url="{{ url_for('home') }}" class="{{ 'active-tab' if active=='home' else '' }}">Home</li>
             <li data-url="{{ url_for('curated') }}" class="{{ 'active-tab' if active=='curated' else '' }}">Curated</li>
             <li data-url="{{ url_for('apps') }}" class="{{ 'active-tab' if active=='apps' else '' }}">Apps</li>
         </ul>
-    </nav>
+    </div>
 
-    <main id="content">
+    <div id="persistent-player" style="display:none;">
+        {% block persistent_player %}{% endblock %}
+    </div>
+
+    <div id="content">
         {% block content %}{% endblock %}
-    </main>
+    </div>
+
+    <div id="system-update-overlay">
+        <div id="system-update-text">Updating system</div>
+        <div id="system-update-spinner"></div>
+    </div>
 
     <script src="{{ url_for('static', filename='base.js') }}"></script>
+    <script src="{{ url_for('static', filename='home.js') }}"></script>
+    <script src="{{ url_for('static', filename='curated.js') }}"></script>
 
 </body>
 </html>
-
 
