@@ -170,6 +170,10 @@ Vendor links (read the above warning first):
     **"Settings"** → **"General"** →
     scroll to **"Digital Rights Management (DRM) Content"** → enable
     **"Play DRM-controlled content"**.
+    
+    **"Settings"** → **"General"** →
+    scroll to **"Zoom"** → adujst (this depends on the screen)
+    **"Default zoom"**.
 
     **"Settings"** → **"Privacy & Security"** →
     scroll to **"Cookies and Site Data"** → disable
