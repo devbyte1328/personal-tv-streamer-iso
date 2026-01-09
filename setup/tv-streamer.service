@@ -7,8 +7,6 @@ After=graphical-session.target
 Type=simple
 WorkingDirectory=/home/tv-streamer/personal-tv-streamer-iso
 ExecStart=/home/tv-streamer/personal-tv-streamer-iso/venv/bin/python /home/tv-streamer/personal-tv-streamer-iso/main.py
-Restart=always
-RestartSec=2
 Environment=DISPLAY=:0
 
 [Install]
