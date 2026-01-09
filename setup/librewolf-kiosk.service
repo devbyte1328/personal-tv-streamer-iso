@@ -6,7 +6,8 @@ Requires=tv-streamer.service
 [Service]
 Type=simple
 ExecStart=/usr/bin/bash -c "/usr/bin/librewolf & /usr/bin/xdotool search --sync --onlyvisible --name LibreWolf windowactivate && /usr/bin/wmctrl -r :ACTIVE: -b add,fullscreen && wait"
-Restart=no
+Restart=always
+RestartSec=2
 Environment=DISPLAY=:0
 Environment=MOZ_ENABLE_WAYLAND=0
 
