@@ -231,8 +231,9 @@ async def RequestUpdate(ws):
             subprocess.run(["bash", update_command_script_path])
             os.remove(update_command_script_path)
 
-        subprocess.run(["reboot"])
         await ws.send("UpdateFinished")
+        subprocess.run(["reboot"])
+        
 
     except Exception:
         await ws.send("UpdateFailed")
