@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=LibreWolf Fullscreen
+Exec=/bin/bash -c 'librewolf & sleep 2; xdotool search --sync --onlyvisible --class LibreWolf windowactivate; wmctrl -r :ACTIVE: -b add,fullscreen'
+X-GNOME-Autostart-enabled=true
+

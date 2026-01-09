@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=TV Streamer Backend
+Exec=/home/tv-streamer/personal-tv-streamer-iso/venv/bin/python /home/tv-streamer/personal-tv-streamer-iso/main.py
+Terminal=false
+X-GNOME-Autostart-enabled=true
+
