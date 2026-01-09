@@ -9,7 +9,6 @@ ExecStart=/usr/bin/bash -c "/usr/bin/librewolf & /usr/bin/xdotool search --sync 
 Restart=always
 RestartSec=2
 Environment=DISPLAY=:0
-Environment=MOZ_ENABLE_WAYLAND=0
 
 [Install]
 WantedBy=default.target
