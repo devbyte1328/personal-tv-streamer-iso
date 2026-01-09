@@ -40,21 +40,25 @@ async def handler(websocket):
             log_event(ip_address, "RECEIVED", decrypted_text)
 
             if "UpdateCheck" in data:
-                client_name = data["UpdateCheck"][0]["Client"]
+                update_items = data["UpdateCheck"]
 
-                payload_directory = "payload"
-                payload_entries = os.listdir(payload_directory) if os.path.isdir(payload_directory) else []
+                client_name = update_items[0]["Client"]
+                client_build = int(update_items[1]["Build"])
 
-                client_exists = os.path.isdir(os.path.join(payload_directory, client_name))
-                build_exists = any(
-                    entry.startswith("build-") and os.path.isdir(os.path.join(payload_directory, entry))
-                    for entry in payload_entries
-                )
+                req_path = os.path.join("payload", client_name, "update-requirements")
+                update_available = False
 
-                result = "True" if client_exists or build_exists else "False"
-                response = fernet.encrypt(result.encode())
+                if os.path.isfile(req_path):
+                    with open(req_path, "r", encoding="utf-8") as f:
+                        for line in f:
+                            if line.startswith("Build:"):
+                                server_build = int(line.split(":", 1)[1].strip())
+                                update_available = client_build < server_build
+                                break
+
+                response = fernet.encrypt(str(update_available).encode())
                 await websocket.send(response)
-                log_event(ip_address, "RESPONDED", f"UpdateCheck={result}")
+                log_event(ip_address, "RESPONDED", f"UpdateCheck={update_available}")
 
             elif "UpdateRequest" in data:
                 client_name = data["UpdateRequest"]["Client"]
@@ -63,8 +67,11 @@ async def handler(websocket):
                 file_count = 0
 
                 if os.path.isdir(client_payload_path):
-                    for root, directories, files in os.walk(client_payload_path):
+                    for root, _, files in os.walk(client_payload_path):
                         for file_name in files:
+                            if file_name == "update-requirements":
+                                continue
+
                             file_path = os.path.join(root, file_name)
                             with open(file_path, "rb") as file_handle:
                                 encoded_content = base64.b64encode(file_handle.read()).decode("utf-8")
