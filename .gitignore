@@ -5,5 +5,4 @@ database/clientinfo
 database/serverinfo
 database/update
 database/updates
-update-server/payload
 update-server/logs.txt
