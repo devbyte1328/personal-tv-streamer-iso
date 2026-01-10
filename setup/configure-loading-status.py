@@ -20,10 +20,10 @@ def run_librewolf_once(username, home):
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL
     )
-    time.sleep(5)
+    time.sleep(35)
     p.terminate()
     try:
-        p.wait(timeout=5)
+        p.wait(timeout=35)
     except subprocess.TimeoutExpired:
         p.kill()
         p.wait()
