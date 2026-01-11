@@ -413,7 +413,7 @@ def url_control_stop_spinner():
     return "", 204
 
 if __name__ == "__main__":
-    pyautogui.moveTo(x=center_x-center_x, y=center_y)
+    pyautogui.moveTo(x=0, y=height)
     if os.path.exists("database/update"):
         os.remove("database/update")
     update_available = asyncio.run(CheckUpdate())
