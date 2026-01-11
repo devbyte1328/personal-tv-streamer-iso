@@ -23,9 +23,9 @@ SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key t
 fernet = Fernet(SHARED_KEY)
 _spinner_process = None
 _spinner_lock = threading.Lock()
-baseDir = os.path.dirname(os.path.abspath(__file__))
-moveAudioPath = os.path.join(baseDir, "static/assets/audio-feedback/move.mp3")
-enterAudioPath = os.path.join(baseDir, "static/assets/audio-feedback/enter.mp3")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+moveAudioPath = os.path.join(BASE_DIR, "static", "assets", "audio-feedback", "move.mp3")
+enterAudioPath = os.path.join(BASE_DIR, "static", "assets", "audio-feedback", "enter.mp3")
 subprocess.run(["xmodmap", os.path.expanduser("~/.Xmodmap")], check=True)
 
 def playMove():
@@ -65,19 +65,18 @@ def start_keyboard_listener():
     listener.join()
 
 def load_server_info():
-    server_info_path = os.path.join("database", "serverinfo")
+    server_info_path = os.path.join(BASE_DIR, "database", "serverinfo")
     server_ip = "0.0.0.0"
     server_port = "8764"
 
-    # Create serverinfo with defaults if missing
+    os.makedirs(os.path.dirname(server_info_path), exist_ok=True)
+
     if not os.path.isfile(server_info_path):
-        os.makedirs(os.path.dirname(server_info_path), exist_ok=True)
         with open(server_info_path, "w", encoding="utf-8") as file:
             file.write(f"IP: {server_ip}\n")
             file.write(f"PORT: {server_port}\n")
         return server_ip, server_port
 
-    # Read existing serverinfo values
     with open(server_info_path, "r", encoding="utf-8") as file:
         for line in file:
             key, _, value = line.partition(": ")
@@ -91,7 +90,7 @@ def load_server_info():
 
 async def CheckUpdate():
     try:
-        client_info_path = "database/clientinfo"
+        client_info_path = os.path.join(BASE_DIR, "database", "clientinfo")
 
         # Ensure clientinfo exists
         if not os.path.isfile(client_info_path):
@@ -145,7 +144,7 @@ async def RequestUpdate(ws):
         await ws.send("UpdateStarted")
 
         # Read client identifier
-        client_info_path = "database/clientinfo"
+        client_info_path = os.path.join(BASE_DIR, "database", "clientinfo")
         client = "None"
 
         if os.path.isfile(client_info_path):
@@ -156,7 +155,7 @@ async def RequestUpdate(ws):
                         client = value.strip()
 
         # Prepare update staging directory
-        updates_directory = os.path.join("database", "updates")
+        updates_directory = os.path.join(BASE_DIR, "database", "updates")
         os.makedirs(updates_directory, exist_ok=True)
 
         # Connect to update server
@@ -280,7 +279,8 @@ def start_ws():
     asyncio.run(ws_server())
 
 def run_youtube_api():
-    subprocess.Popen(["python3", "/home/tv-streamer/personal-tv-streamer-iso/apis/youtube-api.py"])
+    subprocess.Popen(["python3",os.path.join(BASE_DIR, "apis", "youtube-api.py")])
+
 
 def fetch_weather_for_location(location_name):
     search_response = requests.get(
@@ -394,7 +394,7 @@ def url_control_start_spinner():
     with _spinner_lock:
         if _spinner_process is None or _spinner_process.poll() is not None:
             _spinner_process = subprocess.Popen(
-                ["python3", os.path.abspath("lib/spinner_overlay.py")],
+                ["python3", os.path.join(BASE_DIR, "lib", "spinner_overlay.py")],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 start_new_session=True
@@ -414,12 +414,13 @@ def url_control_stop_spinner():
 
 if __name__ == "__main__":
     pyautogui.moveTo(x=0, y=height)
-    if os.path.exists("database/update"):
-        os.remove("database/update")
+    update_flag = os.path.join(BASE_DIR, "database", "update")
+    if os.path.exists(update_flag):
+        os.remove(update_flag)
     update_available = asyncio.run(CheckUpdate())
     if update_available:
-        os.makedirs("database", exist_ok=True)
-        open("database/update", "w").close()
+        os.makedirs(os.path.join(BASE_DIR, "database"), exist_ok=True)
+        open(update_flag, "w").close()
     pulled_folder_path = os.path.join(app.root_path, "database", "pulled")
     os.makedirs(pulled_folder_path, exist_ok=True)
     threading.Thread(target=start_ws, daemon=True).start()
