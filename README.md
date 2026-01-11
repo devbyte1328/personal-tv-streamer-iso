@@ -1,24 +1,26 @@
 
-# Personal Streamer TV
+# Personal TV Streamer based on Manjaro.
 
-# This project is a **work in progress**.
+# This project is a work in progress. this README is currently for development purposes:
 
-# The following is for development.
+## 📖 Description
+
+This project is a TV-style streamer built on top of a lightweight Linux desktop (currently Manjaro Cinnamon).  
+It's designed to turn almost any PC into a living room TV streamer, controlled with an airmouse, for accessing streaming services, websites, news, weather, and time information.
 
 ## 📺💻 Supported Devices
 
-The TV Streamer is designed to run on a PC, such as a Mini PC, Dell Optiplex, or an old laptop you have lying around.  
-In fact, **almost any computer will work** as long as you can install the ISO, connect it to your TV, and control it with an airmouse.
+> [!WARNING]
+> The minimum hardware requirements for the TV Streamer have not been determined yet.
+
+Almost any computer can be used for the TV Streamer, including Mini PCs, Dell Optiplex systems, and old laptops.  
+You only need to install the ISO, connect it to your TV, and use an airmouse for control.
 
 ![Blackview](images/Blackview.png) ![Dell_Optiplex](images/Dell_Optiplex.png) ![Laptop](images/Laptop.png)
 
-The minimum hardware requirements for the TV Streamer have not been determined yet.
-
 > [!WARNING]
-> I am not sponsored by, nor affiliated with, any airmouse vendors.  
-> I have personally tested the two airmouse models listed below, but **I cannot guarantee the reliability, safety, or trustworthiness** of any vendors linked here.  
-> Please research and verify vendors on your own before making a purchase.  
-> Most airmouses share similar keyboard layouts, and the Streamer TV is designed to work with any model that provides the standard set of keys.
+> I am not sponsored by or affiliated with any airmouse vendors; while I have tested the models listed below, I cannot guarantee the reliability, safety, or trustworthiness of any linked vendors, so please research before purchasing, as most airmouses share similar layouts and the TV Streamer works with any model that provides the standard keys.
+
 ### Supported Airmouses
 
 The following airmouse models have been tested and confirmed to work:
@@ -35,9 +37,7 @@ Vendor links (read the above warning first):
 ## 🧰 How To Setup the Streamer
 
 > [!NOTE]
-> The long term goal is to base this streamer on a fork of my **[Easy Arch](https://github.com/devbyte1328/easy-arch-desktop-iso)** distro, which I can modify and use as a template (essentially close to upstream Arch). That project currently has some issues, so we will use Manjaro as a base instead.
-> I’m not fully sure whether producing custom Manjaro-based builds is officially supported, and I’m not attempting to automate much at this stage. For now, you’ll have to follow a lot of manual steps to setup the streamer.  
-> Once Easy Arch is patched up, I will migrate this project to the new base and automate the setup process.
+> The long-term goal is to base this streamer on a fork of my **[Easy Arch](https://github.com/devbyte1328/easy-arch-desktop-iso)** distribution, which can be modified and used as a base. However, due to current issues with that project, Manjaro is being used as the base for now. I am not familiar with how to fully setup and automate custom Manjaro builds, so much of the setup must currently be done manually until the project is migrated and automated.
 
 1. **Download the Manjaro Cinnamon ISO**
    
