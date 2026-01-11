@@ -6,7 +6,9 @@
 ## 📖 Description
 
 This project is a TV-style streamer built on top of a lightweight Linux desktop (currently Manjaro Cinnamon).  
-It's designed to turn almost any PC into a living room TV streamer, controlled with an airmouse, for accessing streaming services, websites, news, weather, and time information.
+It's designed to turn almost any PC into a living room TV streamer, controlled with an airmouse, for accessing streaming services, websites, news, weather, and time.
+
+![Demo](images/Demo.png)
 
 ## 📺💻 Supported Devices
 
@@ -61,13 +63,12 @@ Vendor links (read the above warning first):
 
 3. **Boot from USB**
 
-    Reboot your machine and use your **BIOS/UEFI boot menu** to boot from the USB drive.  
-    When the boot options appear, choose either **"Boot with open-source drivers"** or **"Boot with proprietary drivers."**  
-    (As of now, it does not matter which option you select.)
+    Reboot your machine and use your BIOS/UEFI boot menu to boot from the USB drive.  
+    When the boot options appear, select **`Boot with open-source drivers`**.   
 
 4. **Live Environment and Installation**
 
-    After booting, the ISO will load into a live session. When the **"Manjaro Hello"** window appears, begin the installation by clicking **"Launch Installer"**, located at the bottom center under the **"INSTALLATION"** text label.
+    After booting, the ISO will load into a live session. When the <ins>*Manjaro Hello*</ins> window appears, begin the installation by clicking **`Launch Installer`**, located at the bottom center under the <ins>*INSTALLATION*</ins> text label.
 
     Select your preferred **"language"**, **"location and timezone"** (the streamer displays the time and weather on the home page), and **"keyboard layout"**.
 
