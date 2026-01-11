@@ -186,10 +186,6 @@ Vendor links (read the above warning first):
     ```
     Set **"media.autoplay.default"** → **0**
     ```
-    media.autoplay.allow-extension-background-pages
-    ```
-    Set **"media.autoplay.allow-extension-background-pages"** → **true**
-    ```
     media.autoplay.block-webaudio
     ```
     Set **"media.autoplay.block-webaudio"** → **false**
@@ -209,6 +205,22 @@ Vendor links (read the above warning first):
     browser.link.open_newwindow
     ```
     Set **"browser.link.open_newwindow"** → 1
+    ```
+    browser.startup.page
+    ```
+    Set **"browser.startup.page"** → 1
+    ```
+    browser.sessionstore.resume_from_crash
+    ```
+    Set **"browser.sessionstore.resume_from_crash"** → false
+    ```
+    browser.sessionstore.restore_on_demand
+    ```
+    Set **"browser.sessionstore.restore_on_demand"** → false
+    ```
+    browser.sessionstore.max_resumed_crashes
+    ```
+    Set **"browser.sessionstore.max_resumed_crashes"** → false
 
 10. **Reboot**
 
