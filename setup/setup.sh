@@ -66,3 +66,15 @@ sudo YT_DATA_API_KEY="$YT_DATA_API_KEY" -u tv-streamer bash -c 'cd .. && source 
 
 echo "Enabling and starting keyd for virtual panel control"
 sudo systemctl enable --now keyd
+
+echo "Detecting GPU and installing appropriate drivers"
+GPU_INFO="$(lspci | grep -E 'VGA|3D')"
+if echo "$GPU_INFO" | grep -qi nvidia; then
+  pacman -S --noconfirm --needed nvidia nvidia-utils libva libva-utils mesa >/dev/null 2>&1
+elif echo "$GPU_INFO" | grep -qi amd; then
+  pacman -S --noconfirm --needed mesa libva libva-utils xf86-video-amdgpu >/dev/null 2>&1
+elif echo "$GPU_INFO" | grep -qi intel; then
+  pacman -S --noconfirm --needed intel-media-driver libva libva-utils mesa >/dev/null 2>&1
+else
+  pacman -S --noconfirm --needed mesa libva libva-utils >/dev/null 2>&1
+fi
