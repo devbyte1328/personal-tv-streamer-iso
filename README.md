@@ -96,8 +96,11 @@ Vendor links (read the above warning first):
 6. **First Manual Step**
    
     Generate a <ins>*YouTube Data API v3*</ins> key(follow Google documentation or follow or lookup a YouTube tutorial video).
+    
     https://console.developers.google.com
+    
     https://developers.google.com/youtube/registering_an_application
+    
     https://www.youtube.com/watch?v=XEZYadc2o-8
 
     Once you have your API key, run the following to make it available to the system:
