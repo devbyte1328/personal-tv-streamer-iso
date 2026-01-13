@@ -74,7 +74,7 @@ Vendor links (read the above warning first):
 
     Check **`Erase disk`**, uncheck **`Encrypt system`**, and click **`Next`**.
 
-    For <ins>*What is your name?*</ins>, <ins>*What name do you want to use to log in?*</ins>, and <ins>*What is the name of this computer*</ins>, write:
+    For <ins>*What is your name?*</ins>, <ins>*What name do you want to use to log in?*</ins>, and <ins>*What is the name of this computer?*</ins>, write:
     ```
     tv-streamer
     ```
@@ -82,33 +82,33 @@ Vendor links (read the above warning first):
     ```
     pass
     ```
-    Check **`Log in automatically`**, check **`Use the same password for the administrator account.`**, click **`Next`**, check **`No Office Suite.`**, and click **`Next`**.
-
-    At the **"Summary"** page, click **"Install,"** then confirm with **"Install Now."**  
-    Allow Manjaro Cinnamon to complete the installation. When finished, check **"Restart now"** and click **"Done."**
+    Check **`Log in automatically`**, check **`Use the same password for the administrator account.`**, and click **`Next`**.
+    
+    Select **`No Office Suite.`**, click **`Next`**, click **`Install`**, and click **`Install Now`**.
+    
+    When Manjaro Cinnamon completes the installation check **`Restart now`**, and click **`Done`**.
    
 5. **First Boot After Installation**
 
-    When the system starts for the first time, the **"Manjaro Hello"** window will appear again.  
-    Uncheck "Launch at start" and close the window.
-    After closing **"Manjaro Hello"**, a **"Save history"** window will become visible.  
-    Click **"No"** to close that window as well.
+    In the <ins>*Manjaro Hello*</ins> window, uncheck **`Launch at start`**, and close the window.
+    In the <ins>*Save history*</ins> window, click **`No`**, and close the window.
 
 6. **First Manual Step**
    
-    Before continuing to the setup script, generate a **YouTube Data API key**.
-
-    Follow the official YouTube/Google documentation (or lookup a YouTube tutorial video):  
+    Generate a <ins>*YouTube Data API v3*</ins> key(follow Google documentation or follow or lookup a YouTube tutorial video).
+    https://console.developers.google.com
     https://developers.google.com/youtube/registering_an_application
+    https://www.youtube.com/watch?v=XEZYadc2o-8
 
     Once you have your API key, run the following to make it available to the system:
    
-    ⚠️ Replace `<your-api-key-here>` with your YouTube Data API key (Don't share this with anyone).
+    ⚠️ Replace <ins>*API_GOES_HERE*</ins> with your <ins>*YouTube Data API v3*</ins> key (don't share your API key with anyone).
     
     ```
-    echo 'export YT_DATA_API_KEY="<your-api-key-here>"' >> ~/.bashrc
+    echo 'export YT_DATA_API_KEY="API_GOES_HERE"' >> ~/.bashrc
     ```
-    Reload your shell:
+    
+    Reload shell:
     ```
     source ~/.bashrc
     ```
@@ -116,28 +116,35 @@ Vendor links (read the above warning first):
 7. **Run the Setup Script**
 
     Click the terminal icon in the bottom left corner of the panel.
+    
     Git clone this repository:
     ```
     git clone https://github.com/devbyte1328/personal-tv-streamer-iso
     ```
+    
     Navigate into the setup directory:
     ```
     cd personal-tv-streamer-iso/setup/
     ```
-    Set permissions for **"setup.sh"**:
+    
+    Set permissions for <ins>*setup.sh*</ins>:
     ```
     sudo chmod +x setup.sh
     ```
-    Run **"setup.sh"** with sudo and your YouTube API key:
+    
+    Run <ins>*setup.sh*</ins> with sudo and your YouTube API key:
     ```
     sudo YT_DATA_API_KEY="$YT_DATA_API_KEY" ./setup.sh
     ```
-    Allow the setup script to finish before moving onto the manual setup.
 
 8. **Manual Setup**
     
     Configure Firewall Settings:
-    Click **"Menu"** → search for **"Firewall"** → open it → enter **"password"** → click **"Enable"**.
+    In the Terminal, run Firewall with sudo:
+    ```
+    sudo gufw
+    ```
+    Check <ins>*Status*<ins>.
 
     Configure Power Management Settings:
     Click **"Menu"** → search for **"Power Management"** →
