@@ -53,7 +53,7 @@ Vendor links (read the above warning first):
     - **[balenaEtcher](https://etcher.balena.io/)** (Windows/macOS/Linux)
     - **[Rufus](https://rufus.ie/en/)** (Windows only)
     - Or use the `dd` command (Linux/macOS):
-    ```bash
+    ```
     sudo dd if=manjaro-cinnamon-25.0.3-250609-linux612.iso of=/dev/sdX bs=4M status=progress && sync
     ```
     
@@ -64,21 +64,25 @@ Vendor links (read the above warning first):
 3. **Boot from USB**
 
     Reboot your machine and use your BIOS/UEFI boot menu to boot from the USB drive.  
-    When the boot options appear, select **`Boot with open-source drivers`**.   
+    When the boot options appear, press **`Boot with open-source drivers`**.   
 
 4. **Live Environment and Installation**
 
     After booting, the ISO will load into a live session. When the <ins>*Manjaro Hello*</ins> window appears, begin the installation by clicking **`Launch Installer`**, located at the bottom center under the <ins>*INSTALLATION*</ins> text label.
 
-    Select your preferred **"language"**, **"location and timezone"** (the streamer displays the time and weather on the home page), and **"keyboard layout"**.
+    Select your preferred <ins>*language*</ins>, <ins>*region*</ins>, <ins>*timezone*</ins> (time is displayed on the home page), and <ins>*keyboard layout*</ins>.
 
-    When you reach the **"Partitions"** step, choose **"Erase disk"** and leave **"Encrypt system"** unchecked.
+    Check **`Erase disk`**, uncheck **`Encrypt system`**, and click **`Next`**.
 
-    In the **"Users"** section, enter **"tv-streamer"** for all three name fields and set the password to **"password"**
-    (As of now, password is only used for setup so just use "password" for simplicity.)  
-    Make sure to enable both **"Log in automatically"** and **"Use the same password for the administrator account."**
-
-    For the **"Office Suite"** step, select **"No Office Suite."**
+    For <ins>*What is your name?*</ins>, <ins>*What name do you want to use to log in?*</ins>, and <ins>*What is the name of this computer*</ins>, write:
+    ```
+    tv-streamer
+    ```
+    For password, write:
+    ```
+    pass
+    ```
+    Check **`Log in automatically`**, check **`Use the same password for the administrator account.`**, click **`Next`**, check **`No Office Suite.`**, and click **`Next`**.
 
     At the **"Summary"** page, click **"Install,"** then confirm with **"Install Now."**  
     Allow Manjaro Cinnamon to complete the installation. When finished, check **"Restart now"** and click **"Done."**
@@ -113,19 +117,19 @@ Vendor links (read the above warning first):
 
     Click the terminal icon in the bottom left corner of the panel.
     Git clone this repository:
-    ```bash
+    ```
     git clone https://github.com/devbyte1328/personal-tv-streamer-iso
     ```
     Navigate into the setup directory:
-    ```bash
+    ```
     cd personal-tv-streamer-iso/setup/
     ```
     Set permissions for **"setup.sh"**:
-    ```bash
+    ```
     sudo chmod +x setup.sh
     ```
     Run **"setup.sh"** with sudo and your YouTube API key:
-    ```bash
+    ```
     sudo YT_DATA_API_KEY="$YT_DATA_API_KEY" ./setup.sh
     ```
     Allow the setup script to finish before moving onto the manual setup.
@@ -222,7 +226,7 @@ Vendor links (read the above warning first):
 10. **Reboot**
 
     Reboot to finalize changes:
-    ```bash
+    ```
     sudo reboot
     ``` 
     
