@@ -36,7 +36,7 @@ Vendor links (read the above warning first):
 - https://www.aliexpress.com/item/1005005245440379.html  
 - https://www.amazon.com/dp/B08DFDNZCV?ref=ppx_yo2ov_dt_b_fed_asin_title
 
-## 🧰 How To Setup the Streamer
+## 🧰 How to Setup the Streamer
 
 > [!NOTE]
 > The long-term goal is to base this streamer on a fork of my **[Easy Arch](https://github.com/devbyte1328/easy-arch-desktop-iso)** distribution, which can be modified and used as a base. However, due to current issues with that project, Manjaro is being used as the base for now. I am not familiar with how to fully setup and automate custom Manjaro builds, so much of the setup must currently be done manually until the project is migrated and automated.
@@ -151,7 +151,7 @@ Vendor links (read the above warning first):
 
     **Configure Power Management Settings:**
     
-    Click <ins>*Menu*</ins>, search for and press <ins>*Power Management*</ins>, set **`Turn off Screen`** to **`Never`**, and set **`Power Button`**> to **`Shut Down`**.
+    Click <ins>*Menu*</ins>, search for and press <ins>*Power Management*</ins>, set **`Turn off Screen`** to **`Never`**, and set **`Power Button`** to **`Shut Down`**.
 
     **Configure Sleep Mode Settings:**
     
@@ -175,13 +175,16 @@ Vendor links (read the above warning first):
     ```
     Enable **"Loading Spinner"**.
     
-    Visit the Tampermonkey Add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
-    → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
+    Visit the Tampermonkey Addon URL:
+    ```
+    https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/
+    ```
+    Click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
     check **"Pin extention to toolbar"** → click **"OK"** → click on the Tampermonkey icon at the top right cornor of the browser
     → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from the repository
     setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
     
-    Go to the **Hamburger Menu** (top-right corner).
+    Click the hamburger icon (top-right corner).
 
     **"Settings"** → **"General"** →
     scroll to **"Translations"** → disable
