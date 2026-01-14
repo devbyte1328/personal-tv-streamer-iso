@@ -142,33 +142,38 @@ Vendor links (read the above warning first):
 
 8. **Manual Setup**
     
-    Configure Firewall Settings:
+    **Configure Firewall Settings:**
     In the Terminal, run Firewall with sudo:
     ```
     sudo gufw
     ```
     Check <ins>*Status*<ins>.
 
-    Configure Power Management Settings:
-    Click **"Menu"** → search for **"Power Management"** →
-    set **"Turn off Screen"** to **"Never"** and set **"Power Button"** to **"Shut Down"**.
-
-    Configure Sleep Mode Settings:
-    Click **"Menu"** → search for **"Screensaver"** → set to **"Disable"**.
-
-    Configure Startup Applications:
-    Click **"Menu"** → search for **"Startup Applications"** →
-    find **"Update Notifier"** → set to **"Disable"**.
-
-    Configure Notifications:
-    Click **"Menu"** → search for **"Notifications"** →
-    open it → find **"Enable notifications"** → set to **"Disable"**.
-
-    Configure Librewolf Settings:
+    **Configure Power Management Settings:**
     
-    Open **"Librewolf"**.
+    Click <ins>*Menu*</ins>, search for and press <ins>*Power Management*</ins>, set **`Turn off Screen`** to **`Never`**, and set **`Power Button`**> to **`Shut Down`**.
+
+    **Configure Sleep Mode Settings:**
     
-    Visit the URL **"about:addons"** → Enable **"Loading Spinner"**.
+    Click <ins>*Menu*</ins>, search for and press <ins>*Screensaver*</ins> → set **`Delay before startng the screensaver`** to **`Never`**, and uncheck **`Lock the computer after the screensaver starts`**.
+
+    **Configure Startup Applications:**
+    
+    Click <ins>*Menu*</ins>, search for and press <ins>*Startup Applications*</ins>, uncheck **`Blueman Applet`**, uncheck **`Clipit`**, uncheck **`Manjaro Hello`**, and uncheck **`MSM Notifier`**.
+
+    **Configure Notifications:**
+    
+    Click <ins>*Menu*</ins>, search for and press <ins>*Notifications*</ins>, uncheck **`Enable notifications`**.
+
+    **Configure Librewolf Settings:**
+    
+    Click <ins>*Menu*</ins>, search for and press <ins>*Librewolf*</ins>.
+    
+    Visit the URL:
+    ```
+    about:addons
+    ```
+    Enable **"Loading Spinner"**.
     
     Visit the Tampermonkey Add-on URL: **"https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/"**
     → click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
