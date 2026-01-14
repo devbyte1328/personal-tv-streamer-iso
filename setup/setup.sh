@@ -32,6 +32,7 @@ rm -rf /tmp/yay # ">/dev/null 2>&1" to make it silent
 echo "Installing packages, this takes a moment..."
 # This forces Librewolf to be installed in the home directory
 mkdir -p /home/tv-streamer/.librewolf
+chown -R tv-streamer:tv-streamer ~/.librewolf
 sudo -u tv-streamer bash -c "yay -S --noconfirm --needed keyd xdotool wmctrl curl ffmpeg mpg123 python python-pip tk gedit librewolf-bin >/dev/null 2>&1" # ">/dev/null 2>&1" to make it silent, "grep -v '^\s*#'" to ignore the comments
 
 echo "Removing Manjaro Cinnamon packages that are not needed, this takes a moment..."
