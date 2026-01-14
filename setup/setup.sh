@@ -30,6 +30,8 @@ sudo -u tv-streamer bash -c 'cd /tmp/yay && makepkg -si --noconfirm >/dev/null 2
 rm -rf /tmp/yay # ">/dev/null 2>&1" to make it silent
 
 echo "Installing packages, this takes a moment..."
+# This forces Librewolf to be installed in the home directory
+mkdir -p /home/tv-streamer/.librewolf
 sudo -u tv-streamer bash -c "yay -S --noconfirm --needed keyd xdotool wmctrl curl ffmpeg mpg123 python python-pip tk gedit librewolf-bin >/dev/null 2>&1" # ">/dev/null 2>&1" to make it silent, "grep -v '^\s*#'" to ignore the comments
 
 echo "Removing Manjaro Cinnamon packages that are not needed, this takes a moment..."
@@ -39,8 +41,6 @@ echo "Configuring Librewolf policies"
 cp policies.json /usr/lib/librewolf/distribution/policies.json
 
 echo "Configuring Librewolf loading status"
-# This forces Librewolf to be installed in the home directory
-mkdir -p /home/tv-streamer/.librewolf
 # Remove default grey colored new URL display at bottom left
 python3 /home/tv-streamer/personal-tv-streamer-iso/setup/configure-loading-status.py
 # Add loading screen connector to Python 
