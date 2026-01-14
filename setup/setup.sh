@@ -39,6 +39,8 @@ echo "Configuring Librewolf policies"
 cp policies.json /usr/lib/librewolf/distribution/policies.json
 
 echo "Configuring Librewolf loading status"
+# This forces Librewolf to be installed in the home directory
+mkdir -p /home/tv-streamer/.librewolf
 # Remove default grey colored new URL display at bottom left
 python3 /home/tv-streamer/personal-tv-streamer-iso/setup/configure-loading-status.py
 # Add loading screen connector to Python 
