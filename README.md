@@ -312,7 +312,7 @@ If the client <ins>*Build*</ins> value is lower than the <ins>*Build*</ins> valu
 [2026-01-15 19:07:43.632548] [123.456.789.00:1682] [DISCONNECT] closed
 ```
 
-When client receive <ins>*UpdateCheck=True*</ins>, an Update button, highlighted with a bright yellow indicator, appears under the <ins>*Apps*</ins> page. Upon pressing <ins>*Update*</ins>, the server receives the request and initiates the transfer of new files and commands to the client:
+When client receive <ins>*UpdateCheck=True*</ins>, an update button, highlighted with a bright yellow indicator, appears under the <ins>*Apps*</ins> page. Upon pressing <ins>*Update*</ins>, the server receives the request and initiates the transfer of new files and commands to the client:
 
 ```
 [2026-01-15 19:08:01.102433] [123.456.789.00:1682] [CONNECT] opened
@@ -324,7 +324,8 @@ When client receive <ins>*UpdateCheck=True*</ins>, an Update button, highlighted
 
 During file transfer, the TV Streamer client covers the screen with a loading spinner to indicate that an update is in progress. Once the file transfer is complete, the TV Streamer moves the new files into the <ins>/home/tv-streamer/personal-tv-streamer-iso/</ins> directory (excluding <ins>update-requirements</ins>), executes <ins>update-com.sh</ins>, and reboots.
 
-<ins>*update-requirements*</ins> first command updates the <ins>*Build*</ins> value to avoid repeating the same update next boot up.
+<ins>*update-requirements*</ins> first command updates the <ins>*Build*</ins> value to avoid repeating the same update next boot.
+
 Logs are saved at <ins>*/home/tv-streamer/personal-tv-streamer-iso/update-server/logs.txt*</ins>.
 
 ## Credits
