@@ -23,8 +23,6 @@ You only need to install the ISO, connect it to your TV, and use an airmouse for
 > [!WARNING]
 > I am not sponsored by or affiliated with any airmouse vendors; while I have tested the models listed below, I cannot guarantee the reliability, safety, or trustworthiness of any linked vendors, so please research before purchasing, as most airmouses share similar layouts and the TV Streamer works with any model that provides the standard keys.
 
-### Supported Airmouses
-
 The following airmouse models have been tested and confirmed to work:
 
 - **EASYTONE**
@@ -95,8 +93,8 @@ Vendor links (read the above warning first):
 
 6. **First Manual Step**
    
-    > [!WARNING]
-    > Do not share your API key with anyone!
+> [!WARNING]
+> Do not share your API key with anyone!
    
     Generate a <ins>*YouTube Data API v3*</ins> key(follow Google documentation or follow or lookup a YouTube tutorial video).
     
