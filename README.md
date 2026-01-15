@@ -36,7 +36,7 @@ Vendor links (read the above warning first):
 - https://www.aliexpress.com/item/1005005245440379.html  
 - https://www.amazon.com/dp/B08DFDNZCV?ref=ppx_yo2ov_dt_b_fed_asin_title
 
-## 🧰 How to Setup the Streamer
+## 🧰 Setting Up the Streamer
 
 > [!NOTE]
 > The long-term goal is to base this streamer on a fork of my **[Easy Arch](https://github.com/devbyte1328/easy-arch-desktop-iso)** distribution, which can be modified and used as a base. However, due to current issues with that project, Manjaro is being used as the base for now. I am not familiar with how to fully setup and automate custom Manjaro builds, so much of the setup must currently be done manually until the project is migrated and automated.
@@ -251,12 +251,13 @@ Vendor links (read the above warning first):
     sudo reboot
     ``` 
     
-## 🖥️📡 How to Setup Update Server
+## 🖥️📡 Setting Up the Update Server
+
 ![Update_Button_Demo](images/Update_Button_Demo.png)
 
-It's possible to service TV Streamers from far away by setting up an update server and configuring the client to ping the server every boot up.
+It’s possible to service TV streamers remotely by setting up an update server and configuring the client to check the server for available updates on every boot.
 
-### 📺 How to configure the client
+### 📺 Configuring the Client
 When running the Python script <ins>*main.py*</ins> for the first time, the files <ins>*/database/clientinfo*</ins> and <ins>*/database/serverinfo*</ins> are created.
 
 Here is the content of <ins>*clientinfo*<ins>:
