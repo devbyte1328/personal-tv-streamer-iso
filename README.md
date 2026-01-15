@@ -91,11 +91,11 @@ Vendor links (read the above warning first):
     In the <ins>*Manjaro Hello*</ins> window, uncheck **`Launch at start`**, and close the window.
     In the <ins>*Save history*</ins> window, click **`No`**, and close the window.
 
-6. **First Manual Step**
-   
 > [!WARNING]
 > Do not share your API key with anyone!
-   
+
+6. **First Manual Step**
+
     Generate a <ins>*YouTube Data API v3*</ins> key(follow Google documentation or follow or lookup a YouTube tutorial video).
     
     https://console.developers.google.com
@@ -274,7 +274,7 @@ IP: 0.0.0.0
 PORT: 8764
 ```
 
-Modify <ins>*IP*</ins> to the IP of the target server.
+Modify <ins>*IP*</ins> to match the target server's IP address.
 
 > [!WARNING]
 > Do not skip the next part! If you do, you risk exposing your TV streamers to remote code executions.
@@ -290,18 +290,42 @@ SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q='
 Generate the secret encryption key by running <ins>update-server/gen-key.py</ins>, then update <ins>SHARED_KEY</ins> in <ins>*main.py*</ins> and <ins>*update-server/server.py*</ins> with the new encryption key.
 
 ### 📡🗄️ How to configure and setup the server 
-The server files located in the <ins>*update-server/*</ins> directory.
+The server files are located in the <ins>*update-server/*</ins> directory.
+Inside the <ins>*update-server/payload/*</ins> directory there is the template folder <ins>*None*</ins>, inside the template folder there are three important files that are used for updating client/s: <ins>*clientinfo*</ins>, <ins>*update-com.sh*</ins>, and <ins>*update-requirements*</ins>.
 
-Draft:
+When you have files and commands you want to service your client/s, you have to copy and paste the <ins>*None*</ins> directory into the same directory, rename the new directory to the client TV-Streamer name, place your new files inside, add your new commands to <ins>*update-com.sh*</ins>, and increment the <ins>*Build*</ins> value in <ins>*update-server/payload/<TARGET-CLIENT>/clientinfo*</ins> and <ins>*update-server/payload/<TARGET-CLIENT>/update-requirements*</ins> by 1.
+
+You can then run <ins>*server.py*</ins> to service client/s once they boot up and click <ins>*Update*</ins>.
+
+Server logs show every time client/s boot up:
+
 ```
-You can configure an update server by adding server information to 'database/serverinfo'.
-Once configured, the TV Streamer will check for updates every time it boots up by pinging the server. The update system supports both client-specific updates (targeted to a single TV Streamer) and general updates (applied to all TV Streamers). The TV Streamer sends its "Client Name" and "Build Number". The server evaluates this information and determines whether an update is available. If an update exists, the server notifies the client which makes a "Update" button appear on the left side, highlighted with a glowing yellow indicator to signal its importance. When the user presses the "Update" button, the TV Streamer requests the new files and commands from the server. The server responds by sending does new files and commands. Once received, the TV Streamer applies the new files, runs any commands that were given, and finally reboots to finalize the update.
-
-To have the server send commands for the TV Streamear to execute create a 'update-com.sh' shell script in the payload target user directory.
-There should also be a 'update-requirements' file in the payload target user directory that contains a line in the format 'Build: <number>', which represents the minimum required build for the client.
-
-The TV Streamer doesn't start with a Update Service/Server by default, here is how you set one up:
+[2026-01-15 19:07:43.605954] [123.456.789.00:1682] [CONNECT] opened
+[2026-01-15 19:07:43.617052] [123.456.789.00:1682] [HANDSHAKE] shared key validated
+[2026-01-15 19:07:43.622175] [123.456.789.00:1682] [RECEIVED] {"UpdateCheck": [{"Client": "FamilyMember"}, {"Build": "1"}]}
 ```
+
+If the client <ins>*Build*</ins> value is lower than the <ins>*Build*</ins> value in <ins>*update-server/payload/<TARGET-CLIENT>/clientinfo*</ins> the server sends <ins>*UpdateCheck*</ins> with the boolean set to <ins>*True*</ins>:
+
+```
+[2026-01-15 19:07:43.622290] [123.456.789.00:1682] [RESPONDED] UpdateCheck=True
+[2026-01-15 19:07:43.632548] [123.456.789.00:1682] [DISCONNECT] closed
+```
+
+When client receive <ins>*UpdateCheck=True*</ins>, an Update button, highlighted with a bright yellow indicator, appears under the <ins>*Apps*</ins> page. Upon pressing <ins>*Update*</ins>, the server receives the request and initiates the transfer of new files and commands to the client:
+
+```
+[2026-01-15 19:08:01.102433] [123.456.789.00:1682] [CONNECT] opened
+[2026-01-15 19:08:01.108221] [123.456.789.00:1682] [HANDSHAKE] shared key validated
+[2026-01-15 19:08:01.114902] [123.456.789.00:1682] [RECEIVED] {"UpdateRequest": {"Client": "FamilyMember"}}
+[2026-01-15 19:08:01.201883] [123.456.789.00:1682] [RESPONDED] UpdateRequest files=8
+[2026-01-15 19:08:01.214557] [123.456.789.00:1682] [DISCONNECT] closed
+```
+
+During file transfer, the TV Streamer client covers the screen with a loading spinner to indicate that an update is in progress. Once the file transfer is complete, the TV Streamer moves the new files into the <ins>/home/tv-streamer/personal-tv-streamer-iso/</ins> directory (excluding <ins>update-requirements</ins>), executes <ins>update-com.sh</ins>, and reboots.
+
+<ins>*update-requirements*</ins> first command updates the <ins>*Build*</ins> value to avoid repeating the same update next boot up.
+Logs are saved at <ins>*/home/tv-streamer/personal-tv-streamer-iso/update-server/logs.txt*</ins>.
 
 ## Credits
 
