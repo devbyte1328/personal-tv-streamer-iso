@@ -181,7 +181,7 @@ Vendor links (read the above warning first):
     https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/
     ```
     
-    Click **`Add to Firefox`**, click **`Continue to Installation`**, When install completes, click **`Add`**, check **`Pin extention to toolbar`**, and click **`OK`**, click on the Tampermonkey icon at the top right corner, click **`Dashboard`**, click **`⊞`**(create new script icon) → Copy and paste the content from <ins>*/home/tv-streamer/personal-tv-streamer-iso/setup/Tampermonkey.js*</ins>, save with CTRL+S or click **`File`** and **`Save`**.
+    Click **`Add to Firefox`**, click **`Continue to Installation`**, When install completes, click **`Add`**, check **`Pin extention to toolbar`**, click **`OK`**, click on the Tampermonkey icon at the top right corner, click **`Dashboard`**, click **`⊞`**(create new script icon) → Copy and paste the content from <ins>*/home/tv-streamer/personal-tv-streamer-iso/setup/Tampermonkey.js*</ins>, save with CTRL+S or click **`File`** and **`Save`**.
     
     Click the hamburger icon (top right corner), click **`Settings`**, **"General"**, scroll to or search for <ins>*Translations*</ins> under the <ins>*General*</ins> section, and uncheck **`Enable fullpage translations`**.
 
