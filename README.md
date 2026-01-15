@@ -326,7 +326,7 @@ During file transfer, the TV Streamer client covers the screen with a loading sp
 
 <ins>*update-requirements*</ins> first command updates the <ins>*Build*</ins> value to avoid repeating the same update next boot.
 
-Logs are saved at <ins>*/home/tv-streamer/personal-tv-streamer-iso/update-server/logs.txt*</ins>.
+Logs are saved at <ins>*update-server/logs.txt*</ins>.
 
 ## Credits
 
