@@ -293,7 +293,7 @@ Generate the secret encryption key by running <ins>update-server/gen-key.py</ins
 The server files are located in the <ins>*update-server/*</ins> directory.
 Inside the <ins>*update-server/payload/*</ins> directory there is the template folder <ins>*None*</ins>, inside the template folder there are three important files that are used for updating client/s: <ins>*clientinfo*</ins>, <ins>*update-com.sh*</ins>, and <ins>*update-requirements*</ins>.
 
-When you have files and commands you want to service your client/s, you have to copy and paste the <ins>*None*</ins> directory into the same directory, rename the new directory to the client TV-Streamer name, place your new files inside, add your new commands to <ins>*update-com.sh*</ins>, and increment the <ins>*Build*</ins> value in <ins>*update-server/payload/<TARGET-CLIENT>/clientinfo*</ins> and <ins>*update-server/payload/<TARGET-CLIENT>/update-requirements*</ins> by 1.
+When you have files and commands you want to service your client/s, you have to copy and paste the <ins>*None*</ins> directory into the same directory, rename the new directory to the client TV-Streamer name, place your new files inside, add your new commands to <ins>*update-com.sh*</ins>, and increment the <ins>*Build*</ins> value in <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/clientinfo*</ins> and <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/update-requirements*</ins> by 1.
 
 You can then run <ins>*server.py*</ins> to service client/s once they boot up and click <ins>*Update*</ins>.
 
@@ -305,7 +305,7 @@ Server logs show every time client/s boot up:
 [2026-01-15 19:07:43.622175] [123.456.789.00:1682] [RECEIVED] {"UpdateCheck": [{"Client": "FamilyMember"}, {"Build": "1"}]}
 ```
 
-If the client <ins>*Build*</ins> value is lower than the <ins>*Build*</ins> value in <ins>*update-server/payload/<TARGET-CLIENT>/clientinfo*</ins> the server sends <ins>*UpdateCheck*</ins> with the boolean set to <ins>*True*</ins>:
+If the client <ins>*Build*</ins> value is lower than the <ins>*Build*</ins> value in <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/clientinfo*</ins> the server sends <ins>*UpdateCheck*</ins> with the boolean set to <ins>*True*</ins>:
 
 ```
 [2026-01-15 19:07:43.622290] [123.456.789.00:1682] [RESPONDED] UpdateCheck=True
