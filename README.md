@@ -328,19 +328,10 @@ During file transfer, the TV Streamer client covers the screen with a loading sp
 
 Logs are saved at <ins>*update-server/logs.txt*</ins>.
 
-## Credits
+## Credits/Attributions
 
-### Application Services
-- **YouTube Data API** - Used to retrieve video information, thumbnails, titles, and metadata.
-- **Open-Meteo Weather API (https://open-meteo.com/)** - Provides all weather and forecast data.
+- **Open-Meteo Weather API (https://open-meteo.com/)** - Provides weather and forecast data.
 
-### System & Platform
-- **Manjaro Linux (Cinnamon Edition)** - The application runs on Manjaro Cinnamon and uses the local system clock/time services for real-time clock updates.
-- **Network Time Protocol (NTP)** - System time is synchronized via the operating system’s configured NTP sources (typically pool.ntp.org or Manjaro/Arch Linux regional time servers).
+- **Network Time Protocol (NTP)** - System time is synchronized via the operating system’s configured NTP sources (probably pool.ntp.org or Manjaro/Arch Linux regional time servers).
 
-### Assets & Icons
-- Several icons used in the **"App"** section of the streamer interface are sourced and modified from third-party creators.  
-  A full list of original icon sources and licenses is maintained at:  
-  **`/static/assets/asset-origins.txt`**  
-  GitHub link:  
-  https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt
+- **Assets & Icons (https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)** - many icons used in the <ins>*App*</ins> page are sourced and modified from third-party creators, some of them require attributions as part of their license.
