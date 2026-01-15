@@ -95,6 +95,9 @@ Vendor links (read the above warning first):
 
 6. **First Manual Step**
    
+    > [!WARNING]
+    > Do not share your API key with anyone!
+   
     Generate a <ins>*YouTube Data API v3*</ins> key(follow Google documentation or follow or lookup a YouTube tutorial video).
     
     https://console.developers.google.com
@@ -105,7 +108,7 @@ Vendor links (read the above warning first):
 
     Once you have your API key, run the following to make it available to the system:
    
-    ⚠️ Replace <ins>*API_GOES_HERE*</ins> with your <ins>*YouTube Data API v3*</ins> key (don't share your API key with anyone).
+    ⚠️ Replace <ins>*API_GOES_HERE*</ins> with your <ins>*YouTube Data API v3*</ins> key.
     
     ```
     echo 'export YT_DATA_API_KEY="API_GOES_HERE"' >> ~/.bashrc
@@ -248,8 +251,50 @@ Vendor links (read the above warning first):
     sudo reboot
     ``` 
     
-## 🖥️📡 How to Setup Update Service/Server
+## 🖥️📡 How to Setup Update Server
 ![Update_Button_Demo](images/Update_Button_Demo.png)
+
+It's possible to service TV Streamers from far away by setting up an update server and configuring the client to ping the server every boot up.
+
+### 📺 How to configure the client
+When running the Python script <ins>*main.py*</ins> for the first time, the files <ins>*/database/clientinfo*</ins> and <ins>*/database/serverinfo*</ins> are created.
+
+Here is the content of <ins>*clientinfo*<ins>:
+
+```
+Client: None
+Build: 1
+```
+
+Modify <ins>*None*</ins> to name the TV-Streamer, the name is sent to the server for device specific updates.
+
+Here is the content of <ins>*serverinfo*</ins>:
+
+```
+IP: 0.0.0.0
+PORT: 8764
+```
+
+Modify <ins>*IP*</ins> to the IP of the target server.
+
+> [!WARNING]
+> Do not skip the next part! If you do, you risk exposing your TV streamers to remote code executions.
+
+> [!WARNING]
+> Do not share your encryption key with anyone!
+
+There is an encryption key in <ins>*main.py*</ins> and <ins>*update-server/server.py*</ins> that looks like this (don't worry the key is for demonstration/error avoidance purposes):
+```
+SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q='
+```
+
+Generate the secret encryption key by running <ins>update-server/gen-key.py</ins>, then update <ins>SHARED_KEY</ins> in <ins>*main.py*</ins> and <ins>*update-server/server.py*</ins> with the new encryption key.
+
+### 📡🗄️ How to configure and setup the server 
+The server files located in the <ins>*update-server/*</ins> directory.
+
+Draft:
+```
 You can configure an update server by adding server information to 'database/serverinfo'.
 Once configured, the TV Streamer will check for updates every time it boots up by pinging the server. The update system supports both client-specific updates (targeted to a single TV Streamer) and general updates (applied to all TV Streamers). The TV Streamer sends its "Client Name" and "Build Number". The server evaluates this information and determines whether an update is available. If an update exists, the server notifies the client which makes a "Update" button appear on the left side, highlighted with a glowing yellow indicator to signal its importance. When the user presses the "Update" button, the TV Streamer requests the new files and commands from the server. The server responds by sending does new files and commands. Once received, the TV Streamer applies the new files, runs any commands that were given, and finally reboots to finalize the update.
 
@@ -257,12 +302,8 @@ To have the server send commands for the TV Streamear to execute create a 'updat
 There should also be a 'update-requirements' file in the payload target user directory that contains a line in the format 'Build: <number>', which represents the minimum required build for the client.
 
 The TV Streamer doesn't start with a Update Service/Server by default, here is how you set one up:
-1. **"..."** (Steps to be added...)
-    
-    ```
-    ...
-    ```
-     
+```
+
 ## Credits
 
 ### Application Services
