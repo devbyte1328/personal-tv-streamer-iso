@@ -173,73 +173,73 @@ Vendor links (read the above warning first):
     ```
     about:addons
     ```
-    Enable **"Loading Spinner"**.
+    
+    Check **`Loading Spinner (disabled)`**, click **`Enable`** on the pop up, and click **`Ok`**.
     
     Visit the Tampermonkey Addon URL:
     ```
     https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/
     ```
-    Click **"Add to Firefox"** → click **"Continue to Installation"** → click **"Add"** →
-    check **"Pin extention to toolbar"** → click **"OK"** → click on the Tampermonkey icon at the top right cornor of the browser
-    → click **"Dashboard"** → click **"⊞ (Create a new script...)"** → paste in the Tampermonkey Javascript from the repository
-    setup directory **"setup/Tampermonkey.js"** → save with **"CTRL + S"** (or click **"File"**, then **"Save"**).
     
-    Click the hamburger icon (top-right corner).
-
-    **"Settings"** → **"General"** →
-    scroll to **"Translations"** → disable
-    **"Enable fullpage translations"**.
-
-    **"Settings"** → **"General"** →
-    scroll to **"Digital Rights Management (DRM) Content"** → enable
-    **"Play DRM-controlled content"**.
+    Click **`Add to Firefox`**, click **`Continue to Installation`**, When install completes, click **`Add`**, check **`Pin extention to toolbar`**, and click **`OK`**, click on the Tampermonkey icon at the top right corner, click **`Dashboard`**, click **`⊞`**(create new script icon) → Copy and paste the content from <ins>*/home/tv-streamer/personal-tv-streamer-iso/setup/Tampermonkey.js*</ins>, save with CTRL+S or click **`File`** and **`Save`**.
     
-    **"Settings"** → **"General"** →
-    scroll to **"Zoom"** → adujst (this depends on the screen)
-    **"Default zoom"**.
+    Click the hamburger icon (top right corner), click **`Settings`**, **"General"**, scroll to or search for <ins>*Translations*</ins> under the <ins>*General*</ins> section, and uncheck **`Enable fullpage translations`**.
 
-    **"Settings"** → **"Privacy & Security"** →
-    scroll to **"Cookies and Site Data"** → disable
-    **"Delete cookies and site data when Librewolf is closed"**.
+    Scroll to or search for <ins>*DRM*</ins> under the <ins>*General*</ins> section, and check **`Play DRM-controlled content`**.
+
+    Scroll to or search for <ins>*Zoom*</ins> under the <ins>*General*</ins> section, and set **`Default Zoom`** to **`120%`** or adujst based on your screen.
     
-    Visit the URL **"about:config"** →
-    search for these values and set them accordingly:
+    Scroll to or search for <ins>*Delete cookies*</ins> under the <ins>*Privacy & Security*</ins> section, and uncheck **`Delete cookies and site data when Librewolf is closed`**.
+    
+    Visit the URL:
+    ```
+    about:config
+    ```
+
+    Search for and set to **`0`**:
     ```
     media.autoplay.default
     ```
-    Set **"media.autoplay.default"** → **0**
+
+    Search for and set to **`false`**:
     ```
     media.autoplay.block-webaudio
     ```
-    Set **"media.autoplay.block-webaudio"** → **false**
+
+    Search for and set to **`false`**:
     ```
     media.block-autoplay-until-in-foreground
     ```
-    Set **"media.block-autoplay-until-in-foreground"** → **false**
+
+    Search for and set to **`true`**:
     ```
     media.autoplay.enabled
     ```
-    Set **"media.autoplay.enabled"** → **true**
+
+    Search for and set to **`true`**:
     ```
     toolkit.legacyUserProfileCustomizations.stylesheets
     ```
-    Set **"toolkit.legacyUserProfileCustomizations.stylesheets"** → **true**
+
+    Search for and set to **`1`**:
     ```
     browser.link.open_newwindow
     ```
-    Set **"browser.link.open_newwindow"** → 1
+
+    Search for and set to **`false`**:
     ```
     browser.sessionstore.resume_from_crash
     ```
-    Set **"browser.sessionstore.resume_from_crash"** → false
+
+    Search for and set to **`false`**:
     ```
     browser.sessionstore.restore_on_demand
     ```
-    Set **"browser.sessionstore.restore_on_demand"** → false
+
+    Search for and set to **`0`**:
     ```
     browser.sessionstore.max_resumed_crashes
     ```
-    Set **"browser.sessionstore.max_resumed_crashes"** → 0
 
 10. **Reboot**
 
