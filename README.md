@@ -101,7 +101,7 @@ Vendor links (read the above warning):
 
 6. **First Manual Step**
 
-    Generate a <ins>*YouTube Data API v3*</ins> key(follow Google documentation or follow or lookup a YouTube tutorial video).
+    Generate a <ins>*YouTube Data API v3*</ins> key (follow Google documentation or follow or lookup a YouTube tutorial video).
     
     https://console.developers.google.com
     
@@ -170,6 +170,12 @@ Vendor links (read the above warning):
     **Configure Notifications:**
     
     Click <ins>*Menu*</ins>, search for and press <ins>*Notifications*</ins>, uncheck **`Enable notifications`**.
+    
+    **Configure Sound Settings:**
+     Click <ins>*Menu*</ins>, search for and press <ins>*Sound*</ins>, click on the **`HDMI`** device (or whatever you connected your TV Streamer to).
+
+    **Configure Display Settings:**
+     Click <ins>*Menu*</ins>, search for and press <ins>*Display*</ins>, set **`Resolution`** to **`1920 x 1080(16:9)`**, and set **`Refresh Rate`** to **`30.00 Hz`**.
 
     **Configure Librewolf Settings:**
     
@@ -187,7 +193,7 @@ Vendor links (read the above warning):
     https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/
     ```
     
-    Click **`Add to Firefox`**, click **`Continue to Installation`**, When install completes, click **`Add`**, check **`Pin extention to toolbar`**, click **`OK`**, click on the Tampermonkey icon at the top right corner, click **`Dashboard`**, click **`⊞`**(create new script icon) → Copy and paste the content from <ins>*/home/tv-streamer/personal-tv-streamer-iso/setup/Tampermonkey.js*</ins>, save with CTRL+S or click **`File`** and **`Save`**.
+    Click **`Add to Firefox`**, click **`Continue to Installation`**, When install completes, click **`Add`**, check **`Pin extention to toolbar`**, click **`OK`**, click on the Tampermonkey icon at the top right corner, click **`Dashboard`**, click **`⊞`** (create new script icon) → Copy and paste the content from <ins>*/home/tv-streamer/personal-tv-streamer-iso/setup/Tampermonkey.js*</ins>, save with CTRL+S or click **`File`** and **`Save`**.
     
     Click the hamburger icon (top right corner), click **`Settings`**, **"General"**, scroll to or search for <ins>*Translations*</ins> under the <ins>*General*</ins> section, and uncheck **`Enable fullpage translations`**.
 
@@ -341,4 +347,4 @@ Logs are saved at <ins>*update-server/logs.txt*</ins>.
 
 - **Assets & Icons (https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)** - many icons used in the <ins>*App*</ins> page are sourced and modified from third-party creators, some of them require attributions as part of their license.
 
-- **Tampermonkey (https://www.tampermonkey.net/)** - The current navigation system is powered by the Tampermonkey(created by Jan Biniok) browser extension, please consider visiting and contributing to the Tampermonkey project.
+- **Tampermonkey (https://www.tampermonkey.net/)** - The current navigation system is powered by the Tampermonkey (created by Jan Biniok) browser extension, please consider visiting and contributing to the Tampermonkey project.
