@@ -161,7 +161,7 @@ Vendor links (read the above warning):
 
     **Configure Sleep Mode Settings:**
     
-    Click <ins>*Menu*</ins>, search for and press <ins>*Screensaver*</ins> → set **`Delay before startng the screensaver`** to **`Never`**, and uncheck **`Lock the computer after the screensaver starts`**.
+    Click <ins>*Menu*</ins>, search for and press <ins>*Screensaver*</ins>, set **`Delay before startng the screensaver`** to **`Never`**, and uncheck **`Lock the computer after the screensaver starts`**.
 
     **Configure Startup Applications:**
     
@@ -258,7 +258,7 @@ Vendor links (read the above warning):
 
 ![Update_Button_Demo](images/Update_Button_Demo.png)
 
-It’s possible to service TV streamers remotely by setting up an update server and configuring the client to check the server for available updates on every boot.
+It’s possible to service TV Streamers remotely by setting up an update server and configuring the client to check the server for available updates on every boot.
 
 ### 📺 Configuring the Client
 When running the Python script <ins>*main.py*</ins> for the first time, the files <ins>*/database/clientinfo*</ins> and <ins>*/database/serverinfo*</ins> are created.
@@ -282,7 +282,7 @@ PORT: 8764
 Modify <ins>*IP*</ins> to match the target server's IP address.
 
 > [!WARNING]
-> Do not skip the next part! If you do, you risk exposing your TV streamers to remote code executions.
+> Do not skip the next part! If you do, you risk exposing your TV Streamers to remote code executions.
 
 > [!WARNING]
 > Do not share your encryption key with anyone!
@@ -340,3 +340,5 @@ Logs are saved at <ins>*update-server/logs.txt*</ins>.
 - **Network Time Protocol (NTP)** - System time is synchronized via the operating system’s configured NTP sources (probably pool.ntp.org or Manjaro/Arch Linux regional time servers).
 
 - **Assets & Icons (https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)** - many icons used in the <ins>*App*</ins> page are sourced and modified from third-party creators, some of them require attributions as part of their license.
+
+- **Tampermonkey (https://www.tampermonkey.net/)** - The current navigation system is powered by the Tampermonkey(created by Jan Biniok) browser extension, please consider visiting and contributing to the Tampermonkey project.
