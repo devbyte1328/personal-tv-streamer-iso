@@ -172,9 +172,11 @@ Vendor links (read the above warning):
     Click <ins>*Menu*</ins>, search for and press <ins>*Notifications*</ins>, uncheck **`Enable notifications`**.
     
     **Configure Sound Settings:**
+    
      Click <ins>*Menu*</ins>, search for and press <ins>*Sound*</ins>, click on the **`HDMI`** device (or whatever you connected your TV Streamer to).
 
     **Configure Display Settings:**
+    
      Click <ins>*Menu*</ins>, search for and press <ins>*Display*</ins>, set **`Resolution`** to **`1920 x 1080(16:9)`**, and set **`Refresh Rate`** to **`30.00 Hz`**.
 
     **Configure Mouse Settings:**
