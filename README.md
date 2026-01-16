@@ -177,6 +177,9 @@ Vendor links (read the above warning):
     **Configure Display Settings:**
      Click <ins>*Menu*</ins>, search for and press <ins>*Display*</ins>, set **`Resolution`** to **`1920 x 1080(16:9)`**, and set **`Refresh Rate`** to **`30.00 Hz`**.
 
+    **Configure Mouse Settings:**
+     Click <ins>*Menu*</ins>, search for and press <ins>*Mouse and Touchpad*</ins>, set **`Size`** to max (or adujst to your screen).
+
     **Configure Librewolf Settings:**
     
     Click <ins>*Menu*</ins>, search for and press <ins>*Librewolf*</ins>.
