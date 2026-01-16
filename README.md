@@ -256,6 +256,24 @@ Vendor links (read the above warning):
     browser.sessionstore.max_resumed_crashes
     ```
 
+    **Configure Weather and Forecast:**
+    
+    Here is the content of <ins>*/home/tv-streamer/personal-tv-streamer-iso/database/locations.txt*</ins>:
+    
+    ```
+    LocaleString: "en-US"
+    Timezone: "America/New_York"
+    WeatherLocation1: "New York"
+    WeatherLocation2: "Dallas"
+    ```
+    
+    The weather and forecast API is provided for free by <ins>*https://open-meteo.com/*</ins>, to find the available parameters supported by Open-Meteo visit the following wikipedia page:
+    ```
+    https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+    ```
+    
+    Modify <ins>*locations.txt*</ins> to your target timezone and location.
+
 10. **Reboot**
 
     Reboot to finalize changes:
