@@ -15,24 +15,29 @@ It's designed to turn almost any PC into a living room TV streamer, controlled w
 > [!WARNING]
 > The minimum hardware requirements for the TV Streamer have not been determined yet.
 
+> [!WARNING]
+> It is highly recommended to pair the TV Streamer with both an airmouse and a wireless keyboard. The current navigation system is not guaranteed to work with every website, so the wireless keyboard acts as a fallback.
+
 Almost any computer can be used for the TV Streamer, including Mini PCs, Dell Optiplex systems, and old laptops.  
 You only need to install the ISO, connect it to your TV, and use an airmouse for control.
 
 ![Blackview](images/Blackview.png) ![Dell_Optiplex](images/Dell_Optiplex.png) ![Laptop](images/Laptop.png)
 
 > [!WARNING]
-> I am not sponsored by or affiliated with any airmouse vendors; while I have tested the models listed below, I cannot guarantee the reliability, safety, or trustworthiness of any linked vendors, so please research before purchasing, as most airmouses share similar layouts and the TV Streamer works with any model that provides the standard keys.
+> I am not sponsored by or affiliated with any vendors. while I have tested the models listed below, I cannot guarantee the reliability, safety, or trustworthiness of any linked vendors, so please research before purchasing. most airmouses share similar layouts and the TV Streamer works with any model that provides the standard keys.
 
-The following airmouse models have been tested and confirmed to work:
+The following models have been tested and confirmed to work:
 
-- **EASYTONE**
-- **WeChip W1**  
+- **EASYTONE - Airmouse**
+- **WeChip W1 - Airmouse**  
+- **MagiDeal - Wireless Keyboard** 
 
-![Airmouse_EASYTONE.png](images/Airmouse_EASYTONE.png) ![Airmouse_Wechip_W1.png](images/Airmouse_Wechip_W1.png)
+![Airmouse_EASYTONE.png](images/Airmouse_EASYTONE.png) ![Airmouse_Wechip_W1.png](images/Airmouse_Wechip_W1.png) ![Wireless_Keyboard_MagiDeal.png](images/Wireless_Keyboard_MagiDeal.png)
 
-Vendor links (read the above warning first):
+Vendor links (read the above warning):
 - https://www.aliexpress.com/item/1005005245440379.html  
 - https://www.amazon.com/dp/B08DFDNZCV?ref=ppx_yo2ov_dt_b_fed_asin_title
+- https://www.aliexpress.com/item/1005010274597702.html
 
 ## 🧰 Setting Up the Streamer
 
