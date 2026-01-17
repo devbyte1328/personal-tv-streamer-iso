@@ -44,24 +44,40 @@ async def handler(websocket):
 
                 client_name = update_items[0]["Client"]
                 client_build = int(update_items[1]["Build"])
+                
+                version_string = update_items[0]["Version"]
+                client_version = version_string.split("+", 1)[0]
+                client_name = version_string.split("+", 1)[1].rsplit(".", 1)[0]
+                client_build = int(version_string.split("+", 1)[1].rsplit(".", 1)[1])
 
-                req_path = os.path.join("payload", client_name, "update-requirements")
+                req_path = os.path.join("payload", client_name, "clientinfo")
                 update_available = False
-
                 if os.path.isfile(req_path):
                     with open(req_path, "r", encoding="utf-8") as f:
-                        for line in f:
-                            if line.startswith("Build:"):
-                                server_build = int(line.split(":", 1)[1].strip())
-                                update_available = client_build < server_build
-                                break
+                        line = f.readline().strip()
+
+                        server_version = line.split("+", 1)[0].split(":", 1)[1].strip()
+                        server_name = line.split("+", 1)[1].rsplit(".", 1)[0]
+                        server_build = int(line.split("+", 1)[1].rsplit(".", 1)[1])
+
+                        if (
+                            client_version == server_version and
+                            client_name == server_name and
+                            client_build < server_build
+                        ):
+                            update_available = True
 
                 response = fernet.encrypt(str(update_available).encode())
                 await websocket.send(response)
                 log_event(ip_address, "RESPONDED", f"UpdateCheck={update_available}")
 
             elif "UpdateRequest" in data:
-                client_name = data["UpdateRequest"]["Client"]
+                version_string = data["UpdateRequest"]["Version"]
+
+                client_version = version_string.split("+", 1)[0]
+                client_name = version_string.split("+", 1)[1].rsplit(".", 1)[0]
+                client_build = int(version_string.split("+", 1)[1].rsplit(".", 1)[1])
+
                 client_payload_path = os.path.join("payload", client_name)
 
                 file_count = 0
@@ -69,7 +85,7 @@ async def handler(websocket):
                 if os.path.isdir(client_payload_path):
                     for root, _, files in os.walk(client_payload_path):
                         for file_name in files:
-                            if file_name == "update-requirements":
+                            if file_name == "clientinfo":
                                 continue
 
                             file_path = os.path.join(root, file_name)

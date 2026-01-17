@@ -14,6 +14,8 @@ from pynput import keyboard
 from playsound3 import playsound
 
 __version__ = "0.1.0"
+client_device = "None"
+device_build = "1"
 app = Flask(__name__)
 pyautogui.FAILSAFE = False
 width, height = pyautogui.size()
@@ -97,21 +99,15 @@ async def CheckUpdate():
         if not os.path.isfile(client_info_path):
             os.makedirs(os.path.dirname(client_info_path), exist_ok=True)
             with open(client_info_path, "w", encoding="utf-8") as file:
-                file.write("Client: None\n")
-                file.write("Build: 1\n")
+                file.write(f"Version: {__version__}+{client_device}.{device_build}")
 
-        client = "None"
-        build = "1"
-
-        # Read client and build values
         with open(client_info_path, "r", encoding="utf-8") as file:
-            for line in file:
-                key, _, value = line.partition(": ")
-                value = value.strip()
-                if key == "Client":
-                    client = value
-                elif key == "Build":
-                    build = value
+            line = file.readline().strip()
+            if line.startswith("Version:"):
+                local_version = line.split(":", 1)[1].strip()
+            else:
+                raise ValueError("Invalid version file format")
+
 
         server_ip, server_port = load_server_info()
         websocket_url = f"ws://{server_ip}:{server_port}"
@@ -126,8 +122,7 @@ async def CheckUpdate():
 
             payload = {
                 "UpdateCheck": [
-                    {"Client": client},
-                    {"Build": build}
+                    {"Version": local_version}
                 ]
             }
 
@@ -144,16 +139,12 @@ async def RequestUpdate(ws):
     try:
         await ws.send("UpdateStarted")
 
-        # Read client identifier
-        client_info_path = os.path.join(BASE_DIR, "database", "clientinfo")
-        client = "None"
-
-        if os.path.isfile(client_info_path):
-            with open(client_info_path, "r", encoding="utf-8") as file:
-                for line in file:
-                    key, _, value = line.partition(": ")
-                    if key == "Client":
-                        client = value.strip()
+        with open(os.path.join(BASE_DIR, "database", "clientinfo", "r", encoding="utf-8") as file:
+            line = file.readline().strip()
+            if line.startswith("Version:"):
+                local_version = line.split(":", 1)[1].strip()
+            else:
+                raise ValueError("Invalid version file format")
 
         # Prepare update staging directory
         updates_directory = os.path.join(BASE_DIR, "database", "updates")
@@ -175,7 +166,7 @@ async def RequestUpdate(ws):
             # Request update payload
             await update_ws.send(
                 fernet.encrypt(
-                    json.dumps({"UpdateRequest": {"Client": client}}).encode()
+                    json.dumps({"UpdateRequest": {"Version": local_version}}).encode()
                 )
             )
 
