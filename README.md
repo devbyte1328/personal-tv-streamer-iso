@@ -11,10 +11,10 @@ This project is designed to turn almost any PC into a living room TV-Style Strea
 
 ## 📺💻 Supported Devices
 
-> [!WARNING]
+> [!NOTE]
 > The minimum hardware requirements for the TV Streamer have not been determined yet.
 
-> [!WARNING]
+> [!NOTE]
 > It is highly recommended to pair the TV Streamer with both an airmouse and a wireless keyboard. The current airmouse browser navigation is not guaranteed to work with every website, so the wireless keyboard acts as a fallback device to control the websites/streaming services.
 
 Almost any computer can be used for the TV Streamer, including Mini PCs, Dell Optiplex systems, and old laptops.  
