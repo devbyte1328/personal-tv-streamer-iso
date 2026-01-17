@@ -41,14 +41,10 @@ async def handler(websocket):
 
             if "UpdateCheck" in data:
                 update_items = data["UpdateCheck"]
-
-                client_name = update_items[0]["Client"]
-                client_build = int(update_items[1]["Build"])
-                
                 version_string = update_items[0]["Version"]
-                client_version = version_string.split("+", 1)[0]
-                client_name = version_string.split("+", 1)[1].rsplit(".", 1)[0]
-                client_build = int(version_string.split("+", 1)[1].rsplit(".", 1)[1])
+                client_version, rest = version_string.split("+", 1)
+                client_name, build_str = rest.rsplit(".", 1)
+                client_build = int(build_str)
 
                 req_path = os.path.join("payload", client_name, "clientinfo")
                 update_available = False
