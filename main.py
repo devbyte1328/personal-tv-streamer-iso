@@ -139,12 +139,15 @@ async def RequestUpdate(ws):
     try:
         await ws.send("UpdateStarted")
 
-        with open(os.path.join(BASE_DIR, "database", "clientinfo", "r", encoding="utf-8") as file:
-            line = file.readline().strip()
-            if line.startswith("Version:"):
-                local_version = line.split(":", 1)[1].strip()
-            else:
-                raise ValueError("Invalid version file format")
+        path = os.path.join(BASE_DIR, "database", "clientinfo")
+
+        with open(path, encoding="utf-8") as f:
+            line = f.readline().strip()
+
+        if not line.startswith("Version:"):
+            raise ValueError("Invalid version file format")
+
+        local_version = line.split(":", 1)[1].strip()
 
         # Prepare update staging directory
         updates_directory = os.path.join(BASE_DIR, "database", "updates")
