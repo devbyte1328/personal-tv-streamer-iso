@@ -28,7 +28,9 @@ You only need to install the ISO, connect it to your TV, and use an airmouse for
 The following models have been tested and confirmed to work:
 
 **EASYTONE** - Airmouse
+
 **WeChip W1** - Airmouse
+
 **MagiDeal** - Wireless Keyboard
 
 ![Airmouse_EASYTONE.png](images/Airmouse_EASYTONE.png) ![Airmouse_Wechip_W1.png](images/Airmouse_Wechip_W1.png) ![Wireless_Keyboard_MagiDeal.png](images/Wireless_Keyboard_MagiDeal.png)
