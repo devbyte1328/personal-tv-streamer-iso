@@ -1,12 +1,11 @@
 
-# Personal TV Streamer based on Manjaro.
+# Manjaro TV Streamer.
 
 # This project is a work in progress. this README is currently for development purposes:
 
 ## 📖 Description
 
-This project is a TV-style streamer built on top of a lightweight Linux desktop (currently Manjaro Cinnamon).  
-It's designed to turn almost any PC into a living room TV streamer, controlled with an airmouse, for accessing streaming services, websites, news, weather, and time.
+This project is designed to turn almost any PC into a living room TV-Style Streamer, controlled with an airmouse and wireless keyboard, for accessing streaming services, websites, news, weather, and time.
 
 ![Demo](images/Demo.png)
 
@@ -16,7 +15,7 @@ It's designed to turn almost any PC into a living room TV streamer, controlled w
 > The minimum hardware requirements for the TV Streamer have not been determined yet.
 
 > [!WARNING]
-> It is highly recommended to pair the TV Streamer with both an airmouse and a wireless keyboard. The current navigation system is not guaranteed to work with every website, so the wireless keyboard acts as a fallback.
+> It is highly recommended to pair the TV Streamer with both an airmouse and a wireless keyboard. The current airmouse browser navigation is not guaranteed to work with every website, so the wireless keyboard acts as a fallback device to control the websites/streaming services.
 
 Almost any computer can be used for the TV Streamer, including Mini PCs, Dell Optiplex systems, and old laptops.  
 You only need to install the ISO, connect it to your TV, and use an airmouse for control.
@@ -28,21 +27,30 @@ You only need to install the ISO, connect it to your TV, and use an airmouse for
 
 The following models have been tested and confirmed to work:
 
-- **EASYTONE - Airmouse**
-- **WeChip W1 - Airmouse**  
-- **MagiDeal - Wireless Keyboard** 
+**EASYTONE** - Airmouse
+**WeChip W1** - Airmouse
+**MagiDeal** - Wireless Keyboard
 
 ![Airmouse_EASYTONE.png](images/Airmouse_EASYTONE.png) ![Airmouse_Wechip_W1.png](images/Airmouse_Wechip_W1.png) ![Wireless_Keyboard_MagiDeal.png](images/Wireless_Keyboard_MagiDeal.png)
 
-Vendor links (read the above warning):
-- https://www.aliexpress.com/item/1005005245440379.html  
-- https://www.amazon.com/dp/B08DFDNZCV?ref=ppx_yo2ov_dt_b_fed_asin_title
-- https://www.aliexpress.com/item/1005010274597702.html
+Vendor links:
+
+```
+https://www.aliexpress.com/item/1005005245440379.html
+```
+
+```
+https://www.amazon.com/dp/B08DFDNZCV?ref=ppx_yo2ov_dt_b_fed_asin_title
+```
+
+```
+https://www.aliexpress.com/item/1005010274597702.html
+```
 
 ## 🧰 Setting Up the Streamer
 
 > [!NOTE]
-> The long-term goal is to base this streamer on a fork of my **[Easy Arch](https://github.com/devbyte1328/easy-arch-desktop-iso)** distribution, which can be modified and used as a base. However, due to current issues with that project, Manjaro is being used as the base for now. I am not familiar with how to fully setup and automate custom Manjaro builds, so much of the setup must currently be done manually until the project is migrated and automated.
+> The long-term goal of this project is to base the TV Streamer on a fork of my **[Easy Arch](https://github.com/devbyte1328/easy-arch-desktop-iso)** distribution, which can be modified and used as a base. However, due to current issues with that project, Manjaro is being used as the base for now. I am not familiar with how to fully setup and automate custom Manjaro builds, so much of the setup must currently be done manually until the project is migrated and automated.
 
 1. **Download the Manjaro Cinnamon ISO**
    
@@ -370,4 +378,4 @@ Logs are saved at <ins>*update-server/logs.txt*</ins>.
 
 - **Assets & Icons (https://github.com/devbyte1328/personal-tv-streamer-iso/blob/main/static/assets/asset-origins.txt)** - many icons used in the <ins>*App*</ins> page are sourced and modified from third-party creators, some of them require attributions as part of their license.
 
-- **Tampermonkey (https://www.tampermonkey.net/)** - The current navigation system is powered by the Tampermonkey (created by Jan Biniok) browser extension, please consider visiting and contributing to the Tampermonkey project.
+- **Tampermonkey (https://www.tampermonkey.net/)** - The current airmouse browser navigation is powered by the Tampermonkey (created by Jan Biniok) browser extension, please consider visiting and contributing to the Tampermonkey project.
