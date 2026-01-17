@@ -13,16 +13,16 @@ import base64
 from pynput import keyboard
 from playsound3 import playsound
 
-__version__ = "0.1.0"
-client_device = "None"
-device_build = "1"
+SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key to avoid raising error
+__version__ = "0.2.0" # Do not modify this!
+client_device = "None" # Do not modify this!
+device_build = "1" # Do not modify this!
 app = Flask(__name__)
 pyautogui.FAILSAFE = False
 width, height = pyautogui.size()
 center_x = width // 2
 center_y = height // 2
 weather_data = {"locations": []}
-SHARED_KEY = b'UM_pZBDsFnObCNvGijuUAiLexwfgPOv3ATMHvxjAa-Q=' # Placeholder key to avoid raising error
 fernet = Fernet(SHARED_KEY)
 _spinner_process = None
 _spinner_lock = threading.Lock()

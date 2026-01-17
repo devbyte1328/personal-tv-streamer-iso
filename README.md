@@ -305,8 +305,7 @@ When running the Python script <ins>*main.py*</ins> for the first time, the file
 Here is the content of <ins>*clientinfo*<ins>:
 
 ```
-Client: None
-Build: 1
+Version: 0.2.0+None.1
 ```
 
 Modify <ins>*None*</ins> to name the TV-Streamer, the name is sent to the server for device specific updates.
@@ -335,9 +334,9 @@ Generate the secret encryption key by running <ins>update-server/gen-key.py</ins
 
 ### 📡🗄️ How to configure and setup the server 
 The server files are located in the <ins>*update-server/*</ins> directory.
-Inside the <ins>*update-server/payload/*</ins> directory there is the template folder <ins>*None*</ins>, inside the template folder there are three important files that are used for updating client/s: <ins>*clientinfo*</ins>, <ins>*update-com.sh*</ins>, and <ins>*update-requirements*</ins>.
+Inside the <ins>*update-server/payload/*</ins> directory there is the template folder <ins>*None*</ins>, inside the template folder there are two important files that are used for updating client/s: <ins>*clientinfo*</ins> and <ins>*update-com.sh*</ins>.
 
-When you have files and commands you want to service your client/s, you have to copy and paste the <ins>*None*</ins> directory into the same directory, rename the new directory to the client TV-Streamer name, place your new files inside, add your new commands to <ins>*update-com.sh*</ins>, and increment the <ins>*Build*</ins> value in <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/clientinfo*</ins> and <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/update-requirements*</ins> by 1.
+When you have files and commands you want to service your client/s, you have to copy and paste the <ins>*None*</ins> directory into the same directory, rename the new directory to the client TV-Streamer name, place your new files inside, add your new commands to <ins>*update-com.sh*</ins>, and increment the <ins>*Build*</ins> value (the last number) in <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/clientinfo*</ins> by 1.
 
 You can then run <ins>*server.py*</ins> to service client/s once they boot up and click <ins>*Update*</ins>.
 
@@ -346,7 +345,7 @@ Server logs show every time client/s boot up:
 ```
 [2026-01-15 19:07:43.605954] [123.456.789.00:1682] [CONNECT] opened
 [2026-01-15 19:07:43.617052] [123.456.789.00:1682] [HANDSHAKE] shared key validated
-[2026-01-15 19:07:43.622175] [123.456.789.00:1682] [RECEIVED] {"UpdateCheck": [{"Client": "FamilyMember"}, {"Build": "1"}]}
+[2026-01-15 19:07:43.622175] [123.456.789.00:1682] [RECEIVED] {"UpdateCheck": [{"Version": "0.2.0+FamilyMember.1"}]}
 ```
 
 If the client <ins>*Build*</ins> value is lower than the <ins>*Build*</ins> value in <ins>*update-server/payload/&lt;TARGET-CLIENT&gt;/clientinfo*</ins> the server sends <ins>*UpdateCheck*</ins> with the boolean set to <ins>*True*</ins>:
@@ -361,12 +360,12 @@ When client receives <ins>*UpdateCheck=True*</ins>, an update button, highlighte
 ```
 [2026-01-15 19:08:01.102433] [123.456.789.00:1682] [CONNECT] opened
 [2026-01-15 19:08:01.108221] [123.456.789.00:1682] [HANDSHAKE] shared key validated
-[2026-01-15 19:08:01.114902] [123.456.789.00:1682] [RECEIVED] {"UpdateRequest": {"Client": "FamilyMember"}}
+[2026-01-15 19:08:01.114902] [123.456.789.00:1682] [RECEIVED] {"UpdateRequest": [{"Version": "0.2.0+FamilyMember.1"}]}
 [2026-01-15 19:08:01.201883] [123.456.789.00:1682] [RESPONDED] UpdateRequest files=8
 [2026-01-15 19:08:01.214557] [123.456.789.00:1682] [DISCONNECT] closed
 ```
 
-During file transfer, the TV Streamer client covers the screen with a loading spinner to indicate that an update is in progress. Once the file transfer is complete, the TV Streamer moves the new files into the <ins>/home/tv-streamer/personal-tv-streamer-iso/</ins> directory (excluding <ins>update-requirements</ins>), executes <ins>update-com.sh</ins>, deletes <ins>update-com.sh</ins>, and reboots.
+During file transfer, the TV Streamer client covers the screen with a loading spinner to indicate that an update is in progress. Once the file transfer is complete, the TV Streamer moves the new files into the <ins>/home/tv-streamer/personal-tv-streamer-iso/</ins> directory, executes <ins>update-com.sh</ins>, deletes <ins>update-com.sh</ins>, and reboots.
 
 The first command in <ins>*update-com.sh*</ins> updates the <ins>*Build*</ins> value to avoid repeating the same update request.
 
