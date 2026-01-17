@@ -13,6 +13,7 @@ import base64
 from pynput import keyboard
 from playsound3 import playsound
 
+__version__ = "0.1.0"
 app = Flask(__name__)
 pyautogui.FAILSAFE = False
 width, height = pyautogui.size()
