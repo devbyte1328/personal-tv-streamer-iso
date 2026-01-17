@@ -139,95 +139,88 @@ async def RequestUpdate(ws):
     try:
         await ws.send("UpdateStarted")
 
-        path = os.path.join(BASE_DIR, "database", "clientinfo")
+        client_info_path = os.path.join(BASE_DIR, "database", "clientinfo")
+        with open(client_info_path, encoding="utf-8") as client_info_file:
+            first_line = client_info_file.readline().strip()
 
-        with open(path, encoding="utf-8") as f:
-            line = f.readline().strip()
-
-        if not line.startswith("Version:"):
+        if not first_line.startswith("Version:"):
             raise ValueError("Invalid version file format")
 
-        local_version = line.split(":", 1)[1].strip()
+        local_version = first_line.split(":", 1)[1].strip()
 
-        # Prepare update staging directory
-        updates_directory = os.path.join(BASE_DIR, "database", "updates")
-        os.makedirs(updates_directory, exist_ok=True)
+        updates_staging_root = os.path.join(BASE_DIR, "database", "updates")
+        os.makedirs(updates_staging_root, exist_ok=True)
 
-        # Connect to update server
         server_ip, server_port = load_server_info()
         websocket_url = f"ws://{server_ip}:{server_port}"
 
-        async with websockets.connect(websocket_url, max_size=None) as update_ws:
-            # Shared key handshake
-            await update_ws.send(fernet.encrypt(SHARED_KEY))
-            response = await update_ws.recv()
+        async with websockets.connect(websocket_url, max_size=None) as update_socket:
+            await update_socket.send(fernet.encrypt(SHARED_KEY))
+            handshake_response = await update_socket.recv()
 
-            if fernet.decrypt(response) != SHARED_KEY:
+            if fernet.decrypt(handshake_response) != SHARED_KEY:
                 await ws.send("UpdateFailed")
                 return
 
-            # Request update payload
-            await update_ws.send(
-                fernet.encrypt(
-                    json.dumps({"UpdateRequest": {"Version": local_version}}).encode()
-                )
+            request_payload = {
+                "UpdateRequest": {
+                    "Version": local_version
+                }
+            }
+
+            await update_socket.send(
+                fernet.encrypt(json.dumps(request_payload).encode())
             )
 
-            # Receive update files
             while True:
-                response = await update_ws.recv()
-                decrypted = fernet.decrypt(response)
-                data = json.loads(decrypted.decode())
+                encrypted_message = await update_socket.recv()
+                decrypted_message = fernet.decrypt(encrypted_message)
+                decoded_payload = json.loads(decrypted_message.decode())
 
-                if data.get("Done") is True:
+                if decoded_payload.get("Done") is True:
                     break
 
-                relative_path = data["Path"]
-                file_bytes = base64.b64decode(data["FileContent"])
+                relative_file_path = decoded_payload["Path"]
+                file_binary_data = base64.b64decode(decoded_payload["FileContent"])
 
-                destination_path = os.path.join(updates_directory, relative_path)
-                os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+                final_staging_path = os.path.join(updates_staging_root, relative_file_path)
+                os.makedirs(os.path.dirname(final_staging_path), exist_ok=True)
 
-                with open(destination_path, "wb") as file:
-                    file.write(file_bytes)
+                with open(final_staging_path, "wb") as output_file:
+                    output_file.write(file_binary_data)
 
                 await ws.send("UpdateProgress")
 
-        root_directory = os.path.abspath(os.path.dirname(__file__))
-        update_command_script_path = None
+        application_root = os.path.abspath(os.path.dirname(__file__))
+        post_update_script_path = None
 
-        # Move staged files into application root
-        for root_path, directory_names, file_names in os.walk(updates_directory, topdown=False):
-            for file_name in file_names:
-                source_file_path = os.path.join(root_path, file_name)
-                relative_sub_path = os.path.relpath(source_file_path, updates_directory)
-                target_file_path = os.path.join(root_directory, relative_sub_path)
+        for current_root, directory_list, file_list in os.walk(updates_staging_root, topdown=False):
+            for current_file in file_list:
+                source_file = os.path.join(current_root, current_file)
+                relative_location = os.path.relpath(source_file, updates_staging_root)
+                destination_file = os.path.join(application_root, relative_location)
 
-                os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
-                os.replace(source_file_path, target_file_path)
+                os.makedirs(os.path.dirname(destination_file), exist_ok=True)
+                os.replace(source_file, destination_file)
 
-                # Detect post-update command script
-                if file_name == "update-com.sh":
-                    update_command_script_path = target_file_path
+                if current_file == "update-com.sh":
+                    post_update_script_path = destination_file
 
-            # Cleanup empty directories
-            for directory_name in directory_names:
-                directory_path = os.path.join(root_path, directory_name)
-                if not os.listdir(directory_path):
-                    os.rmdir(directory_path)
+            for current_directory in directory_list:
+                absolute_directory_path = os.path.join(current_root, current_directory)
+                if not os.listdir(absolute_directory_path):
+                    os.rmdir(absolute_directory_path)
 
-        if os.path.isdir(updates_directory):
-            os.rmdir(updates_directory)
+        if os.path.isdir(updates_staging_root):
+            os.rmdir(updates_staging_root)
 
-        # Execute post-update command script if present
-        if update_command_script_path and os.path.isfile(update_command_script_path):
-            os.chmod(update_command_script_path, 0o755)
-            subprocess.run(["bash", update_command_script_path])
-            os.remove(update_command_script_path)
+        if post_update_script_path and os.path.isfile(post_update_script_path):
+            os.chmod(post_update_script_path, 0o755)
+            subprocess.run(["bash", post_update_script_path])
+            os.remove(post_update_script_path)
 
         await ws.send("UpdateFinished")
         subprocess.run(["reboot"])
-        
 
     except Exception:
         await ws.send("UpdateFailed")

@@ -81,8 +81,6 @@ async def handler(websocket):
                 if os.path.isdir(client_payload_path):
                     for root, _, files in os.walk(client_payload_path):
                         for file_name in files:
-                            if file_name == "clientinfo":
-                                continue
 
                             file_path = os.path.join(root, file_name)
                             with open(file_path, "rb") as file_handle:
