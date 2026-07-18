@@ -1,7 +1,21 @@
 
 # Manjaro TV Streamer.
 
-# This project is a work in progress. this README is currently for development purposes:
+
+<table width="100%">
+<thead>
+<tr><th align="left">ℹ️ NOTE</th></tr>
+</thead>
+<tbody>
+<tr><td>
+
+This is a neglected and unfinished project that I plan on revisiting in the future. Everything is a mess, so save yourself the headache and come back later.
+
+</td></tr>
+</tbody>
+</table>
+
+---
 
 ## 📖 Description
 
